@@ -1,5 +1,7 @@
 # inkos-like-novel-os
 
+> 面向 OpenClaw 的长篇小说工作流技能骨架。
+
 中文 | [English](#english)
 
 一个面向 **OpenClaw** 的小说生产技能骨架，把长篇 / 连载 / 网文 / 同人写作当成**有状态的工作流系统**来运行，而不是一次性提示词。
