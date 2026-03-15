@@ -46,6 +46,8 @@
 
 - `init_novel_project.sh` — 初始化一个小说项目骨架
 - `update_story_state.py` — 追加章节摘要、伏笔、关系、情绪变化等状态更新
+- `audit_chapter.py` — 对章节做启发式审计，输出 Markdown 或 JSON 报告
+- `build_next_chapter_context.py` — 从 truth files 自动拼装“下一章写作上下文”
 
 ### 4. `assets/project-template/`
 小说项目模板，包含：
@@ -62,6 +64,95 @@
 - `continuity_issues.md`
 - `style_guide.md`
 - `style_profile.json`
+
+## 安装与使用
+
+### 方式一：安装 `.skill` 发布包
+
+从 Releases 下载 `.skill` 文件，用你的 OpenClaw / skill 安装流程导入。
+
+### 方式二：直接使用仓库目录
+
+克隆仓库后，直接使用其中的：
+
+- `SKILL.md`
+- `references/`
+- `scripts/`
+- `assets/project-template/`
+
+### 初始化一个小说项目
+
+```bash
+bash scripts/init_novel_project.sh /path/to/project "书名"
+```
+
+### 生成下一章上下文
+
+```bash
+python3 scripts/build_next_chapter_context.py \
+  --project /path/to/project
+```
+
+### 审计章节
+
+```bash
+python3 scripts/audit_chapter.py \
+  --project /path/to/project \
+  --chapter-file /path/to/project/chapters/ch12.md
+```
+
+输出 JSON：
+
+```bash
+python3 scripts/audit_chapter.py \
+  --project /path/to/project \
+  --chapter-file /path/to/project/chapters/ch12.md \
+  --json
+```
+
+### 追加章节状态
+
+```bash
+python3 scripts/update_story_state.py \
+  --project /path/to/project \
+  --chapter 12 \
+  --title "沉默的代价" \
+  --summary "主角第一次确认玉佩被人调包" \
+  --state-change "林烬确认玉佩是伪造的" \
+  --hook-open "是谁替换了玉佩" \
+  --relationship "林烬 -> 徐安：信任下降" \
+  --emotion "林烬：怀疑上升"
+```
+
+## 最小工作流示例
+
+假设用户说：
+
+> 帮我继续写第 12 章，重点是主角开始怀疑徐安，但不要直接撕破脸。
+
+推荐流程：
+
+1. 先生成上下文
+
+```bash
+python3 scripts/build_next_chapter_context.py --project /path/to/project
+```
+
+2. 用生成的上下文去起草章节
+3. 起草完成后跑审计
+
+```bash
+python3 scripts/audit_chapter.py \
+  --project /path/to/project \
+  --chapter-file /path/to/project/chapters/ch12.md
+```
+
+4. 根据审计结果做 spot-fix
+5. 接受后更新状态
+
+```bash
+python3 scripts/update_story_state.py ...
+```
 
 ## 工作流思路
 
@@ -85,28 +176,6 @@
 - 规则可检查
 - 修订有依据
 
-## 快速开始
-
-### 初始化项目
-
-```bash
-bash scripts/init_novel_project.sh /path/to/project "书名"
-```
-
-### 追加章节状态
-
-```bash
-python3 scripts/update_story_state.py \
-  --project /path/to/project \
-  --chapter 12 \
-  --title "沉默的代价" \
-  --summary "主角第一次确认玉佩被人调包" \
-  --state-change "林烬确认玉佩是伪造的" \
-  --hook-open "是谁替换了玉佩" \
-  --relationship "林烬 -> 徐安：信任下降" \
-  --emotion "林烬：怀疑上升"
-```
-
 ## 当前定位
 
 当前版本是：
@@ -120,13 +189,29 @@ python3 scripts/update_story_state.py \
 - 审计参考
 - 工作流说明
 - 初始化 / 更新脚本
+- 上下文组装脚本
+- 启发式章节审计脚本
 
 还没包含：
 
 - 完整 CLI（如 `write next / audit / revise`）
-- 自动章节审计脚本
-- 自动上下文拼装器
+- 真正的 LLM 写作执行器
 - 守护进程 / 通知 / 多 agent 调度
+- 更强的规则引擎和自动修订系统
+
+## Roadmap
+
+- [x] 基础 skill 骨架
+- [x] 项目模板
+- [x] 状态更新脚本
+- [x] 下一章上下文组装器
+- [x] 启发式章节审计脚本
+- [x] `.skill` 发布包
+- [ ] 更强的规则审计
+- [ ] 更稳定的 JSON schema 输出
+- [ ] 轻量 CLI 封装
+- [ ] 自动修订辅助脚本
+- [ ] 版本化项目状态管理
 
 ## 发布说明
 
@@ -142,7 +227,7 @@ An OpenClaw skill skeleton for running long-form fiction as a stateful pipeline.
 
 - `SKILL.md` with workflow and operating model
 - `references/` for audit dimensions, file schemas, canon handling, playbooks, and style learning
-- `scripts/` for project initialization and structured story-state updates
+- `scripts/` for project initialization, story-state updates, chapter auditing, and next-context building
 - `assets/project-template/` for bootstrapping a new novel project
 
 ## Goal
