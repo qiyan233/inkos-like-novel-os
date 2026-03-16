@@ -4,205 +4,279 @@ import json
 import re
 from pathlib import Path
 
-SEVERITY_ORDER = {"critical": 0, "major": 1, "minor": 2, "note": 3}
-TRANSITIONS = ["突然", "忽然", "仿佛", "竟然", "不禁", "猛地", "一时间", "at that moment", "suddenly", "instantly", "as if", "unexpectedly"]
-REPORT_SPEAK = ["核心", "本质上", "某种意义上", "换句话说", "信息差", "底层逻辑", "情绪价值", "动机", "strategy", "framework"]
-CROWD_CLICHES = ["全场震惊", "所有人都", "全都愣住了", "everyone gasped", "the whole room fell silent"]
+from inkos_common import extract_bullets, extract_keywords, iso_now, latest_sections, read_text, write_json
+
+SEVERITY_ORDER = {'critical': 0, 'major': 1, 'minor': 2, 'note': 3}
+TRANSITIONS = ['突然', '忽然', '仿佛', '竟然', '不禁', '猛地', '一时间', 'at that moment', 'suddenly', 'instantly', 'as if', 'unexpectedly']
+REPORT_SPEAK = ['核心', '本质上', '某种意义上', '换句话说', '信息差', '底层逻辑', '情绪价值', '动机', 'strategy', 'framework']
+CROWD_CLICHES = ['全场震惊', '所有人都', '全都愣住了', 'everyone gasped', 'the whole room fell silent']
+TIME_JUMPS = ['次日', '第二天', '当夜', '当天晚上', '数日后', '三日后', '一周后', 'later that day', 'the next day', 'hours later']
+TELLING_PHRASES = ['他感到', '她感到', '他意识到', '她意识到', 'he felt', 'she felt']
+KNOWLEDGE_LEAPS = ['所有真相', '完整计划', '幕后之人就是', '答案已经摆在眼前', '真相大白']
+PROTAGONIST_LOCK_BREAKS = ['突然心软', '轻易原谅', '毫无理由地退让', '无条件相信', '主动坦白一切']
+STATE_TURN_MARKERS = ['决定', '确认', '发现', '明白', '知道', '拿到', '失去', '暴露', '受伤', '怀疑', 'betrayed', 'revealed', 'decided']
 
 
-def read_text(path: Path) -> str:
-    return path.read_text(encoding="utf-8") if path.exists() else ""
-
-
-def tail_chapter_summaries(text: str, count: int = 3) -> str:
-    matches = list(re.finditer(r"^##\s+Chapter\s+\d+.*$", text, flags=re.M))
-    if not matches:
-        return text.strip()
-    sections = []
-    for i, m in enumerate(matches):
-        start = m.start()
-        end = matches[i + 1].start() if i + 1 < len(matches) else len(text)
-        sections.append(text[start:end].strip())
-    return "\n\n".join(sections[-count:])
-
-
-def add(findings, severity, dimension, message, evidence=None):
+def add(findings, rule_id, severity, dimension, message, evidence=None, repair_targets=None):
     findings.append({
-        "severity": severity,
-        "dimension": dimension,
-        "message": message,
-        "evidence": evidence,
+        'rule_id': rule_id,
+        'severity': severity,
+        'dimension': dimension,
+        'message': message,
+        'evidence': evidence or [],
+        'repair_targets': repair_targets or [],
     })
 
 
-def extract_bullets(text: str):
-    return [m.group(1).strip() for m in re.finditer(r"^-\s+(.+)$", text, flags=re.M)]
+def finding_counts(findings):
+    counts = {'critical': 0, 'major': 0, 'minor': 0, 'note': 0}
+    for item in findings:
+        counts[item['severity']] += 1
+    return counts
 
 
-def audit(project: Path, chapter_path: Path):
-    chapter = read_text(chapter_path)
-    current_state = read_text(project / "current_state.md")
-    book_rules = read_text(project / "book_rules.md")
-    pending_hooks = read_text(project / "pending_hooks.md")
-    character_matrix = read_text(project / "character_matrix.md")
-    chapter_summaries = read_text(project / "chapter_summaries.md")
-    outline = read_text(project / "outline.md")
+def chapter_metrics(chapter):
+    paras = [p.strip() for p in re.split(r'\n\s*\n', chapter) if p.strip()]
+    return {
+        'char_count': len(chapter),
+        'paragraph_count': len(paras),
+        'dialogue_quote_count': chapter.count('“') + chapter.count('"'),
+        'time_jump_markers': sum(chapter.count(x) for x in TIME_JUMPS),
+    }
+
+
+def open_hook_keywords(pending_hooks):
+    keywords = []
+    open_hooks = [x for x in extract_bullets(pending_hooks) if '[OPEN]' in x]
+    for hook in open_hooks:
+        hook = re.sub(r'\[[^\]]+\]\s*', '', hook)
+        hook = re.sub(r'\([^\)]*\)', '', hook)
+        keywords.extend(extract_keywords(hook, min_len=2, limit=6))
+    return open_hooks, list(dict.fromkeys(keywords))
+
+
+def build_report(project, chapter_file):
+    project = Path(project)
+    chapter_file = Path(chapter_file)
+    chapter = read_text(chapter_file)
+    current_state = read_text(project / 'current_state.md')
+    book_rules = read_text(project / 'book_rules.md')
+    pending_hooks = read_text(project / 'pending_hooks.md')
+    chapter_summaries = read_text(project / 'chapter_summaries.md')
+    outline = read_text(project / 'outline.md')
 
     findings = []
     fix_plan = []
-    lower = chapter.lower()
+    rules_evaluated = []
 
     if not chapter.strip():
-        add(findings, "critical", "chapter-input", "Chapter text is empty.")
-        return findings, ["Provide chapter text before auditing."], "block"
+        add(findings, 'AUD-000', 'critical', 'chapter-input', 'Chapter text is empty.', repair_targets=['Provide chapter text before auditing.'])
+        counts = finding_counts(findings)
+        return {
+            'schema_version': 'inkos.audit-report.v1',
+            'tool': 'audit_chapter',
+            'generated_at': iso_now(),
+            'project': str(project),
+            'chapter': str(chapter_file),
+            'overall': 'block',
+            'summary': {'counts': counts, 'finding_count': 1, 'rules_evaluated': []},
+            'source_files': [str(chapter_file)],
+            'chapter_metrics': chapter_metrics(chapter),
+            'findings': findings,
+            'minimal_fix_plan': ['Provide chapter text before auditing.'],
+        }
 
-    # 1. Repetition / fatigue
+    rules_evaluated.append('AUD-101')
     for word in TRANSITIONS:
         count = chapter.count(word)
         if count >= 3:
-            sev = "major" if count >= 5 else "minor"
-            add(findings, sev, "repetition-fatigue", f"Transition word '{word}' appears {count} times.")
-            fix_plan.append(f"Reduce repeated transition word '{word}'.")
+            sev = 'major' if count >= 5 else 'minor'
+            add(findings, 'AUD-101', sev, 'repetition-fatigue', "Transition word '%s' appears %s times." % (word, count), evidence=[word], repair_targets=["Reduce repeated transition word '%s'." % word])
+            fix_plan.append("Reduce repeated transition word '%s'." % word)
 
-    # 2. Report-speak
+    rules_evaluated.append('AUD-102')
     report_hits = [w for w in REPORT_SPEAK if w in chapter]
     if report_hits:
-        sev = "major" if len(report_hits) >= 3 else "minor"
-        add(findings, sev, "report-speak", f"Abstract/report-like wording detected: {', '.join(report_hits[:6])}.")
-        fix_plan.append("Replace abstract explanation with concrete action, sensory evidence, or dialogue.")
+        sev = 'major' if len(report_hits) >= 3 else 'minor'
+        add(findings, 'AUD-102', sev, 'report-speak', 'Abstract/report-like wording detected: %s.' % ', '.join(report_hits[:6]), evidence=report_hits[:6], repair_targets=['Replace abstract explanation with concrete action, sensory evidence, or dialogue.'])
+        fix_plan.append('Replace abstract explanation with concrete action, sensory evidence, or dialogue.')
 
-    # 3. Generic crowd response
+    rules_evaluated.append('AUD-103')
     crowd_hits = [w for w in CROWD_CLICHES if w in chapter]
     if crowd_hits:
-        add(findings, "minor", "crowd-cliche", f"Generic crowd-response cliché detected: {', '.join(crowd_hits)}.")
-        fix_plan.append("Replace generic crowd reaction with 1-2 specific character reactions.")
+        add(findings, 'AUD-103', 'minor', 'crowd-cliche', 'Generic crowd-response cliché detected: %s.' % ', '.join(crowd_hits), evidence=crowd_hits, repair_targets=['Replace generic crowd reaction with 1-2 specific character reactions.'])
+        fix_plan.append('Replace generic crowd reaction with 1-2 specific character reactions.')
 
-    # 4. Paragraph monotony
-    paras = [p.strip() for p in re.split(r"\n\s*\n", chapter) if p.strip()]
+    rules_evaluated.append('AUD-104')
+    paras = [p.strip() for p in re.split(r'\n\s*\n', chapter) if p.strip()]
     if len(paras) >= 4:
         lens = [len(p) for p in paras]
-        avg = sum(lens) / len(lens)
+        avg = sum(lens) / float(len(lens))
         close = sum(1 for x in lens if abs(x - avg) <= 25)
-        if close / len(lens) >= 0.7:
-            add(findings, "minor", "paragraph-monotony", "Paragraph lengths are too uniform; rhythm may feel machine-made.")
-            fix_plan.append("Vary paragraph length and beat density.")
+        if close / float(len(lens)) >= 0.7:
+            add(findings, 'AUD-104', 'minor', 'paragraph-monotony', 'Paragraph lengths are too uniform; rhythm may feel machine-made.', repair_targets=['Vary paragraph length and beat density.'])
+            fix_plan.append('Vary paragraph length and beat density.')
 
-    # 5. Hook management
-    open_hooks = [x for x in extract_bullets(pending_hooks) if "[OPEN]" in x]
+    rules_evaluated.append('AUD-105')
+    open_hooks, hook_keywords = open_hook_keywords(pending_hooks)
     if len(open_hooks) >= 8 and len(chapter) < 8000:
-        add(findings, "minor", "hook-management", f"There are {len(open_hooks)} open hooks; consider advancing at least one clearly.")
-        fix_plan.append("Advance or partially pay off at least one existing hook.")
+        add(findings, 'AUD-105', 'minor', 'hook-overload', 'There are %s open hooks; consider advancing at least one clearly.' % len(open_hooks), evidence=open_hooks[:5], repair_targets=['Advance or partially pay off at least one existing hook.'])
+        fix_plan.append('Advance or partially pay off at least one existing hook.')
 
-    # 6. Outline drift (very heuristic)
-    outline_keywords = [w for w in re.findall(r"[\u4e00-\u9fffA-Za-z]{3,}", outline)[:40] if len(w) >= 3]
+    rules_evaluated.append('AUD-106')
+    if len(open_hooks) >= 3 and len(chapter) > 1200 and hook_keywords:
+        if not any(keyword in chapter for keyword in hook_keywords[:12]):
+            add(findings, 'AUD-106', 'minor', 'hook-advancement', 'Chapter does not appear to touch any currently open hook keywords.', evidence=hook_keywords[:8], repair_targets=['Check whether this chapter should advance, delay, or intentionally isolate current open hooks.'])
+            fix_plan.append('Check whether this chapter should advance, delay, or intentionally isolate current open hooks.')
+
+    rules_evaluated.append('AUD-107')
+    outline_keywords = extract_keywords(outline, min_len=3, limit=40)
     if outline_keywords:
         hit = sum(1 for w in outline_keywords[:15] if w in chapter)
         if hit == 0 and len(chapter) > 1500:
-            add(findings, "major", "outline-drift", "Chapter appears weakly connected to the current outline keywords.")
-            fix_plan.append("Check whether the chapter still serves the planned arc or chapter function.")
+            add(findings, 'AUD-107', 'major', 'outline-drift', 'Chapter appears weakly connected to the current outline keywords.', evidence=outline_keywords[:10], repair_targets=['Check whether the chapter still serves the planned arc or chapter function.'])
+            fix_plan.append('Check whether the chapter still serves the planned arc or chapter function.')
 
-    # 7. Current-state mismatch heuristic
-    facts_section = current_state.split("## Character beliefs")[0]
-    state_keywords = [w for w in re.findall(r"[\u4e00-\u9fffA-Za-z]{2,}", facts_section) if len(w) >= 2]
+    rules_evaluated.append('AUD-108')
+    facts_section = current_state.split('## Character beliefs')[0]
+    state_keywords = extract_keywords(facts_section, min_len=2, limit=20)
     if state_keywords:
-        overlap = sum(1 for w in state_keywords[:20] if w in chapter)
+        overlap = sum(1 for w in state_keywords if w in chapter)
         if overlap <= 1 and len(chapter) > 2000:
-            add(findings, "major", "state-cohesion", "Chapter barely references current authoritative state; risk of drift.")
-            fix_plan.append("Re-check current_state.md and ensure the chapter reflects active facts, conflicts, and pressures.")
+            add(findings, 'AUD-108', 'major', 'state-cohesion', 'Chapter barely references current authoritative state; risk of drift.', evidence=state_keywords[:10], repair_targets=['Re-check current_state.md and ensure the chapter reflects active facts, conflicts, and pressures.'])
+            fix_plan.append('Re-check current_state.md and ensure the chapter reflects active facts, conflicts, and pressures.')
 
-    # 8. Character consistency heuristic
-    rule_lines = extract_bullets(book_rules)
-    protagonist_constraints = [x for x in rule_lines if "personality" in x.lower() or "constraint" in x.lower() or "prohibition" in x.lower()]
-    if protagonist_constraints and len(chapter) > 1200:
-        if any(k in chapter for k in ["突然心软", "轻易原谅", "毫无理由地退让"]):
-            add(findings, "major", "character-consistency", "Potential protagonist lock break: sudden softness/retreat language found.")
-            fix_plan.append("Re-check protagonist lock before keeping this turn in characterization.")
+    rules_evaluated.append('AUD-109')
+    constraint_lines = [x for x in extract_bullets(book_rules) if re.search(r'不能|不得|不要|禁止|avoid|never|must not|do not|constraint|prohibition', x, flags=re.I)]
+    lock_breaks = [x for x in PROTAGONIST_LOCK_BREAKS if x in chapter]
+    if constraint_lines and lock_breaks:
+        add(findings, 'AUD-109', 'major', 'protagonist-lock', 'Potential protagonist lock break language found.', evidence=lock_breaks + constraint_lines[:3], repair_targets=['Re-check protagonist lock before keeping this turn in characterization.'])
+        fix_plan.append('Re-check protagonist lock before keeping this turn in characterization.')
 
-    # 9. Information boundary leak heuristic
-    recent = tail_chapter_summaries(chapter_summaries)
-    matrix_words = [w for w in re.findall(r"[\u4e00-\u9fffA-Za-z]{2,}", character_matrix) if len(w) >= 2]
-    if ("不知道" in current_state or "不知" in current_state) and any(x in chapter for x in ["早就知道", "其实早已明白", "他当然知道真相"]):
-        add(findings, "critical", "information-boundary", "Possible knowledge leak against current_state character-belief section.")
-        fix_plan.append("Verify who is allowed to know the revealed fact, then patch the leaking line.")
-    elif recent and any(x in chapter for x in ["所有真相", "完整计划", "幕后之人就是"]):
-        add(findings, "minor", "information-boundary", "Check whether current POV earns this level of knowledge disclosure.")
+    rules_evaluated.append('AUD-110')
+    recent = latest_sections(chapter_summaries, r'^##\s+Chapter\s+\d+.*$', 3)
+    if ('不知道' in current_state or '不知' in current_state) and any(x in chapter for x in ['早就知道', '其实早已明白', '他当然知道真相']):
+        add(findings, 'AUD-110', 'critical', 'information-boundary', 'Possible knowledge leak against current_state character-belief section.', repair_targets=['Verify who is allowed to know the revealed fact, then patch the leaking line.'])
+        fix_plan.append('Verify who is allowed to know the revealed fact, then patch the leaking line.')
+    elif recent and any(x in chapter for x in KNOWLEDGE_LEAPS):
+        add(findings, 'AUD-110', 'minor', 'information-boundary', 'Check whether current POV earns this level of knowledge disclosure.', evidence=[x for x in KNOWLEDGE_LEAPS if x in chapter], repair_targets=['Check whether current POV has actually earned this reveal level.'])
+        fix_plan.append('Check whether current POV has actually earned this reveal level.')
 
-    # 10. Dialogue authenticity heuristic
-    quote_count = chapter.count("“") + chapter.count('"')
+    rules_evaluated.append('AUD-111')
+    jump_hits = [x for x in TIME_JUMPS if x in chapter]
+    if len(jump_hits) >= 2 and len(chapter) < 2500:
+        sev = 'major' if len(jump_hits) >= 3 else 'minor'
+        add(findings, 'AUD-111', sev, 'timeline-continuity', 'Multiple time-jump markers appear in a compact chapter; verify timeline coherence.', evidence=jump_hits, repair_targets=['Check whether time progression is clear and earned between scene beats.'])
+        fix_plan.append('Check whether time progression is clear and earned between scene beats.')
+
+    rules_evaluated.append('AUD-112')
+    quote_count = chapter.count('“') + chapter.count('"')
     if quote_count == 0 and len(chapter) > 1800:
-        add(findings, "note", "dialogue-balance", "Long chapter with no dialogue; verify that this is intentional.")
+        add(findings, 'AUD-112', 'note', 'dialogue-balance', 'Long chapter with no dialogue; verify that this is intentional.')
 
-    # 11. Telling vs dramatizing heuristic
-    telling_hits = [w for w in ["他感到", "她感到", "他意识到", "她意识到", "he felt", "she felt"] if w in chapter]
+    rules_evaluated.append('AUD-113')
+    telling_hits = [w for w in TELLING_PHRASES if w in chapter]
     if len(telling_hits) >= 3:
-        add(findings, "minor", "telling-vs-dramatizing", f"Repeated emotional labeling found: {', '.join(sorted(set(telling_hits)))}.")
-        fix_plan.append("Replace some direct emotion labels with action or sensory cues.")
+        add(findings, 'AUD-113', 'minor', 'telling-vs-dramatizing', 'Repeated emotional labeling found: %s.' % ', '.join(sorted(set(telling_hits))), evidence=sorted(set(telling_hits)), repair_targets=['Replace some direct emotion labels with action or sensory cues.'])
+        fix_plan.append('Replace some direct emotion labels with action or sensory cues.')
 
-    # overall verdict
-    if any(f["severity"] == "critical" for f in findings):
-        overall = "block"
-    elif any(f["severity"] == "major" for f in findings):
-        overall = "revise"
+    rules_evaluated.append('AUD-114')
+    turn_hits = [w for w in STATE_TURN_MARKERS if w in chapter]
+    if len(turn_hits) >= 4:
+        add(findings, 'AUD-114', 'note', 'state-update-pressure', 'Chapter contains multiple state-turn markers; remember to update truth files after acceptance.', evidence=turn_hits[:8], repair_targets=['Prepare state updates for summaries, hooks, relationships, and emotional arcs.'])
+        fix_plan.append('Prepare state updates for summaries, hooks, relationships, and emotional arcs.')
+
+    findings.sort(key=lambda x: (SEVERITY_ORDER[x['severity']], x['rule_id']))
+    dedup_fix_plan = []
+    seen = set()
+    for item in fix_plan:
+        if item in seen:
+            continue
+        seen.add(item)
+        dedup_fix_plan.append(item)
+    if not dedup_fix_plan:
+        dedup_fix_plan = ['No obvious high-severity issue found by heuristic audit. Do a human pass for subtle continuity and tone.']
+
+    counts = finding_counts(findings)
+    if counts['critical']:
+        overall = 'block'
+    elif counts['major']:
+        overall = 'revise'
     else:
-        overall = "pass"
+        overall = 'pass'
 
-    findings.sort(key=lambda x: SEVERITY_ORDER[x["severity"]])
-    if not fix_plan:
-        fix_plan = ["No obvious high-severity issue found by heuristic audit. Do a human pass for subtle continuity and tone."]
-
-    return findings, list(dict.fromkeys(fix_plan)), overall
+    return {
+        'schema_version': 'inkos.audit-report.v1',
+        'tool': 'audit_chapter',
+        'generated_at': iso_now(),
+        'project': str(project),
+        'chapter': str(chapter_file),
+        'overall': overall,
+        'summary': {
+            'counts': counts,
+            'finding_count': len(findings),
+            'rules_evaluated': rules_evaluated,
+        },
+        'source_files': [
+            str(chapter_file),
+            str(project / 'current_state.md'),
+            str(project / 'book_rules.md'),
+            str(project / 'pending_hooks.md'),
+            str(project / 'chapter_summaries.md'),
+            str(project / 'outline.md'),
+        ],
+        'chapter_metrics': chapter_metrics(chapter),
+        'findings': findings,
+        'minimal_fix_plan': dedup_fix_plan,
+    }
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Heuristic chapter auditor for inkos-like-novel-os projects.")
-    parser.add_argument("--project", required=True)
-    parser.add_argument("--chapter-file", required=True)
-    parser.add_argument("--json", action="store_true", help="Output JSON instead of Markdown.")
-    parser.add_argument("--write-report", action="store_true", help="Write report into project/reviews/.")
+    parser = argparse.ArgumentParser(description='Heuristic chapter auditor for inkos-like-novel-os projects.')
+    parser.add_argument('--project', required=True)
+    parser.add_argument('--chapter-file', required=True)
+    parser.add_argument('--json', action='store_true', help='Output JSON instead of Markdown.')
+    parser.add_argument('--write-report', action='store_true', help='Write report into project/reviews/.')
     args = parser.parse_args()
 
-    project = Path(args.project)
-    chapter_file = Path(args.chapter_file)
-    findings, fix_plan, overall = audit(project, chapter_file)
-
-    report = {
-        "overall": overall,
-        "chapter": str(chapter_file),
-        "findings": findings,
-        "minimal_fix_plan": fix_plan,
-    }
+    report = build_report(args.project, args.chapter_file)
 
     if args.write_report:
-        reviews = project / "reviews"
+        reviews = Path(args.project) / 'reviews'
         reviews.mkdir(parents=True, exist_ok=True)
-        out = reviews / f"{chapter_file.stem}.audit.json"
-        out.write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
+        out = reviews / ('%s.audit.json' % Path(args.chapter_file).stem)
+        write_json(out, report)
+        report['report_path'] = str(out)
 
     if args.json:
         print(json.dumps(report, ensure_ascii=False, indent=2))
         return
 
-    print("# Chapter Audit")
+    print('# Chapter Audit')
     print()
-    print("## Summary verdict")
-    print(f"- overall: {overall}")
+    print('## Summary verdict')
+    print('- overall: %s' % report['overall'])
     print()
-    print("## Findings")
-    grouped = {k: [] for k in ["critical", "major", "minor", "note"]}
-    for item in findings:
-        grouped[item["severity"]].append(item)
-    for sev in ["critical", "major", "minor", "note"]:
-        print(f"### {sev}")
+    print('## Summary counts')
+    for sev in ['critical', 'major', 'minor', 'note']:
+        print('- %s: %s' % (sev, report['summary']['counts'][sev]))
+    print()
+    print('## Findings')
+    grouped = {'critical': [], 'major': [], 'minor': [], 'note': []}
+    for item in report['findings']:
+        grouped[item['severity']].append(item)
+    for sev in ['critical', 'major', 'minor', 'note']:
+        print('### %s' % sev)
         if not grouped[sev]:
-            print("- none")
+            print('- none')
         else:
             for item in grouped[sev]:
-                print(f"- [{item['dimension']}] {item['message']}")
+                print('- [%s/%s] %s' % (item['rule_id'], item['dimension'], item['message']))
         print()
-    print("## Minimal fix plan")
-    for item in fix_plan:
-        print(f"- {item}")
+    print('## Minimal fix plan')
+    for item in report['minimal_fix_plan']:
+        print('- %s' % item)
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()

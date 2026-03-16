@@ -255,6 +255,7 @@ Good pattern:
 - `scripts/audit_chapter.py` — run a heuristic chapter audit with Markdown or JSON output
 - `scripts/smoke_test.sh` — quick regression test for the init/context/audit/update loop
 - `scripts/package_skill.sh` — create a clean `.skill` package with a stable top-level directory name
+- `scripts/inkos_cli.py` — lightweight CLI wrapper for init/context/audit/state-update/package/smoke-test
 
 ## Use bundled references
 
@@ -264,6 +265,8 @@ Read these only when needed:
 - `references/file-schemas.md` — what each truth file should contain
 - `references/workflow-playbooks.md` — step-by-step operating playbooks
 - `references/worked-examples.md` — concrete end-to-end examples from project setup to chapter progression
+- `references/json-schemas.md` — stable JSON output contracts for tooling and automation
+- `references/audit-rules.md` — structured rule inventory for the chapter auditor
 - `references/canon-side-story.md` — how to handle prequels / sequels / alternate lines
 - `references/style-learning.md` — how to learn and apply style without overfitting
 

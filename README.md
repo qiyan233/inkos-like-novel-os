@@ -52,8 +52,10 @@
 
 - `init_novel_project.sh` — 初始化一个小说项目骨架，并创建标准工作目录
 - `update_story_state.py` — 追加章节摘要、伏笔、关系、情绪变化等状态更新
-- `audit_chapter.py` — 对章节做启发式审计，输出 Markdown 或 JSON 报告
-- `build_next_chapter_context.py` — 从 truth files 自动拼装“下一章写作上下文”
+- `audit_chapter.py` — 对章节做启发式但结构化的规则审计，输出稳定 JSON 或 Markdown 报告
+- `build_next_chapter_context.py` — 从 truth files 自动拼装“下一章写作上下文”，并支持稳定 JSON 输出
+- `update_story_state.py` — 追加章节状态变更，并可输出 JSON 更新报告
+- `inkos_cli.py` — 轻量 CLI 封装，统一 init/context/audit/state-update/package/smoke-test 入口
 - `smoke_test.sh` — 快速回归测试整个 init → context → audit → update 链路
 - `package_skill.sh` — 稳定打包 `.skill` 文件，确保顶层目录始终为 `inkos-like-novel-os/`
 
@@ -168,6 +170,25 @@ python3 scripts/audit_chapter.py \
 
 ```bash
 python3 scripts/update_story_state.py ...
+```
+
+## JSON 与 CLI
+
+当前脚本已经开始提供更稳定的 JSON 契约，适合后续接自动修订脚本、状态快照或外部工具。
+
+可参考：
+
+- `references/json-schemas.md`
+- `references/audit-rules.md`
+
+### 统一 CLI 示例
+
+```bash
+python3 scripts/inkos_cli.py init /path/to/project "书名"
+python3 scripts/inkos_cli.py context --project /path/to/project --json
+python3 scripts/inkos_cli.py audit --project /path/to/project --chapter-file /path/to/project/chapters/ch12.md --json
+python3 scripts/inkos_cli.py state-update --project /path/to/project --chapter 12 --title "沉默的代价" --summary "..." --json
+python3 scripts/inkos_cli.py smoke-test
 ```
 
 ## 验证与打包
@@ -312,7 +333,9 @@ python3 scripts/update_story_state.py \
 - 工作流说明
 - 初始化 / 更新脚本
 - 上下文组装脚本
-- 启发式章节审计脚本
+- 启发式但结构化的章节审计脚本
+- 稳定 JSON schema 输出
+- 轻量 CLI
 - smoke test
 - 稳定打包脚本
 
@@ -333,9 +356,9 @@ python3 scripts/update_story_state.py \
 - [x] `.skill` 发布包
 - [x] smoke test
 - [x] 稳定打包脚本
-- [ ] 更强的规则审计
-- [ ] 更稳定的 JSON schema 输出
-- [ ] 轻量 CLI 封装
+- [x] 更强的规则审计（基础版）
+- [x] 更稳定的 JSON schema 输出（v1 contracts）
+- [x] 轻量 CLI 封装
 - [ ] 自动修订辅助脚本
 - [ ] 版本化项目状态管理
 
