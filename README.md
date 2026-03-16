@@ -13,6 +13,10 @@
 - 支持“起草 → 审计 → 局部修订 → 更新状态”的闭环
 - 支持番外、前传、后传、if 线等依赖正典约束的写作场景
 
+灵感参考原项目 **InkOS**：<https://github.com/Narcooo/inkos>
+
+> 说明：本项目是面向 OpenClaw 的 skill skeleton，受 InkOS 启发，但不是原项目的官方移植版本。
+
 ## 适用场景
 
 适合这些需求：
@@ -195,6 +199,83 @@ bash scripts/package_skill.sh
 bash scripts/package_skill.sh /path/to/dist v0.1.3
 ```
 
+## 从 0 到第 3 章：一个最小 walkthrough
+
+假设你想跑一个古风悬疑长篇，核心是“玉佩被调包”。
+
+### Step 1：初始化项目
+
+```bash
+bash scripts/init_novel_project.sh /path/to/project "玉佩疑云"
+```
+
+初始化后先不要急着写正文，先补最关键的 truth files：
+
+- `story_bible.md`：世界、势力、玉佩相关规则
+- `book_rules.md`：主角锁、禁忌、悬疑释放规则
+- `outline.md`：前 3 章要推进什么
+- `current_state.md`：谁知道什么、谁怀疑谁
+
+### Step 2：准备第 1 章
+
+先明确 chapter function，例如：
+
+- 主角第一次察觉玉佩不对
+- 徐安在场但态度暧昧
+- 留下“谁先碰过玉佩”的悬念
+- 不能直接揭示幕后人
+
+然后生成下一章上下文：
+
+```bash
+python3 scripts/build_next_chapter_context.py --project /path/to/project
+```
+
+### Step 3：写完第 1 章后审计
+
+```bash
+python3 scripts/audit_chapter.py \
+  --project /path/to/project \
+  --chapter-file /path/to/project/chapters/ch01.md
+```
+
+重点看：
+
+- 主角有没有 OOC
+- 是否提前泄露真相
+- 是否有太重的解释腔 / 报告感
+- 钩子有没有被意外说破
+
+### Step 4：接受后更新状态
+
+```bash
+python3 scripts/update_story_state.py \
+  --project /path/to/project \
+  --chapter 1 \
+  --title "第一章" \
+  --summary "林烬察觉玉佩手感异常。" \
+  --state-change "林烬确认玉佩并非记忆中的原物。" \
+  --hook-open "是谁在林烬之前碰过玉佩" \
+  --relationship "林烬 -> 徐安：试探增加，信任下降" \
+  --emotion "林烬：警觉上升"
+```
+
+### Step 5：推进到第 2～3 章
+
+推荐节奏：
+
+- **第 1 章**：察觉异常，建立悬念
+- **第 2 章**：试探徐安，怀疑开始发酵
+- **第 3 章**：怀疑方向第一次偏转，悬念加深
+
+原则是：
+
+- 每章都推进至少一个 hook
+- 每章都要产生明确 state change
+- 真相不要直线揭露，而是逐步校正怀疑对象
+
+更完整的落地范例，可读：`references/worked-examples.md`。
+
 ## 工作流思路
 
 推荐按下面的方式运行：
@@ -267,6 +348,9 @@ bash scripts/package_skill.sh /path/to/dist v0.1.3
 ## English
 
 An OpenClaw skill skeleton for running long-form fiction as a stateful pipeline.
+
+Inspired by the original InkOS project: <https://github.com/Narcooo/inkos>.
+This repository is an OpenClaw-oriented skill skeleton, not an official port of the original project.
 
 ## Included
 

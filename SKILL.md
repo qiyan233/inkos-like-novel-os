@@ -263,6 +263,7 @@ Read these only when needed:
 - `references/audit-dimensions.md` — audit taxonomy and severity model
 - `references/file-schemas.md` — what each truth file should contain
 - `references/workflow-playbooks.md` — step-by-step operating playbooks
+- `references/worked-examples.md` — concrete end-to-end examples from project setup to chapter progression
 - `references/canon-side-story.md` — how to handle prequels / sequels / alternate lines
 - `references/style-learning.md` — how to learn and apply style without overfitting
 
