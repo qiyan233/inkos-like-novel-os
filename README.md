@@ -55,9 +55,13 @@
 - `audit_chapter.py` — 对章节做启发式但结构化的规则审计，输出稳定 JSON 或 Markdown 报告
 - `build_next_chapter_context.py` — 从 truth files 自动拼装“下一章写作上下文”，并支持稳定 JSON 输出
 - `update_story_state.py` — 追加章节状态变更，并可输出 JSON 更新报告
-- `inkos_cli.py` — 轻量 CLI 封装，统一 init/context/audit/state-update/package/smoke-test 入口
-- `smoke_test.sh` — 快速回归测试整个 init → context → audit → update 链路
+- `inkos_cli.py` — 轻量 CLI 封装，统一 init/context/audit/state-update/revision-plan/spot-fixes/snapshot/diff/package/smoke-test 入口
+- `smoke_test.sh` — 快速回归测试整个 init → context → audit → update → revision-plan → spot-fixes → snapshot/diff 链路
 - `package_skill.sh` — 稳定打包 `.skill` 文件，确保顶层目录始终为 `inkos-like-novel-os/`
+- `build_revision_plan.py` — 基于 audit report 产出结构化修订计划，区分局部修补与场景级重写
+- `suggest_spot_fixes.py` — 为低风险局部问题生成 spot-fix 建议
+- `snapshot_story_state.py` — 对 truth files 建立版本化快照
+- `diff_story_state.py` — 对比 snapshot 与当前 / 其他 snapshot 的状态差异
 
 ### 4. `assets/project-template/`
 小说项目模板，包含：
@@ -180,6 +184,7 @@ python3 scripts/update_story_state.py ...
 
 - `references/json-schemas.md`
 - `references/audit-rules.md`
+- `references/revision-workflow.md`
 
 ### 统一 CLI 示例
 
@@ -188,8 +193,32 @@ python3 scripts/inkos_cli.py init /path/to/project "书名"
 python3 scripts/inkos_cli.py context --project /path/to/project --json
 python3 scripts/inkos_cli.py audit --project /path/to/project --chapter-file /path/to/project/chapters/ch12.md --json
 python3 scripts/inkos_cli.py state-update --project /path/to/project --chapter 12 --title "沉默的代价" --summary "..." --json
+python3 scripts/inkos_cli.py revision-plan --project /path/to/project --chapter-file /path/to/project/chapters/ch12.md --json
+python3 scripts/inkos_cli.py spot-fixes --project /path/to/project --chapter-file /path/to/project/chapters/ch12.md --json
+python3 scripts/inkos_cli.py snapshot --project /path/to/project --chapter 12 --label accepted --json
+python3 scripts/inkos_cli.py diff --project /path/to/project --from latest --to current --json
 python3 scripts/inkos_cli.py smoke-test
 ```
+
+
+## 修订与状态版本化
+
+现在这套骨架已经不只是“写完后跑个 audit”，而是开始形成更完整的 revision OS：
+
+- `audit_chapter.py`：发现问题
+- `build_revision_plan.py`：决定修订策略与优先级
+- `suggest_spot_fixes.py`：给出低风险局部修改建议
+- `snapshot_story_state.py`：在关键节点保存 truth files 快照
+- `diff_story_state.py`：比较 snapshot 与当前状态的变化
+
+适合的最小闭环：
+
+1. 写完章节
+2. 跑 audit
+3. 产出 revision plan
+4. 处理 spot-fix / scene rewrite
+5. 接受章节后更新 truth files
+6. 建立 snapshot，必要时再 diff 回查
 
 ## 验证与打包
 
@@ -205,6 +234,8 @@ bash scripts/smoke_test.sh
 - 下一章上下文构建
 - 章节审计
 - 状态更新
+- 修订计划与 spot-fix 建议
+- 状态快照与差异对比
 
 ### 打包 `.skill`
 

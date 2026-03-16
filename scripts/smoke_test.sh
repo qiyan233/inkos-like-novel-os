@@ -48,8 +48,20 @@ printf '\n===== update_story_state =====\n'
   --state-change "林烬确认手中的玉佩手感异常，怀疑其并非原物。" \
   --hook-open "是谁在林烬之前碰过玉佩" \
   --relationship "林烬 -> 徐安：出现试探与怀疑" \
-  --emotion "林烬：警觉上升"
+  --emotion "林烬：警觉上升" \
+  --json >/dev/null
 printf 'story state update ok\n'
+
+printf '\n===== revision_plan / spot_fixes =====\n'
+"$PYTHON_BIN" "$ROOT/scripts/build_revision_plan.py" --project "$PROJECT" --chapter-file "$PROJECT/chapters/ch01.md" --json >/dev/null
+"$PYTHON_BIN" "$ROOT/scripts/suggest_spot_fixes.py" --project "$PROJECT" --chapter-file "$PROJECT/chapters/ch01.md" --json >/dev/null
+printf 'revision helpers ok\n'
+
+printf '\n===== snapshot / diff =====\n'
+SNAP1=$("$PYTHON_BIN" "$ROOT/scripts/snapshot_story_state.py" --project "$PROJECT" --chapter 1 --label before-edit)
+echo "补一条临时状态" >> "$PROJECT/current_state.md"
+"$PYTHON_BIN" "$ROOT/scripts/diff_story_state.py" --project "$PROJECT" --from "$SNAP1" --to current --json >/dev/null
+printf 'state snapshot diff ok\n'
 
 echo
 echo 'Smoke test passed.'

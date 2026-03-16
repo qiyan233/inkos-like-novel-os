@@ -55,6 +55,33 @@ def main():
     p.add_argument('--json', action='store_true')
     p.add_argument('--write-report', action='store_true')
 
+    p = sub.add_parser('revision-plan', help='Build a revision plan from an audit or chapter file.')
+    p.add_argument('--project')
+    p.add_argument('--chapter-file')
+    p.add_argument('--audit-report')
+    p.add_argument('--json', action='store_true')
+    p.add_argument('--write-report', action='store_true')
+
+    p = sub.add_parser('spot-fixes', help='Suggest low-risk spot fixes from an audit or chapter file.')
+    p.add_argument('--project')
+    p.add_argument('--chapter-file')
+    p.add_argument('--audit-report')
+    p.add_argument('--json', action='store_true')
+    p.add_argument('--write-report', action='store_true')
+
+    p = sub.add_parser('snapshot', help='Create a versioned story-state snapshot.')
+    p.add_argument('--project', required=True)
+    p.add_argument('--label')
+    p.add_argument('--chapter', type=int)
+    p.add_argument('--notes')
+    p.add_argument('--json', action='store_true')
+
+    p = sub.add_parser('diff', help='Diff story-state snapshots or current state.')
+    p.add_argument('--project', required=True)
+    p.add_argument('--from', dest='from_ref', required=True)
+    p.add_argument('--to', dest='to_ref', default='current')
+    p.add_argument('--json', action='store_true')
+
     p = sub.add_parser('package', help='Package the skill into a .skill zip.')
     p.add_argument('outdir', nargs='?', default='')
     p.add_argument('version_suffix', nargs='?', default='')
@@ -95,6 +122,48 @@ def main():
             cmd.append('--json')
         if args.write_report:
             cmd.append('--write-report')
+        run(cmd)
+    elif args.command == 'revision-plan':
+        cmd = py('build_revision_plan.py', [])
+        if args.project:
+            cmd.extend(['--project', args.project])
+        if args.chapter_file:
+            cmd.extend(['--chapter-file', args.chapter_file])
+        if args.audit_report:
+            cmd.extend(['--audit-report', args.audit_report])
+        if args.json:
+            cmd.append('--json')
+        if args.write_report:
+            cmd.append('--write-report')
+        run(cmd)
+    elif args.command == 'spot-fixes':
+        cmd = py('suggest_spot_fixes.py', [])
+        if args.project:
+            cmd.extend(['--project', args.project])
+        if args.chapter_file:
+            cmd.extend(['--chapter-file', args.chapter_file])
+        if args.audit_report:
+            cmd.extend(['--audit-report', args.audit_report])
+        if args.json:
+            cmd.append('--json')
+        if args.write_report:
+            cmd.append('--write-report')
+        run(cmd)
+    elif args.command == 'snapshot':
+        cmd = py('snapshot_story_state.py', ['--project', args.project])
+        if args.label:
+            cmd.extend(['--label', args.label])
+        if args.chapter is not None:
+            cmd.extend(['--chapter', str(args.chapter)])
+        if args.notes:
+            cmd.extend(['--notes', args.notes])
+        if args.json:
+            cmd.append('--json')
+        run(cmd)
+    elif args.command == 'diff':
+        cmd = py('diff_story_state.py', ['--project', args.project, '--from', args.from_ref, '--to', args.to_ref])
+        if args.json:
+            cmd.append('--json')
         run(cmd)
     elif args.command == 'package':
         extra = []
