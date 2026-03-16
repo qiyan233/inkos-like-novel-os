@@ -14,6 +14,7 @@ TEMPLATE_DIR="$SKILL_DIR/assets/project-template"
 
 mkdir -p "$PROJECT_DIR"
 cp -r "$TEMPLATE_DIR"/. "$PROJECT_DIR"/
+mkdir -p "$PROJECT_DIR/chapters" "$PROJECT_DIR/reviews"
 
 sed -i "s/{{BOOK_TITLE}}/${BOOK_TITLE//\//\\/}/g" "$PROJECT_DIR"/README-project.md
 sed -i "s/{{BOOK_TITLE}}/${BOOK_TITLE//\//\\/}/g" "$PROJECT_DIR"/story_bible.md

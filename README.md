@@ -4,7 +4,7 @@
 
 中文 | [English](#english)
 
-一个面向 **OpenClaw** 的小说生产技能骨架，把长篇 / 连载 / 网文 / 同人写作当成**有状态的工作流系统**来运行，而不是一次性提示词。
+一个面向 **OpenClaw** 的小说生产技能骨架，把长篇 / 连载 / 网文 / 同人写作当成 **有状态的工作流系统** 来运行，而不是一次性提示词。
 
 这个项目的目标不是直接“替你写神作”，而是提供一个接近 **InkOS** 思路的基础设施：
 
@@ -46,10 +46,12 @@
 ### 3. `scripts/`
 辅助脚本：
 
-- `init_novel_project.sh` — 初始化一个小说项目骨架
+- `init_novel_project.sh` — 初始化一个小说项目骨架，并创建标准工作目录
 - `update_story_state.py` — 追加章节摘要、伏笔、关系、情绪变化等状态更新
 - `audit_chapter.py` — 对章节做启发式审计，输出 Markdown 或 JSON 报告
 - `build_next_chapter_context.py` — 从 truth files 自动拼装“下一章写作上下文”
+- `smoke_test.sh` — 快速回归测试整个 init → context → audit → update 链路
+- `package_skill.sh` — 稳定打包 `.skill` 文件，确保顶层目录始终为 `inkos-like-novel-os/`
 
 ### 4. `assets/project-template/`
 小说项目模板，包含：
@@ -82,11 +84,19 @@
 - `scripts/`
 - `assets/project-template/`
 
+## 快速开始
+
 ### 初始化一个小说项目
 
 ```bash
 bash scripts/init_novel_project.sh /path/to/project "书名"
 ```
+
+初始化后会自动准备：
+
+- truth files 模板
+- `chapters/`
+- `reviews/`
 
 ### 生成下一章上下文
 
@@ -156,6 +166,35 @@ python3 scripts/audit_chapter.py \
 python3 scripts/update_story_state.py ...
 ```
 
+## 验证与打包
+
+### 跑 smoke test
+
+```bash
+bash scripts/smoke_test.sh
+```
+
+它会自动验证：
+
+- 项目初始化
+- 下一章上下文构建
+- 章节审计
+- 状态更新
+
+### 打包 `.skill`
+
+```bash
+bash scripts/package_skill.sh
+```
+
+输出会写到默认 `dist/` 目录。
+
+如果要显式指定输出目录和版本后缀：
+
+```bash
+bash scripts/package_skill.sh /path/to/dist v0.1.3
+```
+
 ## 工作流思路
 
 推荐按下面的方式运行：
@@ -193,6 +232,8 @@ python3 scripts/update_story_state.py ...
 - 初始化 / 更新脚本
 - 上下文组装脚本
 - 启发式章节审计脚本
+- smoke test
+- 稳定打包脚本
 
 还没包含：
 
@@ -209,6 +250,8 @@ python3 scripts/update_story_state.py ...
 - [x] 下一章上下文组装器
 - [x] 启发式章节审计脚本
 - [x] `.skill` 发布包
+- [x] smoke test
+- [x] 稳定打包脚本
 - [ ] 更强的规则审计
 - [ ] 更稳定的 JSON schema 输出
 - [ ] 轻量 CLI 封装
@@ -229,7 +272,7 @@ An OpenClaw skill skeleton for running long-form fiction as a stateful pipeline.
 
 - `SKILL.md` with workflow and operating model
 - `references/` for audit dimensions, file schemas, canon handling, playbooks, and style learning
-- `scripts/` for project initialization, story-state updates, chapter auditing, and next-context building
+- `scripts/` for project initialization, story-state updates, chapter auditing, next-context building, smoke testing, and packaging
 - `assets/project-template/` for bootstrapping a new novel project
 
 ## Goal

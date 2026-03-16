@@ -247,6 +247,15 @@ Good pattern:
 - Xu An does not know the true source.
 ```
 
+## Use bundled scripts where helpful:
+
+- `scripts/init_novel_project.sh` — scaffold a new novel project with standard working directories
+- `scripts/update_story_state.py` — append structured state deltas after a chapter
+- `scripts/build_next_chapter_context.py` — assemble a compact truth-file context for the next chapter
+- `scripts/audit_chapter.py` — run a heuristic chapter audit with Markdown or JSON output
+- `scripts/smoke_test.sh` — quick regression test for the init/context/audit/update loop
+- `scripts/package_skill.sh` — create a clean `.skill` package with a stable top-level directory name
+
 ## Use bundled references
 
 Read these only when needed:
