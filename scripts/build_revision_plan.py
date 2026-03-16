@@ -162,8 +162,8 @@ def main():
     if args.write_report:
         chapter_stem = Path(plan['chapter']).stem
         out = Path(plan['project']) / 'reviews' / ('%s.revision-plan.json' % chapter_stem)
-        write_json(out, plan)
         plan['report_path'] = str(out)
+        write_json(out, plan)
 
     if args.json:
         print(json.dumps(plan, ensure_ascii=False, indent=2))

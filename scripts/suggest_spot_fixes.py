@@ -118,8 +118,8 @@ def main():
     if args.write_report:
         chapter_stem = Path(data['chapter']).stem
         out = Path(data['project']) / 'reviews' / ('%s.spot-fixes.json' % chapter_stem)
-        write_json(out, data)
         data['report_path'] = str(out)
+        write_json(out, data)
 
     if args.json:
         print(json.dumps(data, ensure_ascii=False, indent=2))

@@ -43,6 +43,19 @@ def sha1_file(path):
     return h.hexdigest()
 
 
+def unique_snapshot_dir(root, snapshot_id):
+    dest = root / snapshot_id
+    if not dest.exists():
+        return snapshot_id, dest
+    index = 2
+    while True:
+        candidate = '%s-%02d' % (snapshot_id, index)
+        dest = root / candidate
+        if not dest.exists():
+            return candidate, dest
+        index += 1
+
+
 def snapshot(project, label=None, chapter=None, notes=None):
     project = Path(project)
     root = project / '.inkos-state' / 'snapshots'
@@ -54,8 +67,8 @@ def snapshot(project, label=None, chapter=None, notes=None):
     if label:
         parts.append(safe_slug(label))
     snapshot_id = '-'.join(parts)
-    dest = root / snapshot_id
-    dest.mkdir(parents=True, exist_ok=True)
+    snapshot_id, dest = unique_snapshot_dir(root, snapshot_id)
+    dest.mkdir(parents=True, exist_ok=False)
 
     copied = []
     missing = []

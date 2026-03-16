@@ -14,6 +14,8 @@ def resolve_snapshot(project, ref):
     if ref == 'current':
         return {'kind': 'current', 'id': 'current', 'path': project, 'path_str': str(project)}
     if ref == 'latest':
+        if not root.exists():
+            raise SystemExit('No snapshots found under %s' % root)
         choices = sorted([p for p in root.iterdir() if p.is_dir()])
         if not choices:
             raise SystemExit('No snapshots found under %s' % root)

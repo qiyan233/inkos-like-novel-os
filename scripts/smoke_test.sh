@@ -59,9 +59,48 @@ printf 'revision helpers ok\n'
 
 printf '\n===== snapshot / diff =====\n'
 SNAP1=$("$PYTHON_BIN" "$ROOT/scripts/snapshot_story_state.py" --project "$PROJECT" --chapter 1 --label before-edit)
+SNAP2=$("$PYTHON_BIN" "$ROOT/scripts/snapshot_story_state.py" --project "$PROJECT" --chapter 1 --label before-edit)
+if [ "$SNAP1" = "$SNAP2" ]; then
+  echo 'snapshot collision detected'
+  exit 1
+fi
 echo "补一条临时状态" >> "$PROJECT/current_state.md"
 "$PYTHON_BIN" "$ROOT/scripts/diff_story_state.py" --project "$PROJECT" --from "$SNAP1" --to current --json >/dev/null
 printf 'state snapshot diff ok\n'
+
+printf '\n===== write-report regression =====\n'
+"$PYTHON_BIN" "$ROOT/scripts/audit_chapter.py" --project "$PROJECT" --chapter-file "$PROJECT/chapters/ch01.md" --write-report --json > "$TMPDIR/audit.json"
+"$PYTHON_BIN" "$ROOT/scripts/update_story_state.py" --project "$PROJECT" --chapter 1 --title "第一章" --summary "回归测试" --write-report --json > "$TMPDIR/state.json"
+"$PYTHON_BIN" "$ROOT/scripts/build_revision_plan.py" --project "$PROJECT" --chapter-file "$PROJECT/chapters/ch01.md" --write-report --json > "$TMPDIR/revision.json"
+"$PYTHON_BIN" "$ROOT/scripts/suggest_spot_fixes.py" --project "$PROJECT" --chapter-file "$PROJECT/chapters/ch01.md" --write-report --json > "$TMPDIR/fixes.json"
+TMPDIR_FOR_PY="$TMPDIR" "$PYTHON_BIN" - <<'PY'
+import json
+import os
+from pathlib import Path
+
+tmpdir = Path(os.environ['TMPDIR_FOR_PY'])
+for name in ['audit', 'state', 'revision', 'fixes']:
+    stdout = json.load(open(str(tmpdir / (name + '.json')), 'r', encoding='utf-8'))
+    report_path = stdout.get('report_path')
+    assert report_path, name
+    report = json.load(open(report_path, 'r', encoding='utf-8'))
+    assert report.get('report_path') == report_path, (name, report)
+print('write-report regression ok')
+PY
+
+printf '\n===== latest-without-snapshot regression =====\n'
+EMPTY="$TMPDIR/empty-project"
+mkdir -p "$EMPTY"
+set +e
+"$PYTHON_BIN" "$ROOT/scripts/diff_story_state.py" --project "$EMPTY" --from latest --to current >/dev/null 2>"$TMPDIR/latest.err"
+CODE=$?
+set -e
+if [ "$CODE" -eq 0 ]; then
+  echo 'expected latest-without-snapshot to fail'
+  exit 1
+fi
+grep -q 'No snapshots found under' "$TMPDIR/latest.err"
+printf 'latest-without-snapshot regression ok\n'
 
 echo
 echo 'Smoke test passed.'

@@ -236,6 +236,7 @@ bash scripts/smoke_test.sh
 - 状态更新
 - 修订计划与 spot-fix 建议
 - 状态快照与差异对比
+- `write-report` 落盘一致性、snapshot 唯一性、无快照时的错误提示回归验证
 
 ### 打包 `.skill`
 

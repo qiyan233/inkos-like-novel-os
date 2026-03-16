@@ -115,8 +115,8 @@ def main():
 
     if args.write_report:
         out = Path(args.project) / 'reviews' / ('ch%02d.state-update.json' % args.chapter)
-        write_json(out, report)
         report['report_path'] = str(out)
+        write_json(out, report)
 
     if args.json:
         print(json.dumps(report, ensure_ascii=False, indent=2))

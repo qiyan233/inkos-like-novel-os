@@ -245,8 +245,8 @@ def main():
         reviews = Path(args.project) / 'reviews'
         reviews.mkdir(parents=True, exist_ok=True)
         out = reviews / ('%s.audit.json' % Path(args.chapter_file).stem)
-        write_json(out, report)
         report['report_path'] = str(out)
+        write_json(out, report)
 
     if args.json:
         print(json.dumps(report, ensure_ascii=False, indent=2))
