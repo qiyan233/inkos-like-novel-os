@@ -2,6 +2,8 @@
 
 当前版本：**0.3.4**
 
+完整变更记录见 [CHANGELOG.md](CHANGELOG.md)。
+
 > 面向 OpenClaw 的长篇小说工作流技能骨架。
 
 中文 | [English](#english)
@@ -18,6 +20,17 @@
 灵感参考原项目 **InkOS**：<https://github.com/Narcooo/inkos>
 
 > 说明：本项目是面向 OpenClaw 的 skill skeleton，受 InkOS 启发，但不是原项目的官方移植版本。
+
+## 最新更新
+
+### v0.3.4
+
+- 修复 context 构建的多个边界问题：极小 `max-chars`、`recent-chapters=0`、负数参数
+- 修复 `update_story_state.py` 的 `updated_files` 精确性
+- 修复 audit / context / state-update / snapshot / diff 在错误 project 或 chapter 路径下的误导性成功返回
+- 补充 smoke test 回归，并支持自动生成带版本号的 `.skill` 发布包
+
+如果只想看本次发布说明，可直接看 [v0.3.4 Release](https://github.com/qiyan233/inkos-like-novel-os/releases/tag/v0.3.4)。
 
 ## 适用场景
 
@@ -53,13 +66,12 @@
 辅助脚本：
 
 - `init_novel_project.sh` — 初始化一个小说项目骨架，并创建标准工作目录
-- `update_story_state.py` — 追加章节摘要、伏笔、关系、情绪变化等状态更新
+- `update_story_state.py` — 追加章节状态变更（章节摘要、伏笔、关系、情绪变化等），并可输出稳定 JSON 更新报告
 - `audit_chapter.py` — 对章节做启发式但结构化的规则审计，输出稳定 JSON 或 Markdown 报告
 - `build_next_chapter_context.py` — 从 truth files 自动拼装“下一章写作上下文”，并支持稳定 JSON 输出
-- `update_story_state.py` — 追加章节状态变更，并可输出 JSON 更新报告
 - `inkos_cli.py` — 轻量 CLI 封装，统一 init/context/audit/state-update/revision-plan/spot-fixes/snapshot/diff/package/smoke-test 入口
 - `smoke_test.sh` — 快速回归测试整个 init → context → audit → update → revision-plan → spot-fixes → snapshot/diff 链路
-- `package_skill.sh` — 稳定打包 `.skill` 文件，确保顶层目录始终为 `inkos-like-novel-os/`
+- `package_skill.sh` — 稳定打包 `.skill` 文件，并在存在 `VERSION` 时自动输出带版本号的 `.skill` 副本
 - `build_revision_plan.py` — 基于 audit report 产出结构化修订计划，区分局部修补与场景级重写
 - `suggest_spot_fixes.py` — 为低风险局部问题生成 spot-fix 建议
 - `snapshot_story_state.py` — 对 truth files 建立版本化快照
@@ -239,6 +251,7 @@ bash scripts/smoke_test.sh
 - 修订计划与 spot-fix 建议
 - 状态快照与差异对比
 - `write-report` 落盘一致性、snapshot 唯一性、无快照时的错误提示回归验证
+- 边界参数与错误路径输入的回归验证
 
 ### 打包 `.skill`
 
@@ -382,19 +395,26 @@ python3 scripts/update_story_state.py \
 
 ## Roadmap
 
+### 已完成
+
 - [x] 基础 skill 骨架
-- [x] 项目模板
+- [x] 项目模板与 truth files
+- [x] 下一章上下文组装
+- [x] 启发式章节审计
 - [x] 状态更新脚本
-- [x] 下一章上下文组装器
-- [x] 启发式章节审计脚本
-- [x] `.skill` 发布包
-- [x] smoke test
-- [x] 稳定打包脚本
-- [x] 更强的规则审计（基础版）
-- [x] 更稳定的 JSON schema 输出（v1 contracts）
+- [x] revision plan / spot-fix 辅助
+- [x] story-state snapshot / diff
+- [x] 稳定 JSON 契约（v1）
 - [x] 轻量 CLI 封装
-- [ ] 自动修订辅助脚本
-- [ ] 版本化项目状态管理
+- [x] `.skill` 打包与版本化产物
+- [x] smoke test 回归
+
+### 下一步
+
+- [ ] 更强的规则引擎与更细粒度审计
+- [ ] 场景级 rewrite / patch 辅助
+- [ ] 更完整的 write-next / revise 工作流入口
+- [ ] 更多 worked examples / 示例项目
 
 ## 发布说明
 
