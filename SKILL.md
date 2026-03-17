@@ -5,6 +5,8 @@ description: Novel-production operating system for long-form fiction, web novels
 
 # inkos-like-novel-os
 
+Version: 0.3.4
+
 Build and run long-form fiction as a stateful pipeline, not a one-shot prompt.
 
 Treat this skill as a **novel OS skeleton**: it provides project structure, workflow, audit criteria, and helper scripts for an OpenClaw-based writing system that is conceptually close to InkOS.

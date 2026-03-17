@@ -7,7 +7,7 @@ import shutil
 from datetime import datetime
 from pathlib import Path
 
-from inkos_common import iso_now, write_json
+from inkos_common import iso_now, require_project_markers, write_json
 
 TRACKED_FILES = [
     'story_bible.md',
@@ -57,7 +57,7 @@ def unique_snapshot_dir(root, snapshot_id):
 
 
 def snapshot(project, label=None, chapter=None, notes=None):
-    project = Path(project)
+    project = require_project_markers(project)
     root = project / '.inkos-state' / 'snapshots'
     root.mkdir(parents=True, exist_ok=True)
     stamp = datetime.utcnow().strftime('%Y%m%dT%H%M%SZ')

@@ -1,5 +1,7 @@
 # inkos-like-novel-os
 
+当前版本：**0.3.4**
+
 > 面向 OpenClaw 的长篇小说工作流技能骨架。
 
 中文 | [English](#english)

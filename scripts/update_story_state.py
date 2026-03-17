@@ -3,7 +3,7 @@ import argparse
 import json
 from pathlib import Path
 
-from inkos_common import iso_now, write_json
+from inkos_common import iso_now, require_project_markers, write_json
 
 
 def append_block(path, text):
@@ -16,11 +16,12 @@ def append_block(path, text):
 
 
 def apply_update(project, chapter, title, summary, state_changes, hook_open, hook_advance, hook_close, relationships, emotions):
-    project = Path(project)
+    project = require_project_markers(project)
     summary_path = project / 'chapter_summaries.md'
     hooks_path = project / 'pending_hooks.md'
     matrix_path = project / 'character_matrix.md'
     emotion_path = project / 'emotional_arcs.md'
+    updated_files = []
 
     chapter_block = [
         '## Chapter %s - %s' % (chapter, title),
@@ -47,17 +48,26 @@ def apply_update(project, chapter, title, summary, state_changes, hook_open, hoo
         chapter_block.extend(['  - %s' % x for x in emotions])
 
     append_block(summary_path, '\n'.join(chapter_block))
+    updated_files.append(str(summary_path))
 
-    for hook in hook_open:
-        append_block(hooks_path, '- [OPEN] %s (opened: ch%s)' % (hook, chapter))
-    for hook in hook_advance:
-        append_block(hooks_path, '- [ADVANCED] %s (updated: ch%s)' % (hook, chapter))
-    for hook in hook_close:
-        append_block(hooks_path, '- [PAID OFF] %s (closed: ch%s)' % (hook, chapter))
-    for rel in relationships:
-        append_block(matrix_path, '- %s (updated: ch%s)' % (rel, chapter))
-    for emo in emotions:
-        append_block(emotion_path, '- %s (updated: ch%s)' % (emo, chapter))
+    if hook_open or hook_advance or hook_close:
+        for hook in hook_open:
+            append_block(hooks_path, '- [OPEN] %s (opened: ch%s)' % (hook, chapter))
+        for hook in hook_advance:
+            append_block(hooks_path, '- [ADVANCED] %s (updated: ch%s)' % (hook, chapter))
+        for hook in hook_close:
+            append_block(hooks_path, '- [PAID OFF] %s (closed: ch%s)' % (hook, chapter))
+        updated_files.append(str(hooks_path))
+
+    if relationships:
+        for rel in relationships:
+            append_block(matrix_path, '- %s (updated: ch%s)' % (rel, chapter))
+        updated_files.append(str(matrix_path))
+
+    if emotions:
+        for emo in emotions:
+            append_block(emotion_path, '- %s (updated: ch%s)' % (emo, chapter))
+        updated_files.append(str(emotion_path))
 
     return {
         'schema_version': 'inkos.state-update.v1',
@@ -75,12 +85,7 @@ def apply_update(project, chapter, title, summary, state_changes, hook_open, hoo
             'relationship_changes': relationships,
             'emotion_changes': emotions,
         },
-        'updated_files': [
-            str(summary_path),
-            str(hooks_path),
-            str(matrix_path),
-            str(emotion_path),
-        ],
+        'updated_files': updated_files,
     }
 
 

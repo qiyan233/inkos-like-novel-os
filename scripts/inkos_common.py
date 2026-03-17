@@ -5,8 +5,45 @@ from datetime import datetime
 from pathlib import Path
 
 
+CHAPTER_HEADING_RE = r'^##\s+(?:Chapter\s+\d+.*|第\s*\d+\s*章.*)$'
+TRUNCATION_SUFFIX = '\n...[truncated]'
+DEFAULT_PROJECT_MARKERS = [
+    'README-project.md',
+    'story_bible.md',
+    'book_rules.md',
+    'outline.md',
+    'current_state.md',
+]
+
+
 def iso_now():
     return datetime.utcnow().replace(microsecond=0).isoformat() + 'Z'
+
+
+def require_existing_dir(path, label='Project'):
+    path = Path(path)
+    if not path.exists():
+        raise SystemExit('%s does not exist: %s' % (label, path))
+    if not path.is_dir():
+        raise SystemExit('%s is not a directory: %s' % (label, path))
+    return path
+
+
+def require_existing_file(path, label='File'):
+    path = Path(path)
+    if not path.exists():
+        raise SystemExit('%s does not exist: %s' % (label, path))
+    if not path.is_file():
+        raise SystemExit('%s is not a file: %s' % (label, path))
+    return path
+
+
+def require_project_markers(project, markers=None):
+    project = require_existing_dir(project, 'Project')
+    markers = list(markers or DEFAULT_PROJECT_MARKERS)
+    if markers and not any((project / name).exists() for name in markers):
+        raise SystemExit('Project does not look initialized: no standard InkOS files found under %s' % project)
+    return project
 
 
 def read_text(path):
@@ -22,9 +59,15 @@ def write_json(path, data):
 
 def limit_chars(text, max_chars):
     text = (text or '').strip()
+    if max_chars is None:
+        return text
+    if max_chars <= 0:
+        return ''
     if len(text) <= max_chars:
         return text
-    return text[: max_chars - 20].rstrip() + '\n...[truncated]'
+    if max_chars <= len(TRUNCATION_SUFFIX):
+        return text[:max_chars]
+    return text[: max_chars - len(TRUNCATION_SUFFIX)].rstrip() + TRUNCATION_SUFFIX
 
 
 def chapter_sections(text, heading_re):
@@ -39,11 +82,15 @@ def chapter_sections(text, heading_re):
     return sections
 
 
-def latest_sections(markdown, heading_re, count):
+def latest_sections(markdown, heading_re, count, max_chars=2000):
+    count = int(count or 0)
     sections = chapter_sections(markdown, heading_re)
+    if count <= 0:
+        return ''
     if not sections:
-        return limit_chars(markdown, 2000)
-    return '\n\n'.join(section for _heading, section in sections[-count:])
+        return limit_chars(markdown, max_chars)
+    joined = '\n\n'.join(section for _heading, section in sections[-count:])
+    return limit_chars(joined, max_chars)
 
 
 def extract_bullets(text):

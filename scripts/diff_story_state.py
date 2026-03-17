@@ -4,7 +4,7 @@ import difflib
 import json
 from pathlib import Path
 
-from inkos_common import iso_now, read_text
+from inkos_common import iso_now, read_text, require_project_markers
 from snapshot_story_state import TRACKED_FILES
 
 
@@ -35,7 +35,7 @@ def load_file(base, rel):
 
 
 def diff_report(project, from_ref, to_ref):
-    project = Path(project)
+    project = require_project_markers(project)
     left = resolve_snapshot(project, from_ref)
     right = resolve_snapshot(project, to_ref)
 

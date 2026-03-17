@@ -4,7 +4,7 @@ import json
 import re
 from pathlib import Path
 
-from inkos_common import extract_bullets, extract_keywords, iso_now, latest_sections, read_text, write_json
+from inkos_common import CHAPTER_HEADING_RE, extract_bullets, extract_keywords, iso_now, latest_sections, read_text, require_existing_file, require_project_markers, write_json
 
 SEVERITY_ORDER = {'critical': 0, 'major': 1, 'minor': 2, 'note': 3}
 TRANSITIONS = ['突然', '忽然', '仿佛', '竟然', '不禁', '猛地', '一时间', 'at that moment', 'suddenly', 'instantly', 'as if', 'unexpectedly']
@@ -56,8 +56,8 @@ def open_hook_keywords(pending_hooks):
 
 
 def build_report(project, chapter_file):
-    project = Path(project)
-    chapter_file = Path(chapter_file)
+    project = require_project_markers(project)
+    chapter_file = require_existing_file(chapter_file, 'Chapter file')
     chapter = read_text(chapter_file)
     current_state = read_text(project / 'current_state.md')
     book_rules = read_text(project / 'book_rules.md')
@@ -154,7 +154,7 @@ def build_report(project, chapter_file):
         fix_plan.append('Re-check protagonist lock before keeping this turn in characterization.')
 
     rules_evaluated.append('AUD-110')
-    recent = latest_sections(chapter_summaries, r'^##\s+Chapter\s+\d+.*$', 3)
+    recent = latest_sections(chapter_summaries, CHAPTER_HEADING_RE, 3)
     if ('不知道' in current_state or '不知' in current_state) and any(x in chapter for x in ['早就知道', '其实早已明白', '他当然知道真相']):
         add(findings, 'AUD-110', 'critical', 'information-boundary', 'Possible knowledge leak against current_state character-belief section.', repair_targets=['Verify who is allowed to know the revealed fact, then patch the leaking line.'])
         fix_plan.append('Verify who is allowed to know the revealed fact, then patch the leaking line.')

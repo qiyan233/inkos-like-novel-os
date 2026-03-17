@@ -82,7 +82,7 @@ def main():
     p.add_argument('--to', dest='to_ref', default='current')
     p.add_argument('--json', action='store_true')
 
-    p = sub.add_parser('package', help='Package the skill into a .skill zip.')
+    p = sub.add_parser('package', help='Package the skill into a .skill zip (and a versioned copy when VERSION exists).')
     p.add_argument('outdir', nargs='?', default='')
     p.add_argument('version_suffix', nargs='?', default='')
 
@@ -93,6 +93,10 @@ def main():
     if args.command == 'init':
         run(sh('init_novel_project.sh', [args.project, args.title]))
     elif args.command == 'context':
+        if args.recent_chapters < 0:
+            raise SystemExit('--recent-chapters must be >= 0')
+        if args.max_chars_per_file < 0:
+            raise SystemExit('--max-chars-per-file must be >= 0')
         cmd = py('build_next_chapter_context.py', ['--project', args.project, '--recent-chapters', str(args.recent_chapters), '--max-chars-per-file', str(args.max_chars_per_file)])
         if args.json:
             cmd.append('--json')

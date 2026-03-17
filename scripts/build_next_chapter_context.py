@@ -3,7 +3,7 @@ import argparse
 import json
 from pathlib import Path
 
-from inkos_common import iso_now, limit_chars, latest_sections, read_text
+from inkos_common import CHAPTER_HEADING_RE, iso_now, limit_chars, latest_sections, read_text, require_project_markers
 
 FILES = [
     'story_bible.md',
@@ -20,7 +20,7 @@ FILES = [
 
 
 def build_context_report(project, recent_chapters, max_chars_per_file):
-    project = Path(project)
+    project = require_project_markers(project)
     sections = {}
     section_meta = {}
 
@@ -30,7 +30,7 @@ def build_context_report(project, recent_chapters, max_chars_per_file):
             continue
         original_chars = len(text.strip())
         if name == 'chapter_summaries.md':
-            text = latest_sections(text, r'^##\s+Chapter\s+\d+.*$', recent_chapters)
+            text = latest_sections(text, CHAPTER_HEADING_RE, recent_chapters, max_chars=max_chars_per_file)
         else:
             text = limit_chars(text, max_chars_per_file)
         sections[name] = text.strip()
@@ -85,6 +85,11 @@ def main():
     parser.add_argument('--max-chars-per-file', type=int, default=1800)
     parser.add_argument('--json', action='store_true')
     args = parser.parse_args()
+
+    if args.recent_chapters < 0:
+        raise SystemExit('--recent-chapters must be >= 0')
+    if args.max_chars_per_file < 0:
+        raise SystemExit('--max-chars-per-file must be >= 0')
 
     report = build_context_report(args.project, args.recent_chapters, args.max_chars_per_file)
 
