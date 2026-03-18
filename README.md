@@ -1,6 +1,6 @@
 # inkos-like-novel-os
 
-当前版本：**0.3.4**
+当前版本：**0.4.0**
 
 完整变更记录见 [CHANGELOG.md](CHANGELOG.md)。
 
@@ -23,14 +23,17 @@
 
 ## 最新更新
 
-### v0.3.4
+### v0.4.0
 
-- 修复 context 构建的多个边界问题：极小 `max-chars`、`recent-chapters=0`、负数参数
-- 修复 `update_story_state.py` 的 `updated_files` 精确性
-- 修复 audit / context / state-update / snapshot / diff 在错误 project 或 chapter 路径下的误导性成功返回
-- 补充 smoke test 回归，并支持自动生成带版本号的 `.skill` 发布包
+- 新增 `knowledge_check.py`：检查人物认知边界、POV 泄露和“角色提前知道真相”问题
+- 新增 `hook_report.py`：统计伏笔状态并标出 stale hooks，帮助控制长期连载的 hook 积压
+- 新增 `extract_state.py`：从章节正文提取候选章节摘要、状态变化、关系变化、情绪变化和 hook 更新
+- `inkos_cli.py` 新增 `knowledge-check` / `hook-report` / `extract-state` 子命令
+- 项目模板新增 `character_knowledge.md`，并强化 `pending_hooks.md` / `chapter_summaries.md` 的结构
+- `build_next_chapter_context.py` 现在可自动装入 `character_knowledge.md`
+- 扩展 smoke test，覆盖 knowledge-check / hook-report / extract-state 全链路
 
-如果只想看本次发布说明，可直接看 [v0.3.4 Release](https://github.com/qiyan233/inkos-like-novel-os/releases/tag/v0.3.4)。
+如果只想看本次发布说明，可直接看 [v0.4.0 Release](https://github.com/qiyan233/inkos-like-novel-os/releases/tag/v0.4.0)。
 
 ## 适用场景
 
@@ -69,7 +72,7 @@
 - `update_story_state.py` — 追加章节状态变更（章节摘要、伏笔、关系、情绪变化等），并可输出稳定 JSON 更新报告
 - `audit_chapter.py` — 对章节做启发式但结构化的规则审计，输出稳定 JSON 或 Markdown 报告
 - `build_next_chapter_context.py` — 从 truth files 自动拼装“下一章写作上下文”，并支持稳定 JSON 输出
-- `inkos_cli.py` — 轻量 CLI 封装，统一 init/context/audit/state-update/revision-plan/spot-fixes/snapshot/diff/package/smoke-test 入口
+- `inkos_cli.py` — 轻量 CLI 封装，统一 init/context/audit/knowledge-check/extract-state/hook-report/state-update/revision-plan/spot-fixes/snapshot/diff/package/smoke-test 入口
 - `smoke_test.sh` — 快速回归测试整个 init → context → audit → update → revision-plan → spot-fixes → snapshot/diff 链路
 - `package_skill.sh` — 稳定打包 `.skill` 文件，并在存在 `VERSION` 时自动输出带版本号的 `.skill` 副本
 - `build_revision_plan.py` — 基于 audit report 产出结构化修订计划，区分局部修补与场景级重写
@@ -87,6 +90,7 @@
 - `chapter_summaries.md`
 - `pending_hooks.md`
 - `character_matrix.md`
+- `character_knowledge.md`
 - `emotional_arcs.md`
 - `subplot_board.md`
 - `continuity_issues.md`
@@ -183,8 +187,10 @@ python3 scripts/audit_chapter.py \
   --chapter-file /path/to/project/chapters/ch12.md
 ```
 
-4. 根据审计结果做 spot-fix
-5. 接受后更新状态
+4. 如涉及悬疑/隐藏真相，先跑 knowledge-check
+5. 根据审计结果做 spot-fix
+6. 用 extract-state 生成候选状态更新
+7. 接受后更新状态
 
 ```bash
 python3 scripts/update_story_state.py ...
@@ -206,6 +212,9 @@ python3 scripts/update_story_state.py ...
 python3 scripts/inkos_cli.py init /path/to/project "书名"
 python3 scripts/inkos_cli.py context --project /path/to/project --json
 python3 scripts/inkos_cli.py audit --project /path/to/project --chapter-file /path/to/project/chapters/ch12.md --json
+python3 scripts/inkos_cli.py knowledge-check --project /path/to/project --chapter-file /path/to/project/chapters/ch12.md --json
+python3 scripts/inkos_cli.py extract-state --project /path/to/project --chapter-file /path/to/project/chapters/ch12.md --json
+python3 scripts/inkos_cli.py hook-report --project /path/to/project --stale-after 5 --json
 python3 scripts/inkos_cli.py state-update --project /path/to/project --chapter 12 --title "沉默的代价" --summary "..." --json
 python3 scripts/inkos_cli.py revision-plan --project /path/to/project --chapter-file /path/to/project/chapters/ch12.md --json
 python3 scripts/inkos_cli.py spot-fixes --project /path/to/project --chapter-file /path/to/project/chapters/ch12.md --json
@@ -403,6 +412,9 @@ python3 scripts/update_story_state.py \
 - [x] 启发式章节审计
 - [x] 状态更新脚本
 - [x] revision plan / spot-fix 辅助
+- [x] knowledge boundary 检查
+- [x] hook lifecycle 报告
+- [x] draft-to-state 候选提取
 - [x] story-state snapshot / diff
 - [x] 稳定 JSON 契约（v1）
 - [x] 轻量 CLI 封装
@@ -414,6 +426,7 @@ python3 scripts/update_story_state.py \
 - [ ] 更强的规则引擎与更细粒度审计
 - [ ] 场景级 rewrite / patch 辅助
 - [ ] 更完整的 write-next / revise 工作流入口
+- [ ] knowledge-check 与 truth files 的更深联动
 - [ ] 更多 worked examples / 示例项目
 
 ## 发布说明

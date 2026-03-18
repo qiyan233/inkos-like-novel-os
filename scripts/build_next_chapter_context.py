@@ -13,6 +13,7 @@ FILES = [
     'chapter_summaries.md',
     'pending_hooks.md',
     'character_matrix.md',
+    'character_knowledge.md',
     'emotional_arcs.md',
     'subplot_board.md',
     'style_guide.md',

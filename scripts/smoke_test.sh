@@ -26,6 +26,45 @@ for f in README-project.md story_bible.md book_rules.md outline.md current_state
 done
 printf 'init title escaping ok\n'
 
+cat > "$PROJECT/current_state.md" <<'STATE'
+# Current State — 测试长篇
+
+## Timeline position
+- ch1 aftermath
+
+## Major character states
+- 林烬正在调查玉佩异常。
+
+## Relationships
+- 林烬对徐安保持表面合作。
+
+## Open conflicts
+- 玉佩是否被调包。
+
+## Active resources / items
+- 玉佩
+
+## Facts
+- 玉佩已经被人动过手脚。
+
+## Character beliefs
+- 林烬：不知道真正的替换者是谁。
+- 徐安：不知道林烬已经开始怀疑自己。
+
+## Immediate next pressure
+- 林烬必须确认谁先碰过玉佩。
+STATE
+
+cat > "$PROJECT/character_knowledge.md" <<'KNOW'
+# Character Knowledge
+
+## 林烬
+- knows: 玉佩有异常
+- suspects: 徐安可能隐瞒线索
+- does not know: 真正的替换者身份
+- wrong beliefs: 暂无
+KNOW
+
 cat > "$PROJECT/chapters/ch01.md" <<'CHAPTER'
 # Chapter 1
 
@@ -100,6 +139,21 @@ printf '\n===== audit_chapter =====\n'
 "$PYTHON_BIN" "$ROOT/scripts/audit_chapter.py" --project "$PROJECT" --chapter-file "$PROJECT/chapters/ch01.md" --json >/dev/null
 printf 'chapter audit ok\n'
 
+printf '\n===== knowledge_check =====\n'
+cat > "$PROJECT/chapters/ch02.md" <<'LEAKCHAPTER'
+# Chapter 2
+
+林烬当然知道真正的替换者就是韩岚，只是他还不想把这件事说破。
+LEAKCHAPTER
+K_JSON="$($PYTHON_BIN "$ROOT/scripts/knowledge_check.py" --project "$PROJECT" --chapter-file "$PROJECT/chapters/ch02.md" --json)"
+printf '%s' "$K_JSON" | "$PYTHON_BIN" -c 'import json,sys; data=json.load(sys.stdin); assert data["summary"]["violation_count"] >= 1; assert any(x["type"] == "knowledge-leak" for x in data["violations"]); print("knowledge check ok")' >/dev/null
+printf 'knowledge check ok\n'
+
+printf '\n===== extract_state =====\n'
+E_JSON="$($PYTHON_BIN "$ROOT/scripts/extract_state.py" --project "$PROJECT" --chapter-file "$PROJECT/chapters/ch01.md" --json)"
+printf '%s' "$E_JSON" | "$PYTHON_BIN" -c 'import json,sys; data=json.load(sys.stdin); assert data["write_mode"] == "candidate-only"; assert data["summary"]; assert len(data["state_changes"]) >= 1; print("extract state ok")' >/dev/null
+printf 'extract state ok\n'
+
 printf '\n===== update_story_state =====\n'
 STATE_JSON="$($PYTHON_BIN "$ROOT/scripts/update_story_state.py" \
   --project "$PROJECT" \
@@ -120,6 +174,11 @@ STATE_JSON_MIN="$($PYTHON_BIN "$ROOT/scripts/update_story_state.py" \
   --json)"
 printf '%s' "$STATE_JSON_MIN" | "$PYTHON_BIN" -c 'import json,sys; data=json.load(sys.stdin); assert len(data["updated_files"]) == 1, data["updated_files"]; assert data["updated_files"][0].endswith("chapter_summaries.md")'
 printf 'story state update ok\n'
+
+printf '\n===== hook_report =====\n'
+H_JSON="$($PYTHON_BIN "$ROOT/scripts/hook_report.py" --project "$PROJECT" --stale-after 1 --json)"
+printf '%s' "$H_JSON" | "$PYTHON_BIN" -c 'import json,sys; data=json.load(sys.stdin); assert data["summary"]["hook_count"] >= 1; assert "open" in data["summary"]["counts"]; print("hook report ok")' >/dev/null
+printf 'hook report ok\n'
 
 printf '\n===== revision_plan / spot_fixes =====\n'
 "$PYTHON_BIN" "$ROOT/scripts/build_revision_plan.py" --project "$PROJECT" --chapter-file "$PROJECT/chapters/ch01.md" --json >/dev/null
@@ -176,6 +235,9 @@ printf '\n===== missing-project validation regression =====\n'
 MISSING="$TMPDIR/does-not-exist"
 for cmd in \
   "build_next_chapter_context.py --project $MISSING" \
+  "knowledge_check.py --project $MISSING --chapter-file $PROJECT/chapters/ch01.md" \
+  "extract_state.py --project $MISSING --chapter-file $PROJECT/chapters/ch01.md" \
+  "hook_report.py --project $MISSING" \
   "update_story_state.py --project $MISSING --chapter 1 --title x --summary y" \
   "snapshot_story_state.py --project $MISSING" \
   "diff_story_state.py --project $MISSING --from current --to current"

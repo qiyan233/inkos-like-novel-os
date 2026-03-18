@@ -5,7 +5,7 @@ description: Novel-production operating system for long-form fiction, web novels
 
 # inkos-like-novel-os
 
-Version: 0.3.4
+Version: 0.4.0
 
 Build and run long-form fiction as a stateful pipeline, not a one-shot prompt.
 
@@ -18,10 +18,12 @@ Use this loop:
 1. **Load truth files**
 2. **Plan the next chapter**
 3. **Draft with constraints**
-4. **Audit for continuity / style / pacing / leaks**
-5. **Revise with spot fixes first**
-6. **Update story state**
-7. **Queue unresolved issues for human review**
+4. **Run knowledge-boundary checks when the chapter depends on hidden truths or limited POV**
+5. **Audit for continuity / style / pacing / leaks**
+6. **Revise with spot fixes first**
+7. **Extract candidate state updates from the accepted draft**
+8. **Update story state**
+9. **Queue unresolved issues for human review**
 
 Prefer stable files over fragile memory. If information matters in later chapters, write it into a truth file.
 
@@ -38,6 +40,7 @@ Expected files:
 - `chapter_summaries.md` — per-chapter summaries and state deltas
 - `pending_hooks.md` — open promises, foreshadowing, unresolved conflicts
 - `character_matrix.md` — who met whom, trust/conflict, information boundaries
+- `character_knowledge.md` — optional structured knowledge boundary tracker for major characters
 - `emotional_arcs.md` — tracked emotional movement by key character
 - `subplot_board.md` — A/B/C line progress and stagnation notes
 - `continuity_issues.md` — known inconsistencies or manual review backlog
@@ -71,6 +74,10 @@ Read at least:
 - latest section of `chapter_summaries.md`
 - `pending_hooks.md`
 - `character_matrix.md`
+
+If maintained, also read:
+
+- `character_knowledge.md`
 
 If the request is for a side story, prequel, sequel, or alternate timeline, also establish:
 
@@ -113,7 +120,25 @@ Avoid:
 - broad whole-crowd reactions unless earned
 - full-chapter rewrites when only a few lines are broken
 
-### 5) Audit pass
+### 5) Knowledge-boundary pass
+
+When the chapter depends on mystery, hidden truths, or strict POV, run:
+
+```bash
+python3 scripts/knowledge_check.py \
+  --project /path/to/project \
+  --chapter-file /path/to/project/chapters/ch12.md \
+  --json
+```
+
+Use this to catch:
+
+- characters knowing facts too early
+- narration slipping into omniscient scope
+- side-story / prequel spoiler contamination
+- certainty that should still be suspicion
+
+### 6) Audit pass
 
 After drafting, audit against `references/audit-dimensions.md`.
 
@@ -130,7 +155,7 @@ Minimum audit set:
 
 Write reports into `reviews/` when operating on files.
 
-### 6) Revision policy
+### 7) Revision policy
 
 Prefer this order:
 
@@ -149,18 +174,26 @@ Do not silently change:
 
 If any of the above changes, also update truth files.
 
-### 7) State update
+### 8) State extraction and update
 
-After a chapter is accepted, update:
+After a chapter is accepted, first extract candidate updates:
 
-- `chapter_summaries.md`
-- `current_state.md`
-- `pending_hooks.md`
-- `character_matrix.md`
-- `emotional_arcs.md`
-- `subplot_board.md`
+```bash
+python3 scripts/extract_state.py \
+  --project /path/to/project \
+  --chapter-file /path/to/project/chapters/ch12.md \
+  --json
+```
 
-Use `scripts/update_story_state.py` to append a structured summary block:
+This produces candidate:
+
+- summary
+- state changes
+- hook open / advance / close items
+- relationship changes
+- emotional changes
+
+Then feed approved items into:
 
 ```bash
 python3 scripts/update_story_state.py \
@@ -174,7 +207,22 @@ python3 scripts/update_story_state.py \
   --emotion "Lin Jin: suspicion hardens into anger"
 ```
 
-Then manually refine the truth files if the chapter caused complex changes.
+### 9) Hook pressure review
+
+When many hooks are active, run:
+
+```bash
+python3 scripts/hook_report.py \
+  --project /path/to/project \
+  --stale-after 5 \
+  --json
+```
+
+Use this to spot:
+
+- stale hooks that have been open too long
+- current hook counts by status
+- backlog pressure before the next chapter
 
 ## Modes to support
 
@@ -192,9 +240,11 @@ Sequence:
 1. load context
 2. plan
 3. draft
-4. audit
-5. spot-fix
-6. update state
+4. knowledge-check if needed
+5. audit
+6. spot-fix
+7. extract candidate state
+8. update state
 
 ### Audit-only mode
 
@@ -234,7 +284,7 @@ When working over many chapters:
 
 - prefer additive updates over destructive rewrites
 - never delete hook history without a reason
-- mark hooks as `OPEN`, `PAID OFF`, `BROKEN`, or `DEFERRED`
+- mark hooks as `OPEN`, `PAID OFF`, `BROKEN`, `DEFERRED`, or `ADVANCED`
 - mark uncertain facts as `UNCONFIRMED`
 - separate **world facts** from **character beliefs**
 
@@ -255,9 +305,12 @@ Good pattern:
 - `scripts/update_story_state.py` — append structured state deltas after a chapter
 - `scripts/build_next_chapter_context.py` — assemble a compact truth-file context for the next chapter
 - `scripts/audit_chapter.py` — run a heuristic chapter audit with Markdown or JSON output
+- `scripts/knowledge_check.py` — detect character knowledge-boundary and POV leaks
+- `scripts/hook_report.py` — summarize hook lifecycle state and stale hooks
+- `scripts/extract_state.py` — extract candidate state updates from a chapter draft without writing files
 - `scripts/smoke_test.sh` — quick regression test for the init/context/audit/update loop
 - `scripts/package_skill.sh` — create a clean `.skill` package with a stable top-level directory name
-- `scripts/inkos_cli.py` — lightweight CLI wrapper for init/context/audit/state-update/revision-plan/spot-fixes/snapshot/diff/package/smoke-test
+- `scripts/inkos_cli.py` — lightweight CLI wrapper for init/context/audit/knowledge-check/extract-state/hook-report/state-update/revision-plan/spot-fixes/snapshot/diff/package/smoke-test
 
 ## Use bundled references
 

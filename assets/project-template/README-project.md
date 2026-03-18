@@ -13,6 +13,7 @@ Before writing or revising, read:
 - latest entries in chapter_summaries.md
 - pending_hooks.md
 - character_matrix.md
+- character_knowledge.md (if maintained)
 
 ## Directories
 

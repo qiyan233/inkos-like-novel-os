@@ -81,6 +81,8 @@ Suggested record format:
 
 ```md
 - [OPEN] Who replaced the token? (opened: ch12, owner: mystery line A)
+- [ADVANCED] Lin Jin now suspects an inside actor. (updated: ch15, owner: mystery line A)
+- [PAID OFF] Han Lan replaced the token. (closed: ch20, owner: mystery line A)
 ```
 
 ## character_matrix.md
@@ -94,6 +96,19 @@ Suggested row format:
   - latest change: trust decreased after token incident
   - secrets: Xu An hides contact with the magistrate
   - info asymmetry: Lin Jin does not know the contact exists
+```
+
+## character_knowledge.md
+Optional but recommended when the story depends heavily on hidden truths, mysteries, or spoiler boundaries.
+
+Suggested format:
+
+```md
+## Lin Jin
+- knows:
+- suspects:
+- does not know:
+- wrong beliefs:
 ```
 
 ## emotional_arcs.md

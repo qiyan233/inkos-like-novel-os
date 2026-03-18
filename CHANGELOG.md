@@ -2,6 +2,27 @@
 
 这个文件记录 GitHub 上已发布版本的主要变化。
 
+## v0.4.0 — 2026-03-18
+
+### Added
+
+- 新增 `knowledge_check.py`，用于检测人物认知边界、POV 泄露、以及“角色提前知道真相”类问题
+- 新增 `hook_report.py`，用于统计 hook 生命周期状态并标记 stale hooks
+- 新增 `extract_state.py`，用于从章节正文中提取候选状态更新，默认只输出候选、不直接写盘
+- `inkos_cli.py` 新增 `knowledge-check`、`hook-report`、`extract-state` 子命令
+- 模板新增 `character_knowledge.md`，并补强 `pending_hooks.md` / `chapter_summaries.md` 结构
+
+### Changed
+
+- `build_next_chapter_context.py` 现在支持自动加载 `character_knowledge.md`
+- `SKILL.md` 工作流升级为“knowledge-check → audit → extract-state → state-update”闭环
+- `references/file-schemas.md`、`references/json-schemas.md`、`references/workflow-playbooks.md` 同步扩展新能力说明
+- `smoke_test.sh` 新增对 knowledge-check / hook-report / extract-state 的回归覆盖
+
+### Assets
+
+- `inkos-like-novel-os-v0.4.0.skill`
+
 ## v0.3.4 — 2026-03-17
 
 ### Fixed

@@ -60,101 +60,69 @@
 - `updated_files[]`
 - `report_path`（仅 `--write-report` 时出现）
 
+## 4. `inkos.knowledge-check.v1`
+
+来源：`scripts/knowledge_check.py --json`
+
+核心字段：
+- `schema_version`
+- `tool`
+- `generated_at`
+- `project`
+- `chapter`
+- `chapter_file`
+- `ok`
+- `summary`
+- `source_files[]`
+- `violations[]`
+
+### `violations[]`
+每条 violation 包含：
+- `severity`
+- `type`
+- `character`
+- `fact`
+- `evidence`
+- `reason`
+- `suggested_fix`
+
+## 5. `inkos.hook-report.v1`
+
+来源：`scripts/hook_report.py --json`
+
+核心字段：
+- `schema_version`
+- `tool`
+- `generated_at`
+- `project`
+- `config`
+- `summary`
+- `hooks[]`
+- `stale_hooks[]`
+
+## 6. `inkos.extract-state.v1`
+
+来源：`scripts/extract_state.py --json`
+
+核心字段：
+- `schema_version`
+- `tool`
+- `generated_at`
+- `project`
+- `chapter`
+- `chapter_file`
+- `title_guess`
+- `summary`
+- `state_changes[]`
+- `hook_open[]`
+- `hook_advance[]`
+- `hook_close[]`
+- `relationships[]`
+- `emotions[]`
+- `write_mode`
+
 ## 稳定性原则
 
 - 先新增字段，再考虑移除字段
 - `schema_version` 升级时，尽量保留旧字段语义
 - CLI 与后续自动修订脚本应优先依赖这些 JSON 输出，而不是解析 Markdown 文本
-
-
-## 4. `inkos.revision-plan.v1`
-
-来源：`scripts/build_revision_plan.py --json`
-
-核心字段：
-- `schema_version`
-- `tool`
-- `generated_at`
-- `project`
-- `chapter`
-- `based_on`
-- `overall_strategy`
-- `summary`
-- `minimal_fix_plan[]`
-- `actions[]`
-
-### `actions[]`
-每条 action 包含：
-- `action_id`
-- `priority`
-- `rule_id`
-- `dimension`
-- `target_scope`
-- `needs_human_review`
-- `goal`
-- `recommended_strategy`
-- `repair_targets[]`
-
-## 5. `inkos.spot-fix-suggestions.v1`
-
-来源：`scripts/suggest_spot_fixes.py --json`
-
-核心字段：
-- `schema_version`
-- `tool`
-- `generated_at`
-- `project`
-- `chapter`
-- `based_on`
-- `summary`
-- `suggestions[]`
-
-### `suggestions[]`
-每条 suggestion 包含：
-- `suggestion_id`
-- `rule_id`
-- `severity`
-- `dimension`
-- `snippet`
-- `suggested_action`
-- `repair_targets[]`
-- `confidence`
-
-## 6. `inkos.state-snapshot.v1`
-
-来源：`scripts/snapshot_story_state.py --json`
-
-核心字段：
-- `schema_version`
-- `tool`
-- `generated_at`
-- `project`
-- `snapshot_id`
-- `snapshot_dir`
-- `label`
-- `chapter`
-- `notes`
-- `files_copied[]`
-- `files_missing[]`
-
-## 7. `inkos.state-diff.v1`
-
-来源：`scripts/diff_story_state.py --json`
-
-核心字段：
-- `schema_version`
-- `tool`
-- `generated_at`
-- `project`
-- `from`
-- `to`
-- `summary`
-- `file_diffs[]`
-
-### `file_diffs[]`
-每条 diff 包含：
-- `path`
-- `status`
-- `added_lines`
-- `removed_lines`
-- `diff_excerpt[]`

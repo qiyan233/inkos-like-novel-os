@@ -7,10 +7,12 @@
 3. Review `pending_hooks.md`, `character_matrix.md`, `subplot_board.md`
 4. State the chapter function in 1-3 bullets
 5. Draft the chapter
-6. Audit using core dimensions
-7. Spot-fix the highest-severity issues
-8. Update truth files
-9. Report: what changed, what remains open, what needs human review
+6. Run `knowledge-check` if the chapter depends on hidden truths or limited POV
+7. Audit using core dimensions
+8. Spot-fix the highest-severity issues
+9. Run `extract-state` to prepare candidate truth-file updates
+10. Update truth files
+11. Report: what changed, what remains open, what needs human review
 
 ## Playbook 2: Audit existing chapter
 
@@ -44,3 +46,13 @@ Use when the user wants control over risky changes.
 3. Optionally record quantitative stats in `style_profile.json`
 4. Apply style as a soft constraint, not a prison
 5. During audit, flag mimicry that damages clarity or continuity
+
+## Playbook 6: Draft-to-state extraction
+
+1. Finish draft and save chapter file
+2. Run `knowledge-check` for POV / spoiler leakage
+3. Run `audit` and patch critical / major findings first
+4. Run `extract-state --json`
+5. Review summary / hooks / relationship / emotion candidates
+6. Feed approved items into `update_story_state.py`
+7. If many hooks remain open, run `hook-report` to review backlog pressure

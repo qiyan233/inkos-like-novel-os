@@ -109,3 +109,55 @@ def extract_keywords(text, min_len=2, limit=None):
         if limit and len(out) >= limit:
             break
     return out
+
+
+def normalize_space(text):
+    return re.sub(r'\s+', ' ', text or '').strip()
+
+
+def strip_markdown_headings(text):
+    lines = []
+    for line in (text or '').splitlines():
+        if re.match(r'^\s*#', line):
+            continue
+        lines.append(line)
+    return '\n'.join(lines)
+
+
+def split_sentences(text):
+    text = strip_markdown_headings(text)
+    text = text.replace('\r\n', '\n').replace('\r', '\n')
+    text = re.sub(r'([。！？!?])', r'\1\n', text)
+    raw_parts = text.split('\n')
+    parts = []
+    for raw in raw_parts:
+        part = normalize_space(raw)
+        if not part:
+            continue
+        parts.append(part)
+    return parts
+
+
+def extract_markdown_section(text, heading_title):
+    pattern = r'^##\s+%s\s*$' % re.escape(heading_title)
+    match = re.search(pattern, text or '', flags=re.M)
+    if not match:
+        return ''
+    start = match.end()
+    next_match = re.search(r'^##\s+.+$', (text or '')[start:], flags=re.M)
+    end = start + next_match.start() if next_match else len(text or '')
+    return (text or '')[start:end].strip()
+
+
+def parse_chapter_number(label):
+    text = normalize_space(label)
+    match = re.search(r'Chapter\s+(\d+)', text, flags=re.I)
+    if match:
+        return int(match.group(1))
+    match = re.search(r'第\s*(\d+)\s*章', text)
+    if match:
+        return int(match.group(1))
+    match = re.search(r'\bch(?:apter)?\s*(\d+)\b', text, flags=re.I)
+    if match:
+        return int(match.group(1))
+    return None

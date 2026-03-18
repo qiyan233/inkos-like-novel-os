@@ -41,6 +41,21 @@ def main():
     p.add_argument('--json', action='store_true')
     p.add_argument('--write-report', action='store_true')
 
+    p = sub.add_parser('knowledge-check', help='Check chapter knowledge boundaries and POV leaks.')
+    p.add_argument('--project', required=True)
+    p.add_argument('--chapter-file', required=True)
+    p.add_argument('--json', action='store_true')
+
+    p = sub.add_parser('extract-state', help='Extract candidate state updates from a chapter draft.')
+    p.add_argument('--project', required=True)
+    p.add_argument('--chapter-file', required=True)
+    p.add_argument('--json', action='store_true')
+
+    p = sub.add_parser('hook-report', help='Summarize hook lifecycle status.')
+    p.add_argument('--project', required=True)
+    p.add_argument('--stale-after', type=int, default=5)
+    p.add_argument('--json', action='store_true')
+
     p = sub.add_parser('state-update', help='Append story-state updates.')
     p.add_argument('--project', required=True)
     p.add_argument('--chapter', required=True)
@@ -107,6 +122,23 @@ def main():
             cmd.append('--json')
         if args.write_report:
             cmd.append('--write-report')
+        run(cmd)
+    elif args.command == 'knowledge-check':
+        cmd = py('knowledge_check.py', ['--project', args.project, '--chapter-file', args.chapter_file])
+        if args.json:
+            cmd.append('--json')
+        run(cmd)
+    elif args.command == 'extract-state':
+        cmd = py('extract_state.py', ['--project', args.project, '--chapter-file', args.chapter_file])
+        if args.json:
+            cmd.append('--json')
+        run(cmd)
+    elif args.command == 'hook-report':
+        if args.stale_after < 0:
+            raise SystemExit('--stale-after must be >= 0')
+        cmd = py('hook_report.py', ['--project', args.project, '--stale-after', str(args.stale_after)])
+        if args.json:
+            cmd.append('--json')
         run(cmd)
     elif args.command == 'state-update':
         cmd = py('update_story_state.py', ['--project', args.project, '--chapter', str(args.chapter), '--title', args.title, '--summary', args.summary])
