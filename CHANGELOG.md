@@ -18,7 +18,10 @@
 ### Notes
 
 - 这是一个小版本维护发布，重点是提升开源协作体验、首次上手路径和环境兼容性
-- 当前 `snapshot_story_state.py` 仍存在 `datetime.utcnow()` 的 deprecation warning，但不影响使用与本次发布
+
+### Assets
+
+- `inkos-like-novel-os-v0.4.1.skill`
 
 这个文件记录 GitHub 上已发布版本的主要变化。
 
