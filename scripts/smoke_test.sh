@@ -2,13 +2,49 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-PYTHON_BIN="${PYTHON_BIN:-python3}"
 TMPDIR="$(mktemp -d)"
 PROJECT="$TMPDIR/demo-novel"
 cleanup() {
   rm -rf "$TMPDIR"
 }
 trap cleanup EXIT
+
+resolve_python_cmd() {
+  if [ -n "${PYTHON_BIN:-}" ]; then
+    if command -v -- "$PYTHON_BIN" >/dev/null 2>&1; then
+      PYTHON_CMD=("$PYTHON_BIN")
+      return 0
+    fi
+    echo "Configured PYTHON_BIN is not executable: $PYTHON_BIN" >&2
+    exit 1
+  fi
+
+  local candidate
+  for candidate in python3 python; do
+    if command -v -- "$candidate" >/dev/null 2>&1; then
+      if "$candidate" "$ROOT/scripts/build_next_chapter_context.py" --help >/dev/null 2>&1; then
+        PYTHON_CMD=("$candidate")
+        return 0
+      fi
+    fi
+  done
+
+  if command -v py >/dev/null 2>&1; then
+    if py -3 "$ROOT/scripts/build_next_chapter_context.py" --help >/dev/null 2>&1; then
+      PYTHON_CMD=(py -3)
+      return 0
+    fi
+  fi
+
+  echo 'Could not find a working Python command for the smoke test.' >&2
+  exit 1
+}
+
+run_python() {
+  PYTHONUTF8=1 "${PYTHON_CMD[@]}" "$@"
+}
+
+resolve_python_cmd
 
 bash "$ROOT/scripts/init_novel_project.sh" "$PROJECT" "测试长篇"
 mkdir -p "$PROJECT/chapters" "$PROJECT/reviews"
@@ -84,7 +120,7 @@ cat > "$PROJECT/chapters/ch01.md" <<'CHAPTER'
 CHAPTER
 
 printf '\n===== build_next_chapter_context =====\n'
-"$PYTHON_BIN" "$ROOT/scripts/build_next_chapter_context.py" --project "$PROJECT" >/dev/null
+run_python "$ROOT/scripts/build_next_chapter_context.py" --project "$PROJECT" >/dev/null
 printf 'context build ok\n'
 
 printf '\n===== context max-chars regression =====\n'
@@ -93,14 +129,14 @@ LONG_SUMMARIES="$PROJECT/chapter_summaries.md"
 for i in $(seq 1 40); do
   printf '没有章节标题的长文本段落 %03d %080d\n' "$i" "$i" >> "$LONG_SUMMARIES"
 done
-CTX_JSON="$($PYTHON_BIN "$ROOT/scripts/build_next_chapter_context.py" --project "$PROJECT" --max-chars-per-file 500 --json)"
-CTX_LEN=$(printf '%s' "$CTX_JSON" | "$PYTHON_BIN" -c 'import json,sys; data=json.load(sys.stdin); print(len(data["sections"].get("chapter_summaries.md","")))')
+CTX_JSON="$(run_python "$ROOT/scripts/build_next_chapter_context.py" --project "$PROJECT" --max-chars-per-file 500 --json)"
+CTX_LEN=$(printf '%s' "$CTX_JSON" | run_python -c 'import json,sys; data=json.load(sys.stdin); print(len(data["sections"].get("chapter_summaries.md","")))')
 if [ "$CTX_LEN" -gt 500 ]; then
   echo "chapter_summaries exceeded max chars: $CTX_LEN" >&2
   exit 1
 fi
-CTX_TINY="$($PYTHON_BIN "$ROOT/scripts/build_next_chapter_context.py" --project "$PROJECT" --max-chars-per-file 5 --json)"
-printf '%s' "$CTX_TINY" | "$PYTHON_BIN" -c 'import json,sys; data=json.load(sys.stdin); assert len(data["sections"]["chapter_summaries.md"]) <= 5; print("tiny max chars ok")' >/dev/null
+CTX_TINY="$(run_python "$ROOT/scripts/build_next_chapter_context.py" --project "$PROJECT" --max-chars-per-file 5 --json)"
+printf '%s' "$CTX_TINY" | run_python -c 'import json,sys; data=json.load(sys.stdin); assert len(data["sections"]["chapter_summaries.md"]) <= 5; print("tiny max chars ok")' >/dev/null
 printf 'context max-chars ok\n'
 
 cat > "$PROJECT/chapter_summaries.md" <<'SUMMARIES'
@@ -115,17 +151,12 @@ cat > "$PROJECT/chapter_summaries.md" <<'SUMMARIES'
 SUMMARIES
 
 printf '\n===== chapter heading compatibility regression =====\n'
-CTX_JSON_CN="$($PYTHON_BIN "$ROOT/scripts/build_next_chapter_context.py" --project "$PROJECT" --recent-chapters 2 --json)"
-printf '%s' "$CTX_JSON_CN" | grep -q '第2章 - Second'
-printf '%s' "$CTX_JSON_CN" | grep -q '第3章 - Third'
-if printf '%s' "$CTX_JSON_CN" | grep -q 'Chapter 1 - First'; then
-  echo 'recent chapter extraction did not respect recent-chapters with Chinese headings' >&2
-  exit 1
-fi
-CTX_ZERO="$($PYTHON_BIN "$ROOT/scripts/build_next_chapter_context.py" --project "$PROJECT" --recent-chapters 0 --json)"
-printf '%s' "$CTX_ZERO" | "$PYTHON_BIN" -c 'import json,sys; data=json.load(sys.stdin); assert data["sections"].get("chapter_summaries.md", "") == ""'
+CTX_JSON_CN="$(run_python "$ROOT/scripts/build_next_chapter_context.py" --project "$PROJECT" --recent-chapters 2 --json)"
+printf '%s' "$CTX_JSON_CN" | run_python -c 'import json,sys; data=json.load(sys.stdin); text=data["sections"].get("chapter_summaries.md", ""); assert "第2章 - Second" in text; assert "第3章 - Third" in text; assert "Chapter 1 - First" not in text'
+CTX_ZERO="$(run_python "$ROOT/scripts/build_next_chapter_context.py" --project "$PROJECT" --recent-chapters 0 --json)"
+printf '%s' "$CTX_ZERO" | run_python -c 'import json,sys; data=json.load(sys.stdin); assert data["sections"].get("chapter_summaries.md", "") == ""'
 set +e
-"$PYTHON_BIN" "$ROOT/scripts/build_next_chapter_context.py" --project "$PROJECT" --recent-chapters -1 >/dev/null 2>"$TMPDIR/recent.err"
+run_python "$ROOT/scripts/build_next_chapter_context.py" --project "$PROJECT" --recent-chapters -1 >/dev/null 2>"$TMPDIR/recent.err"
 RECENT_CODE=$?
 set -e
 if [ "$RECENT_CODE" -eq 0 ]; then
@@ -136,7 +167,7 @@ grep -q -- '--recent-chapters must be >= 0' "$TMPDIR/recent.err"
 printf 'chapter heading compatibility ok\n'
 
 printf '\n===== audit_chapter =====\n'
-"$PYTHON_BIN" "$ROOT/scripts/audit_chapter.py" --project "$PROJECT" --chapter-file "$PROJECT/chapters/ch01.md" --json >/dev/null
+run_python "$ROOT/scripts/audit_chapter.py" --project "$PROJECT" --chapter-file "$PROJECT/chapters/ch01.md" --json >/dev/null
 printf 'chapter audit ok\n'
 
 printf '\n===== knowledge_check =====\n'
@@ -145,17 +176,17 @@ cat > "$PROJECT/chapters/ch02.md" <<'LEAKCHAPTER'
 
 林烬当然知道真正的替换者就是韩岚，只是他还不想把这件事说破。
 LEAKCHAPTER
-K_JSON="$($PYTHON_BIN "$ROOT/scripts/knowledge_check.py" --project "$PROJECT" --chapter-file "$PROJECT/chapters/ch02.md" --json)"
-printf '%s' "$K_JSON" | "$PYTHON_BIN" -c 'import json,sys; data=json.load(sys.stdin); assert data["summary"]["violation_count"] >= 1; assert any(x["type"] == "knowledge-leak" for x in data["violations"]); print("knowledge check ok")' >/dev/null
+K_JSON="$(run_python "$ROOT/scripts/knowledge_check.py" --project "$PROJECT" --chapter-file "$PROJECT/chapters/ch02.md" --json)"
+printf '%s' "$K_JSON" | run_python -c 'import json,sys; data=json.load(sys.stdin); assert data["summary"]["violation_count"] >= 1; assert any(x["type"] == "knowledge-leak" for x in data["violations"]); print("knowledge check ok")' >/dev/null
 printf 'knowledge check ok\n'
 
 printf '\n===== extract_state =====\n'
-E_JSON="$($PYTHON_BIN "$ROOT/scripts/extract_state.py" --project "$PROJECT" --chapter-file "$PROJECT/chapters/ch01.md" --json)"
-printf '%s' "$E_JSON" | "$PYTHON_BIN" -c 'import json,sys; data=json.load(sys.stdin); assert data["write_mode"] == "candidate-only"; assert data["summary"]; assert len(data["state_changes"]) >= 1; print("extract state ok")' >/dev/null
+E_JSON="$(run_python "$ROOT/scripts/extract_state.py" --project "$PROJECT" --chapter-file "$PROJECT/chapters/ch01.md" --json)"
+printf '%s' "$E_JSON" | run_python -c 'import json,sys; data=json.load(sys.stdin); assert data["write_mode"] == "candidate-only"; assert data["summary"]; assert len(data["state_changes"]) >= 1; print("extract state ok")' >/dev/null
 printf 'extract state ok\n'
 
 printf '\n===== update_story_state =====\n'
-STATE_JSON="$($PYTHON_BIN "$ROOT/scripts/update_story_state.py" \
+STATE_JSON="$(run_python "$ROOT/scripts/update_story_state.py" \
   --project "$PROJECT" \
   --chapter 1 \
   --title "第一章" \
@@ -165,43 +196,43 @@ STATE_JSON="$($PYTHON_BIN "$ROOT/scripts/update_story_state.py" \
   --relationship "林烬 -> 徐安：出现试探与怀疑" \
   --emotion "林烬：警觉上升" \
   --json)"
-printf '%s' "$STATE_JSON" | "$PYTHON_BIN" -c 'import json,sys; data=json.load(sys.stdin); paths=data["updated_files"]; assert any(p.endswith("chapter_summaries.md") for p in paths); assert any(p.endswith("pending_hooks.md") for p in paths); assert any(p.endswith("character_matrix.md") for p in paths); assert any(p.endswith("emotional_arcs.md") for p in paths)'
-STATE_JSON_MIN="$($PYTHON_BIN "$ROOT/scripts/update_story_state.py" \
+printf '%s' "$STATE_JSON" | run_python -c 'import json,sys; data=json.load(sys.stdin); paths=data["updated_files"]; assert any(p.endswith("chapter_summaries.md") for p in paths); assert any(p.endswith("pending_hooks.md") for p in paths); assert any(p.endswith("character_matrix.md") for p in paths); assert any(p.endswith("emotional_arcs.md") for p in paths)'
+STATE_JSON_MIN="$(run_python "$ROOT/scripts/update_story_state.py" \
   --project "$PROJECT" \
   --chapter 2 \
   --title "第二章" \
   --summary "仅摘要更新" \
   --json)"
-printf '%s' "$STATE_JSON_MIN" | "$PYTHON_BIN" -c 'import json,sys; data=json.load(sys.stdin); assert len(data["updated_files"]) == 1, data["updated_files"]; assert data["updated_files"][0].endswith("chapter_summaries.md")'
+printf '%s' "$STATE_JSON_MIN" | run_python -c 'import json,sys; data=json.load(sys.stdin); assert len(data["updated_files"]) == 1, data["updated_files"]; assert data["updated_files"][0].endswith("chapter_summaries.md")'
 printf 'story state update ok\n'
 
 printf '\n===== hook_report =====\n'
-H_JSON="$($PYTHON_BIN "$ROOT/scripts/hook_report.py" --project "$PROJECT" --stale-after 1 --json)"
-printf '%s' "$H_JSON" | "$PYTHON_BIN" -c 'import json,sys; data=json.load(sys.stdin); assert data["summary"]["hook_count"] >= 1; assert "open" in data["summary"]["counts"]; print("hook report ok")' >/dev/null
+H_JSON="$(run_python "$ROOT/scripts/hook_report.py" --project "$PROJECT" --stale-after 1 --json)"
+printf '%s' "$H_JSON" | run_python -c 'import json,sys; data=json.load(sys.stdin); assert data["summary"]["hook_count"] >= 1; assert "open" in data["summary"]["counts"]; print("hook report ok")' >/dev/null
 printf 'hook report ok\n'
 
 printf '\n===== revision_plan / spot_fixes =====\n'
-"$PYTHON_BIN" "$ROOT/scripts/build_revision_plan.py" --project "$PROJECT" --chapter-file "$PROJECT/chapters/ch01.md" --json >/dev/null
-"$PYTHON_BIN" "$ROOT/scripts/suggest_spot_fixes.py" --project "$PROJECT" --chapter-file "$PROJECT/chapters/ch01.md" --json >/dev/null
+run_python "$ROOT/scripts/build_revision_plan.py" --project "$PROJECT" --chapter-file "$PROJECT/chapters/ch01.md" --json >/dev/null
+run_python "$ROOT/scripts/suggest_spot_fixes.py" --project "$PROJECT" --chapter-file "$PROJECT/chapters/ch01.md" --json >/dev/null
 printf 'revision helpers ok\n'
 
 printf '\n===== snapshot / diff =====\n'
-SNAP1=$("$PYTHON_BIN" "$ROOT/scripts/snapshot_story_state.py" --project "$PROJECT" --chapter 1 --label before-edit)
-SNAP2=$("$PYTHON_BIN" "$ROOT/scripts/snapshot_story_state.py" --project "$PROJECT" --chapter 1 --label before-edit)
+SNAP1=$(run_python "$ROOT/scripts/snapshot_story_state.py" --project "$PROJECT" --chapter 1 --label before-edit)
+SNAP2=$(run_python "$ROOT/scripts/snapshot_story_state.py" --project "$PROJECT" --chapter 1 --label before-edit)
 if [ "$SNAP1" = "$SNAP2" ]; then
   echo 'snapshot collision detected'
   exit 1
 fi
 echo "补一条临时状态" >> "$PROJECT/current_state.md"
-"$PYTHON_BIN" "$ROOT/scripts/diff_story_state.py" --project "$PROJECT" --from "$SNAP1" --to current --json >/dev/null
+run_python "$ROOT/scripts/diff_story_state.py" --project "$PROJECT" --from "$SNAP1" --to current --json >/dev/null
 printf 'state snapshot diff ok\n'
 
 printf '\n===== write-report regression =====\n'
-"$PYTHON_BIN" "$ROOT/scripts/audit_chapter.py" --project "$PROJECT" --chapter-file "$PROJECT/chapters/ch01.md" --write-report --json > "$TMPDIR/audit.json"
-"$PYTHON_BIN" "$ROOT/scripts/update_story_state.py" --project "$PROJECT" --chapter 1 --title "第一章" --summary "回归测试" --write-report --json > "$TMPDIR/state.json"
-"$PYTHON_BIN" "$ROOT/scripts/build_revision_plan.py" --project "$PROJECT" --chapter-file "$PROJECT/chapters/ch01.md" --write-report --json > "$TMPDIR/revision.json"
-"$PYTHON_BIN" "$ROOT/scripts/suggest_spot_fixes.py" --project "$PROJECT" --chapter-file "$PROJECT/chapters/ch01.md" --write-report --json > "$TMPDIR/fixes.json"
-TMPDIR_FOR_PY="$TMPDIR" "$PYTHON_BIN" - <<'PY'
+run_python "$ROOT/scripts/audit_chapter.py" --project "$PROJECT" --chapter-file "$PROJECT/chapters/ch01.md" --write-report --json > "$TMPDIR/audit.json"
+run_python "$ROOT/scripts/update_story_state.py" --project "$PROJECT" --chapter 1 --title "第一章" --summary "回归测试" --write-report --json > "$TMPDIR/state.json"
+run_python "$ROOT/scripts/build_revision_plan.py" --project "$PROJECT" --chapter-file "$PROJECT/chapters/ch01.md" --write-report --json > "$TMPDIR/revision.json"
+run_python "$ROOT/scripts/suggest_spot_fixes.py" --project "$PROJECT" --chapter-file "$PROJECT/chapters/ch01.md" --write-report --json > "$TMPDIR/fixes.json"
+TMPDIR_FOR_PY="$TMPDIR" run_python - <<'PY'
 import json
 import os
 from pathlib import Path
@@ -221,7 +252,7 @@ EMPTY="$TMPDIR/empty-project"
 mkdir -p "$EMPTY"
 cp "$PROJECT/README-project.md" "$EMPTY/README-project.md"
 set +e
-"$PYTHON_BIN" "$ROOT/scripts/diff_story_state.py" --project "$EMPTY" --from latest --to current >/dev/null 2>"$TMPDIR/latest.err"
+run_python "$ROOT/scripts/diff_story_state.py" --project "$EMPTY" --from latest --to current >/dev/null 2>"$TMPDIR/latest.err"
 CODE=$?
 set -e
 if [ "$CODE" -eq 0 ]; then
@@ -243,7 +274,7 @@ for cmd in \
   "diff_story_state.py --project $MISSING --from current --to current"
 do
   set +e
-  "$PYTHON_BIN" "$ROOT/scripts/${cmd%% *}" ${cmd#* } >/dev/null 2>"$TMPDIR/missing.err"
+  run_python "$ROOT/scripts/${cmd%% *}" ${cmd#* } >/dev/null 2>"$TMPDIR/missing.err"
   CODE=$?
   set -e
   if [ "$CODE" -eq 0 ]; then
@@ -253,7 +284,7 @@ do
   grep -Eq 'Project (does not exist|is not a directory)' "$TMPDIR/missing.err"
 done
 set +e
-"$PYTHON_BIN" "$ROOT/scripts/audit_chapter.py" --project "$PROJECT" --chapter-file "$TMPDIR/no-such-chapter.md" >/dev/null 2>"$TMPDIR/missing-chapter.err"
+run_python "$ROOT/scripts/audit_chapter.py" --project "$PROJECT" --chapter-file "$TMPDIR/no-such-chapter.md" >/dev/null 2>"$TMPDIR/missing-chapter.err"
 CODE=$?
 set -e
 if [ "$CODE" -eq 0 ]; then

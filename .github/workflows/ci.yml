@@ -1,0 +1,40 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  basic-checks:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Validate repository basics
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f README.md
+          test -f SKILL.md
+          test -d scripts
+          test -d assets/project-template
+          test -f scripts/smoke_test.sh
+          test -f scripts/init_novel_project.sh
+
+      - name: Python syntax check
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m py_compile scripts/*.py
+
+      - name: Run smoke test
+        shell: bash
+        run: |
+          set -euo pipefail
+          bash scripts/smoke_test.sh

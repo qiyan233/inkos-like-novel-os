@@ -1,0 +1,66 @@
+# 快速上手
+
+本文给第一次接触 `inkos-like-novel-os` 的用户一个最小入口。
+
+## 这个仓库是什么
+
+它不是“自动写完整小说”的黑盒工具，而是一个**面向 OpenClaw 的长篇小说工作流 skeleton**：
+
+- 用 truth files 保存世界状态
+- 用脚本辅助上下文构建、审计、状态更新
+- 用 smoke test 和 CI 保持基础可用性
+
+## 第一步：理解核心文件
+
+建议按这个顺序读：
+
+1. `README.md`：看项目定位、能力边界、快速开始
+2. `SKILL.md`：看工作流主逻辑
+3. `references/`：按需看审计维度、文件结构、示例
+
+## 第二步：初始化一个小说项目
+
+```bash
+bash scripts/init_novel_project.sh /path/to/project "书名"
+```
+
+初始化后，优先补这些文件：
+
+- `story_bible.md`
+- `book_rules.md`
+- `outline.md`
+- `current_state.md`
+- `pending_hooks.md`
+
+## 第三步：跑一个最小工作流
+
+```bash
+python3 scripts/build_next_chapter_context.py --project /path/to/project
+python3 scripts/audit_chapter.py --project /path/to/project --chapter-file /path/to/project/chapters/ch01.md
+```
+
+如章节涉及悬疑、隐藏真相或严格 POV，可继续：
+
+```bash
+python3 scripts/knowledge_check.py --project /path/to/project --chapter-file /path/to/project/chapters/ch01.md --json
+```
+
+接受章节后，再更新状态：
+
+```bash
+python3 scripts/update_story_state.py --project /path/to/project --chapter 1 --title "第一章" --summary "..."
+```
+
+## 第四步：验证仓库基础能力
+
+```bash
+bash scripts/smoke_test.sh
+```
+
+这能帮助你确认当前环境下脚本链路是否正常。
+
+## 协作建议
+
+- 提交前先看 `CONTRIBUTING.md`
+- 讨论和反馈请遵守 `CODE_OF_CONDUCT.md`
+- 遇到安全问题请参考 `SECURITY.md`
