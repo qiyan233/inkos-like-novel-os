@@ -1,5 +1,25 @@
 # Changelog
 
+## v0.4.1 — 2026-03-28
+
+### Added
+
+- 新增最小 `docs/` 上手文档结构：`getting-started`、`installation`、`user-paths`、`project-template`、`faq`
+- 新增 `examples/demo-novel/` 示例项目，包含 truth files 与两章演示内容，方便快速理解 `context / audit / extract-state / state-update` 的协作方式
+- README 顶部新增 CI / License / Version 徽章，并补充 docs / example 导航入口
+- 新增开源协作基础文件：`LICENSE`、`CONTRIBUTING.md`、`CODE_OF_CONDUCT.md`、`SECURITY.md`
+- 新增 GitHub 协作模板与最小 CI 工作流
+
+### Fixed
+
+- 修复 `scripts/smoke_test.sh` 在 Windows / Git Bash 风格环境中的 Python 入口兼容问题
+- 修复 smoke test 对中文 JSON 输出的脆弱匹配方式，改为更稳的 UTF-8 / Python 断言路径
+
+### Notes
+
+- 这是一个小版本维护发布，重点是提升开源协作体验、首次上手路径和环境兼容性
+- 当前 `snapshot_story_state.py` 仍存在 `datetime.utcnow()` 的 deprecation warning，但不影响使用与本次发布
+
 这个文件记录 GitHub 上已发布版本的主要变化。
 
 ## v0.4.0 — 2026-03-18

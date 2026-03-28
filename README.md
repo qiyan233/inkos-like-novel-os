@@ -1,8 +1,8 @@
 # inkos-like-novel-os
 
-[![CI](https://img.shields.io/github/actions/workflow/status/qiyan233/inkos-like-novel-os/ci.yml?branch=main&label=CI)](https://github.com/qiyan233/inkos-like-novel-os/actions/workflows/ci.yml) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE) [![Version](https://img.shields.io/badge/version-v0.4.0-blue)](https://github.com/qiyan233/inkos-like-novel-os/releases/tag/v0.4.0)
+[![CI](https://img.shields.io/github/actions/workflow/status/qiyan233/inkos-like-novel-os/ci.yml?branch=main&label=CI)](https://github.com/qiyan233/inkos-like-novel-os/actions/workflows/ci.yml) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE) [![Version](https://img.shields.io/badge/version-v0.4.1-blue)](https://github.com/qiyan233/inkos-like-novel-os/releases/tag/v0.4.1)
 
-当前版本：**0.4.0**
+当前版本：**0.4.1**
 
 完整变更记录见 [CHANGELOG.md](CHANGELOG.md)。
 
@@ -118,7 +118,7 @@ bash scripts/smoke_test.sh
 - `build_next_chapter_context.py` 现在可自动装入 `character_knowledge.md`
 - 扩展 smoke test，覆盖 knowledge-check / hook-report / extract-state 全链路
 
-如果只想看本次发布说明，可直接看 [v0.4.0 Release](https://github.com/qiyan233/inkos-like-novel-os/releases/tag/v0.4.0)。
+如果只想看本次发布说明，可直接看 [v0.4.0 Release](https://github.com/qiyan233/inkos-like-novel-os/releases/tag/v0.4.1)。
 
 ## 适用场景
 
