@@ -1,5 +1,7 @@
 # inkos-like-novel-os
 
+[![CI](https://img.shields.io/github/actions/workflow/status/qiyan233/inkos-like-novel-os/ci.yml?branch=main&label=CI)](https://github.com/qiyan233/inkos-like-novel-os/actions/workflows/ci.yml) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE) [![Version](https://img.shields.io/badge/version-v0.4.0-blue)](https://github.com/qiyan233/inkos-like-novel-os/releases/tag/v0.4.0)
+
 当前版本：**0.4.0**
 
 完整变更记录见 [CHANGELOG.md](CHANGELOG.md)。
@@ -19,48 +21,92 @@
 
 灵感参考原项目 **InkOS**：<https://github.com/Narcooo/inkos>
 
-> 说明：本项目是面向 OpenClaw 的 skill skeleton，受 InkOS 启发，但不是原项目的官方移植版本。
-
-## 快速导航
-
-### 一句话定位
-
-一个面向 **OpenClaw** 的长篇小说工作流 skill skeleton：用 truth files、审计脚本和状态更新工具，把小说写作运行成可持续维护的流程。
-
-### 适合谁
-
-- 想搭建 **类似 InkOS** 的 OpenClaw 小说工作流
-- 想把长篇 / 连载 / 网文 / 同人写作做成**可协作、可追踪、可回归验证**的仓库
-- 想让 AI 写多章时，尽量基于 `current_state.md`、`chapter_summaries.md`、`pending_hooks.md` 等文件稳定推进
-- 想在起草之外，补上 audit、revision、snapshot/diff 这些“工程化”环节
-
-### 快速开始入口
-
-1. **先读定位**：[`SKILL.md`](SKILL.md)
-2. **看仓库能力与使用方式**：本 README 的[快速开始](#快速开始)
-3. **直接初始化一个项目**：
-
-```bash
-bash scripts/init_novel_project.sh /path/to/project "书名"
-```
-
-4. **跑一遍基础回归**：
-
-```bash
-bash scripts/smoke_test.sh
-```
-
-5. **如果你是第一次上手**：可先看 [`docs/getting-started.md`](docs/getting-started.md)
-
-### 仓库结构导览
-
-- `SKILL.md`：技能主说明，定义工作流与操作模型
-- `scripts/`：初始化、审计、状态更新、快照 diff、打包、smoke test 等脚本
-- `references/`：审计规则、文件结构、workflow playbooks、worked examples
-- `assets/project-template/`：新小说项目模板
-- `docs/`：补充上手说明与协作文档
-
-## 最新更新
+> 说明：本项目是面向 OpenClaw 的 skill skeleton，受 InkOS 启发，但不是原项目的官方移植版本。
+
+
+
+## 快速导航
+
+
+
+### 一句话定位
+
+
+
+一个面向 **OpenClaw** 的长篇小说工作流 skill skeleton：用 truth files、审计脚本和状态更新工具，把小说写作运行成可持续维护的流程。
+
+
+
+### 适合谁
+
+
+
+- 想搭建 **类似 InkOS** 的 OpenClaw 小说工作流
+
+- 想把长篇 / 连载 / 网文 / 同人写作做成**可协作、可追踪、可回归验证**的仓库
+
+- 想让 AI 写多章时，尽量基于 `current_state.md`、`chapter_summaries.md`、`pending_hooks.md` 等文件稳定推进
+
+- 想在起草之外，补上 audit、revision、snapshot/diff 这些“工程化”环节
+
+
+
+### 快速开始入口
+
+
+
+1. **先读定位**：[`SKILL.md`](SKILL.md)
+
+2. **看仓库能力与使用方式**：本 README 的[快速开始](#快速开始)
+
+3. **直接初始化一个项目**：
+
+
+
+```bash
+
+bash scripts/init_novel_project.sh /path/to/project "书名"
+
+```
+
+
+
+4. **跑一遍基础回归**：
+
+
+
+```bash
+
+bash scripts/smoke_test.sh
+
+```
+
+
+
+5. **如果你是第一次上手**：可先看 [`docs/getting-started.md`](docs/getting-started.md)
+6. **想直接看一个完整例子**：打开 [`examples/demo-novel/README.md`](examples/demo-novel/README.md)
+
+
+
+### 仓库结构导览
+
+
+
+- `SKILL.md`：技能主说明，定义工作流与操作模型
+
+- `scripts/`：初始化、审计、状态更新、快照 diff、打包、smoke test 等脚本
+
+- `references/`：审计规则、文件结构、workflow playbooks、worked examples
+
+- `assets/project-template/`：新小说项目模板
+
+- `docs/`：补充上手说明与协作文档
+- `examples/demo-novel/`：最小但完整的示例小说项目，可直接对照 context / audit / extract-state / state-update
+
+
+
+## 最新更新
+
 
 ### v0.4.0
 
