@@ -51,40 +51,76 @@
 
 
 
-### 快速开始入口
+### 快速开始入口 / Quick Entry
 
 
 
-1. **先读定位**：[`SKILL.md`](SKILL.md)
 
-2. **看仓库能力与使用方式**：本 README 的[快速开始](#快速开始)
 
-3. **直接初始化一个项目**：
+
+
+1. **先读定位 / Start with positioning**：[`SKILL.md`](SKILL.md)
+
+
+
+2. **看仓库能力与使用方式 / Usage overview**：本 README 的[快速开始](#快速开始)
+
+
+
+3. **优先使用统一 CLI / Prefer the unified CLI**：
+
+
+
+
 
 
 
 ```bash
 
-bash scripts/init_novel_project.sh /path/to/project "书名"
+
+
+python3 scripts/inkos_cli.py init /path/to/project "书名"
+
+
 
 ```
 
 
 
-4. **跑一遍基础回归**：
+
+
+
+
+4. **跑一遍基础回归 / Run a baseline check**：
+
+
+
+
 
 
 
 ```bash
 
-bash scripts/smoke_test.sh
+
+
+python3 scripts/inkos_cli.py smoke-test
+
+
 
 ```
 
 
 
-5. **如果你是第一次上手**：可先看 [`docs/getting-started.md`](docs/getting-started.md)
-6. **想直接看一个完整例子**：打开 [`examples/demo-novel/README.md`](examples/demo-novel/README.md)
+
+
+
+
+5. **如果你是第一次上手 / First time here**：可先看 [`docs/getting-started.md`](docs/getting-started.md)
+
+6. **想直接看一个完整例子 / Example-first**：打开 [`examples/demo-novel/README.md`](examples/demo-novel/README.md)
+
+7. **想看 CLI 与底层脚本的关系 / CLI vs scripts**：打开 [`docs/cli.md`](docs/cli.md)
+
 
 
 
@@ -184,72 +220,214 @@ bash scripts/smoke_test.sh
 
 ## 安装与使用
 
+
+
 ### 方式一：安装 `.skill` 发布包
+
+
 
 从 Releases 下载 `.skill` 文件，用你的 OpenClaw / skill 安装流程导入。
 
-### 方式二：直接使用仓库目录
 
-克隆仓库后，直接使用其中的：
+
+### 方式二：直接使用仓库目录 / Use the repo directly
+
+
+
+克隆仓库后，推荐把 `scripts/inkos_cli.py` 当作**统一主入口 / unified entrypoint**，其下再调用各个底层脚本：
+
+
 
 - `SKILL.md`
+
 - `references/`
+
 - `scripts/`
+
 - `assets/project-template/`
 
-## 快速开始
 
-### 初始化一个小说项目
+
+如需快速确认 CLI 可用：
+
+
 
 ```bash
-bash scripts/init_novel_project.sh /path/to/project "书名"
+
+python3 scripts/inkos_cli.py --help
+
 ```
+
+
+
+## 快速开始 / CLI Quickstart
+
+
+
+> 推荐入口 / Recommended entrypoint：`python3 scripts/inkos_cli.py ...`
+
+>
+
+> 底层脚本仍然保留，但更适合作为高级用法 / advanced usage。
+
+
+
+### 1. init — 初始化项目 / Initialize a project
+
+
+
+```bash
+
+python3 scripts/inkos_cli.py init /path/to/project "书名"
+
+```
+
+
 
 初始化后会自动准备：
 
+
+
 - truth files 模板
+
 - `chapters/`
+
 - `reviews/`
 
-### 生成下一章上下文
+
+
+### 2. context — 生成下一章上下文 / Build next-chapter context
+
+
 
 ```bash
-python3 scripts/build_next_chapter_context.py \
+
+python3 scripts/inkos_cli.py context \
+
   --project /path/to/project
+
 ```
 
-### 审计章节
+
+
+### 3. audit — 审计章节 / Audit a chapter
+
+
 
 ```bash
-python3 scripts/audit_chapter.py \
+
+python3 scripts/inkos_cli.py audit \
+
   --project /path/to/project \
+
   --chapter-file /path/to/project/chapters/ch12.md
+
 ```
+
+
 
 输出 JSON：
 
+
+
 ```bash
-python3 scripts/audit_chapter.py \
+
+python3 scripts/inkos_cli.py audit \
+
   --project /path/to/project \
+
   --chapter-file /path/to/project/chapters/ch12.md \
+
   --json
+
 ```
 
-### 追加章节状态
+
+
+### 4. extract-state — 提取候选状态更新 / Extract candidate state updates
+
+
 
 ```bash
-python3 scripts/update_story_state.py \
+
+python3 scripts/inkos_cli.py extract-state \
+
   --project /path/to/project \
-  --chapter 12 \
-  --title "沉默的代价" \
-  --summary "主角第一次确认玉佩被人调包" \
-  --state-change "林烬确认玉佩是伪造的" \
-  --hook-open "是谁替换了玉佩" \
-  --relationship "林烬 -> 徐安：信任下降" \
-  --emotion "林烬：怀疑上升"
+
+  --chapter-file /path/to/project/chapters/ch12.md \
+
+  --json
+
 ```
+
+
+
+### 5. state-update — 写回状态 / Update truth files
+
+
+
+```bash
+
+python3 scripts/inkos_cli.py state-update \
+
+  --project /path/to/project \
+
+  --chapter 12 \
+
+  --title "沉默的代价" \
+
+  --summary "主角第一次确认玉佩被人调包" \
+
+  --state-change "林烬确认玉佩是伪造的" \
+
+  --hook-open "是谁替换了玉佩" \
+
+  --relationship "林烬 -> 徐安：信任下降" \
+
+  --emotion "林烬：怀疑上升"
+
+```
+
+
+
+### 6. smoke-test — 跑基础回归 / Run smoke tests
+
+
+
+```bash
+
+python3 scripts/inkos_cli.py smoke-test
+
+```
+
+
+
+### 底层脚本 / Advanced usage
+
+
+
+如果你需要更细粒度地单独调用脚本、调试某一段链路、或在外部工具里直接复用某个脚本，也仍然可以继续使用：
+
+
+
+- `bash scripts/init_novel_project.sh ...`
+
+- `python3 scripts/build_next_chapter_context.py ...`
+
+- `python3 scripts/audit_chapter.py ...`
+
+- `python3 scripts/extract_state.py ...`
+
+- `python3 scripts/update_story_state.py ...`
+
+
+
+更详细的 CLI 说明见 [`docs/cli.md`](docs/cli.md)。
+
+
 
 ## 最小工作流示例
+
 
 假设用户说：
 
@@ -257,29 +435,58 @@ python3 scripts/update_story_state.py \
 
 推荐流程：
 
+
+
 1. 先生成上下文
 
+
+
 ```bash
-python3 scripts/build_next_chapter_context.py --project /path/to/project
+
+python3 scripts/inkos_cli.py context --project /path/to/project
+
 ```
+
+
 
 2. 用生成的上下文去起草章节
+
 3. 起草完成后跑审计
 
+
+
 ```bash
-python3 scripts/audit_chapter.py \
+
+python3 scripts/inkos_cli.py audit \
+
   --project /path/to/project \
+
   --chapter-file /path/to/project/chapters/ch12.md
+
 ```
+
+
 
 4. 如涉及悬疑/隐藏真相，先跑 knowledge-check
+
 5. 根据审计结果做 spot-fix
+
 6. 用 extract-state 生成候选状态更新
+
 7. 接受后更新状态
 
+
+
 ```bash
-python3 scripts/update_story_state.py ...
+
+python3 scripts/inkos_cli.py state-update ...
+
 ```
+
+
+
+如果你更习惯直接调底层脚本，也可以切回 `scripts/*.py`；但文档与示例现在默认以 CLI 作为主路径。
+
 
 ## JSON 与 CLI
 
@@ -291,22 +498,24 @@ python3 scripts/update_story_state.py ...
 - `references/audit-rules.md`
 - `references/revision-workflow.md`
 
-### 统一 CLI 示例
-
-```bash
-python3 scripts/inkos_cli.py init /path/to/project "书名"
-python3 scripts/inkos_cli.py context --project /path/to/project --json
-python3 scripts/inkos_cli.py audit --project /path/to/project --chapter-file /path/to/project/chapters/ch12.md --json
-python3 scripts/inkos_cli.py knowledge-check --project /path/to/project --chapter-file /path/to/project/chapters/ch12.md --json
-python3 scripts/inkos_cli.py extract-state --project /path/to/project --chapter-file /path/to/project/chapters/ch12.md --json
-python3 scripts/inkos_cli.py hook-report --project /path/to/project --stale-after 5 --json
-python3 scripts/inkos_cli.py state-update --project /path/to/project --chapter 12 --title "沉默的代价" --summary "..." --json
-python3 scripts/inkos_cli.py revision-plan --project /path/to/project --chapter-file /path/to/project/chapters/ch12.md --json
-python3 scripts/inkos_cli.py spot-fixes --project /path/to/project --chapter-file /path/to/project/chapters/ch12.md --json
-python3 scripts/inkos_cli.py snapshot --project /path/to/project --chapter 12 --label accepted --json
-python3 scripts/inkos_cli.py diff --project /path/to/project --from latest --to current --json
-python3 scripts/inkos_cli.py smoke-test
-```
+### 统一 CLI 示例 / Unified CLI examples
+
+```bash
+python3 scripts/inkos_cli.py init /path/to/project "书名"
+python3 scripts/inkos_cli.py context --project /path/to/project --json
+python3 scripts/inkos_cli.py audit --project /path/to/project --chapter-file /path/to/project/chapters/ch12.md --json
+python3 scripts/inkos_cli.py knowledge-check --project /path/to/project --chapter-file /path/to/project/chapters/ch12.md --json
+python3 scripts/inkos_cli.py extract-state --project /path/to/project --chapter-file /path/to/project/chapters/ch12.md --json
+python3 scripts/inkos_cli.py hook-report --project /path/to/project --stale-after 5 --json
+python3 scripts/inkos_cli.py state-update --project /path/to/project --chapter 12 --title "沉默的代价" --summary "..." --json
+python3 scripts/inkos_cli.py revision-plan --project /path/to/project --chapter-file /path/to/project/chapters/ch12.md --json
+python3 scripts/inkos_cli.py spot-fixes --project /path/to/project --chapter-file /path/to/project/chapters/ch12.md --json
+python3 scripts/inkos_cli.py snapshot --project /path/to/project --chapter 12 --label accepted --json
+python3 scripts/inkos_cli.py diff --project /path/to/project --from latest --to current --json
+python3 scripts/inkos_cli.py smoke-test
+```
+
+CLI 现在是文档中的默认入口；底层脚本主要用于高级调试、脚本集成和逐个能力验证。
 
 
 ## 修订与状态版本化

@@ -1,8 +1,16 @@
-# 项目模板说明
+# 项目模板说明 / Project Template
 
 `assets/project-template/` 提供的是一个最小可用的长篇小说项目骨架，不是豪华模板，也不是固定写法。
 
-## 初始化
+## 初始化 / Initialize
+
+推荐先走 CLI：
+
+```bash
+python3 scripts/inkos_cli.py init /path/to/project "书名"
+```
+
+如需直接调用底层脚本，也可以：
 
 ```bash
 bash scripts/init_novel_project.sh /path/to/project "书名"
@@ -69,13 +77,13 @@ bash scripts/init_novel_project.sh /path/to/project "书名"
 - `knowledge_check.py` 判断是否提前泄露
 - 起草下一章时避免角色突然知道不该知道的事
 
-## 推荐最小维护节奏
+## 推荐最小维护节奏 / Recommended maintenance loop
 
 每接受一章，至少做三件事：
 
-1. 更新 `chapter_summaries.md`
-2. 更新 `pending_hooks.md`
-3. 更新 `current_state.md`
+1. 用 `python3 scripts/inkos_cli.py extract-state ...` 先提取候选项
+2. 用 `python3 scripts/inkos_cli.py state-update ...` 更新 `chapter_summaries.md`、`pending_hooks.md` 等 truth files
+3. 检查 `current_state.md` 是否需要人工补充或整理
 
 如果这一章显著改变了关系或情绪，再补：
 
@@ -88,4 +96,5 @@ bash scripts/init_novel_project.sh /path/to/project "书名"
 
 - [快速上手](getting-started.md)
 - [用户路径](user-paths.md)
+- [CLI 入口](cli.md)
 - [demo-novel 示例](../examples/demo-novel/README.md)

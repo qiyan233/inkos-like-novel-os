@@ -1,6 +1,13 @@
-# 快速上手
+# 快速上手 / Getting Started
+
+
 
 本文给第一次接触 `inkos-like-novel-os` 的用户一个最小入口。
+
+
+
+> 推荐入口 / Recommended entrypoint：`python3 scripts/inkos_cli.py ...`
+
 
 ## 这个仓库是什么
 
@@ -18,11 +25,16 @@
 2. `SKILL.md`：看工作流主逻辑
 3. `references/`：按需看审计维度、文件结构、示例
 
-## 第二步：初始化一个小说项目
+## 第二步：初始化一个小说项目 / Initialize a project
+
+
 
 ```bash
-bash scripts/init_novel_project.sh /path/to/project "书名"
+
+python3 scripts/inkos_cli.py init /path/to/project "书名"
+
 ```
+
 
 初始化后，优先补这些文件：
 
@@ -32,32 +44,70 @@ bash scripts/init_novel_project.sh /path/to/project "书名"
 - `current_state.md`
 - `pending_hooks.md`
 
-## 第三步：跑一个最小工作流
+## 第三步：跑一个最小工作流 / Run a minimal workflow
+
+
 
 ```bash
-python3 scripts/build_next_chapter_context.py --project /path/to/project
-python3 scripts/audit_chapter.py --project /path/to/project --chapter-file /path/to/project/chapters/ch01.md
+
+python3 scripts/inkos_cli.py context --project /path/to/project
+
+python3 scripts/inkos_cli.py audit --project /path/to/project --chapter-file /path/to/project/chapters/ch01.md
+
 ```
+
+
 
 如章节涉及悬疑、隐藏真相或严格 POV，可继续：
 
+
+
 ```bash
-python3 scripts/knowledge_check.py --project /path/to/project --chapter-file /path/to/project/chapters/ch01.md --json
+
+python3 scripts/inkos_cli.py knowledge-check --project /path/to/project --chapter-file /path/to/project/chapters/ch01.md --json
+
 ```
+
+
+
+你也可以先提取候选状态：
+
+
+
+```bash
+
+python3 scripts/inkos_cli.py extract-state --project /path/to/project --chapter-file /path/to/project/chapters/ch01.md --json
+
+```
+
+
 
 接受章节后，再更新状态：
 
-```bash
-python3 scripts/update_story_state.py --project /path/to/project --chapter 1 --title "第一章" --summary "..."
-```
 
-## 第四步：验证仓库基础能力
 
 ```bash
-bash scripts/smoke_test.sh
+
+python3 scripts/inkos_cli.py state-update --project /path/to/project --chapter 1 --title "第一章" --summary "..."
+
 ```
 
-这能帮助你确认当前环境下脚本链路是否正常。
+
+
+## 第四步：验证仓库基础能力 / Validate the baseline
+
+
+
+```bash
+
+python3 scripts/inkos_cli.py smoke-test
+
+```
+
+
+这能帮助你确认当前环境下 CLI 与底层脚本链路是否正常。
+
+如果你要看 CLI 与底层脚本如何分工，可继续读 [`docs/cli.md`](cli.md)。
 
 ## 协作建议
 

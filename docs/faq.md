@@ -1,4 +1,4 @@
-# FAQ
+# FAQ / 常见问题
 
 ## 这是自动写小说的黑盒吗？
 
@@ -29,7 +29,7 @@
 
 不会。
 
-`extract_state.py` 默认只输出候选结果，方便你人工确认；真正写回 truth files 的是 `update_story_state.py`。
+`python3 scripts/inkos_cli.py extract-state ...` 默认只输出候选结果，方便你人工确认；真正写回 truth files 的是 `python3 scripts/inkos_cli.py state-update ...`（底层分别对应 `extract_state.py` 与 `update_story_state.py`）。
 
 ## 这个仓库适合拿来做什么？
 
@@ -40,14 +40,15 @@
 - 连载 / 网文 / 同人 / 正典衍生项目
 - 需要多章一致性和可追踪状态的写作流程
 
-## 我该先看哪个文档？
+## 我该先看哪个文档？ / Where should I start?
 
 第一次上手：
 
 1. [README](../README.md)
 2. [快速上手](getting-started.md)
-3. [用户路径](user-paths.md)
-4. [demo-novel 示例](../examples/demo-novel/README.md)
+3. [CLI 入口](cli.md)
+4. [用户路径](user-paths.md)
+5. [demo-novel 示例](../examples/demo-novel/README.md)
 
 ## 为什么还要 examples/demo-novel？
 

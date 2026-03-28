@@ -19,6 +19,13 @@ resolve_python_cmd() {
     exit 1
   fi
 
+  if command -v py >/dev/null 2>&1; then
+    if py -3 "$ROOT/scripts/build_next_chapter_context.py" --help >/dev/null 2>&1; then
+      PYTHON_CMD=(py -3)
+      return 0
+    fi
+  fi
+
   local candidate
   for candidate in python3 python; do
     if command -v -- "$candidate" >/dev/null 2>&1; then
@@ -28,13 +35,6 @@ resolve_python_cmd() {
       fi
     fi
   done
-
-  if command -v py >/dev/null 2>&1; then
-    if py -3 "$ROOT/scripts/build_next_chapter_context.py" --help >/dev/null 2>&1; then
-      PYTHON_CMD=(py -3)
-      return 0
-    fi
-  fi
 
   echo 'Could not find a working Python command for the smoke test.' >&2
   exit 1

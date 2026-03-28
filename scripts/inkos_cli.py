@@ -22,7 +22,10 @@ def sh(script, args):
 
 
 def main():
-    parser = argparse.ArgumentParser(description='Lightweight CLI for inkos-like-novel-os workflows.')
+    parser = argparse.ArgumentParser(
+        description='Unified CLI entrypoint for inkos-like-novel-os workflows.',
+        epilog='Recommended local invocation: python3 scripts/inkos_cli.py <command> ...',
+    )
     sub = parser.add_subparsers(dest='command')
 
     p = sub.add_parser('init', help='Initialize a novel project.')
