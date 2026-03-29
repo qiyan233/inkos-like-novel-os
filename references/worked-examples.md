@@ -1,5 +1,7 @@
 # Worked Examples
 
+> CLI-first / CLI 优先：示例里的推荐命令优先展示 `scripts/inkos_cli.py`，底层脚本调用仅作为补充。
+
 这份文件不是理论说明，而是给 agent 和人类作者看的“落地示范”。
 
 目标：

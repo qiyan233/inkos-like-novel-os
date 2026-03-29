@@ -1,5 +1,9 @@
 # File Schemas
 
+## CLI-first note / CLI 优先说明
+
+本文件说明 truth files 的结构；实际读写这些文件时，推荐优先通过 `python3 scripts/inkos_cli.py` 触发对应流程，再按需下探到底层脚本。
+
 Use these schemas as templates, not rigid law. Keep files easy to skim.
 
 ## story_bible.md

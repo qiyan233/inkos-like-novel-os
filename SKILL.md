@@ -11,7 +11,7 @@ Build and run long-form fiction as a stateful pipeline, not a one-shot prompt.
 
 Treat this skill as a **novel OS skeleton**: it provides project structure, workflow, audit criteria, and helper scripts for an OpenClaw-based writing system that is conceptually close to InkOS.
 
-## Core operating model
+## Core operating model / 核心运行模型
 
 Use this loop:
 
@@ -27,7 +27,7 @@ Use this loop:
 
 Prefer stable files over fragile memory. If information matters in later chapters, write it into a truth file.
 
-## Project layout
+## Project layout / 项目结构
 
 When starting a new project, copy the template from `assets/project-template/`.
 
@@ -51,11 +51,27 @@ Expected files:
 
 `current_state.md` is the most important operational file. Keep it compact, current, and explicit.
 
-## Workflow
+## Recommended CLI workflow / 推荐 CLI 工作流
 
-### 1) Initialize a project
+默认优先使用统一入口：
 
-Run:
+```bash
+python3 scripts/inkos_cli.py <command> ...
+```
+
+这样更适合日常使用、文档引用和后续自动化；底层脚本仍可直接调用，但建议视为 advanced / lower-level usage。
+
+### Quick start / 快速开始
+
+#### 1) Initialize a project / 初始化项目
+
+推荐：
+
+```bash
+python3 scripts/inkos_cli.py init /path/to/project "Book Title"
+```
+
+Lower-level usage / 底层脚本方式：
 
 ```bash
 bash scripts/init_novel_project.sh /path/to/project "Book Title"
@@ -63,7 +79,29 @@ bash scripts/init_novel_project.sh /path/to/project "Book Title"
 
 This copies the template and creates the standard directory layout.
 
-### 2) Before writing a chapter
+#### 2) Build next-chapter context / 构建下一章上下文
+
+推荐：
+
+```bash
+python3 scripts/inkos_cli.py context \
+  --project /path/to/project \
+  --recent-chapters 3 \
+  --json
+```
+
+Lower-level usage / 底层脚本方式：
+
+```bash
+python3 scripts/build_next_chapter_context.py \
+  --project /path/to/project \
+  --recent-chapters 3 \
+  --json
+```
+
+## Workflow / 工作流
+
+### 1) Before writing a chapter / 写章前准备
 
 Read at least:
 
@@ -86,7 +124,7 @@ If the request is for a side story, prequel, sequel, or alternate timeline, also
 - what characters do **not** know yet
 - which original hooks must remain untouched
 
-### 3) Planning rules
+### 2) Planning rules / 规划规则
 
 Before drafting, explicitly decide:
 
@@ -100,7 +138,7 @@ Before drafting, explicitly decide:
 
 Write a short chapter plan into the response or a scratch file if useful.
 
-### 4) Drafting rules
+### 3) Drafting rules / 起草规则
 
 Draft from observed reality, not abstract explanation.
 
@@ -120,9 +158,20 @@ Avoid:
 - broad whole-crowd reactions unless earned
 - full-chapter rewrites when only a few lines are broken
 
-### 5) Knowledge-boundary pass
+### 4) Knowledge-boundary pass / 信息边界检查
 
 When the chapter depends on mystery, hidden truths, or strict POV, run:
+
+推荐：
+
+```bash
+python3 scripts/inkos_cli.py knowledge-check \
+  --project /path/to/project \
+  --chapter-file /path/to/project/chapters/ch12.md \
+  --json
+```
+
+Lower-level usage / 底层脚本方式：
 
 ```bash
 python3 scripts/knowledge_check.py \
@@ -138,7 +187,7 @@ Use this to catch:
 - side-story / prequel spoiler contamination
 - certainty that should still be suspicion
 
-### 6) Audit pass
+### 5) Audit pass / 审计检查
 
 After drafting, audit against `references/audit-dimensions.md`.
 
@@ -153,9 +202,27 @@ Minimum audit set:
 - repetitive diction / fatigue terms
 - outline drift
 
+Recommended command:
+
+```bash
+python3 scripts/inkos_cli.py audit \
+  --project /path/to/project \
+  --chapter-file /path/to/project/chapters/ch12.md \
+  --json
+```
+
+Lower-level usage / 底层脚本方式：
+
+```bash
+python3 scripts/audit_chapter.py \
+  --project /path/to/project \
+  --chapter-file /path/to/project/chapters/ch12.md \
+  --json
+```
+
 Write reports into `reviews/` when operating on files.
 
-### 7) Revision policy
+### 6) Revision policy / 修订策略
 
 Prefer this order:
 
@@ -174,9 +241,20 @@ Do not silently change:
 
 If any of the above changes, also update truth files.
 
-### 8) State extraction and update
+### 7) State extraction and update / 状态提取与更新
 
 After a chapter is accepted, first extract candidate updates:
+
+推荐：
+
+```bash
+python3 scripts/inkos_cli.py extract-state \
+  --project /path/to/project \
+  --chapter-file /path/to/project/chapters/ch12.md \
+  --json
+```
+
+Lower-level usage / 底层脚本方式：
 
 ```bash
 python3 scripts/extract_state.py \
@@ -195,6 +273,22 @@ This produces candidate:
 
 Then feed approved items into:
 
+推荐：
+
+```bash
+python3 scripts/inkos_cli.py state-update \
+  --project /path/to/project \
+  --chapter 12 \
+  --title "The Price of Silence" \
+  --summary "..." \
+  --state-change "Lin Jin now knows the token is fake" \
+  --hook-open "Who replaced the token?" \
+  --relationship "Lin Jin -> Xu An: trust decreased" \
+  --emotion "Lin Jin: suspicion hardens into anger"
+```
+
+Lower-level usage / 底层脚本方式：
+
 ```bash
 python3 scripts/update_story_state.py \
   --project /path/to/project \
@@ -207,9 +301,20 @@ python3 scripts/update_story_state.py \
   --emotion "Lin Jin: suspicion hardens into anger"
 ```
 
-### 9) Hook pressure review
+### 8) Hook pressure review / 钩子压力复核
 
 When many hooks are active, run:
+
+推荐：
+
+```bash
+python3 scripts/inkos_cli.py hook-report \
+  --project /path/to/project \
+  --stale-after 5 \
+  --json
+```
+
+Lower-level usage / 底层脚本方式：
 
 ```bash
 python3 scripts/hook_report.py \
@@ -224,9 +329,9 @@ Use this to spot:
 - current hook counts by status
 - backlog pressure before the next chapter
 
-## Modes to support
+## Modes to support / 支持模式
 
-### Full pipeline mode
+### Full pipeline mode / 全流程模式
 
 Use when the user says things like:
 
@@ -246,7 +351,7 @@ Sequence:
 7. extract candidate state
 8. update state
 
-### Audit-only mode
+### Audit-only mode / 仅审计模式
 
 Use when the user already has chapter text and wants:
 
@@ -258,7 +363,7 @@ Use when the user already has chapter text and wants:
 
 Read `references/audit-dimensions.md`, produce findings grouped by severity, then propose minimal edits.
 
-### State-maintenance mode
+### State-maintenance mode / 状态维护模式
 
 Use when the user says:
 
@@ -269,7 +374,7 @@ Use when the user says:
 
 Focus on truth-file accuracy, not prose generation.
 
-### Side-story / fanfic / sequel mode
+### Side-story / fanfic / sequel mode / 外传同人续作模式
 
 Use when the project depends on another canon. Read `references/canon-side-story.md` and establish:
 
@@ -278,7 +383,7 @@ Use when the project depends on another canon. Read `references/canon-side-story
 - forbidden spoilers
 - hook isolation
 
-## File discipline
+## File discipline / 文件纪律
 
 When working over many chapters:
 
@@ -299,20 +404,43 @@ Good pattern:
 - Xu An does not know the true source.
 ```
 
-## Use bundled scripts where helpful:
+## Bundled tools / 内置工具入口
 
-- `scripts/init_novel_project.sh` — scaffold a new novel project with standard working directories
-- `scripts/update_story_state.py` — append structured state deltas after a chapter
-- `scripts/build_next_chapter_context.py` — assemble a compact truth-file context for the next chapter
-- `scripts/audit_chapter.py` — run a heuristic chapter audit with Markdown or JSON output
-- `scripts/knowledge_check.py` — detect character knowledge-boundary and POV leaks
-- `scripts/hook_report.py` — summarize hook lifecycle state and stale hooks
-- `scripts/extract_state.py` — extract candidate state updates from a chapter draft without writing files
-- `scripts/smoke_test.sh` — quick regression test for the init/context/audit/update loop
-- `scripts/package_skill.sh` — create a clean `.skill` package with a stable top-level directory name
-- `scripts/inkos_cli.py` — lightweight CLI wrapper for init/context/audit/knowledge-check/extract-state/hook-report/state-update/revision-plan/spot-fixes/snapshot/diff/package/smoke-test
+推荐优先记住这一个入口：`scripts/inkos_cli.py`。
 
-## Use bundled references
+Common commands:
+
+- `python3 scripts/inkos_cli.py init ...` — scaffold a new novel project
+- `python3 scripts/inkos_cli.py context ...` — assemble next-chapter context
+- `python3 scripts/inkos_cli.py audit ...` — run a chapter audit
+- `python3 scripts/inkos_cli.py knowledge-check ...` — detect knowledge-boundary / POV leaks
+- `python3 scripts/inkos_cli.py extract-state ...` — extract candidate state updates
+- `python3 scripts/inkos_cli.py hook-report ...` — summarize hook lifecycle state
+- `python3 scripts/inkos_cli.py state-update ...` — append structured story-state deltas
+- `python3 scripts/inkos_cli.py revision-plan ...` — build revision plan from chapter or audit
+- `python3 scripts/inkos_cli.py spot-fixes ...` — suggest low-risk local fixes
+- `python3 scripts/inkos_cli.py snapshot ...` — create a state snapshot
+- `python3 scripts/inkos_cli.py diff ...` — diff snapshots or current state
+- `python3 scripts/inkos_cli.py smoke-test` — run smoke tests
+- `python3 scripts/inkos_cli.py package` — create a clean `.skill` package
+
+Advanced / lower-level usage:
+
+- `scripts/init_novel_project.sh`
+- `scripts/build_next_chapter_context.py`
+- `scripts/audit_chapter.py`
+- `scripts/knowledge_check.py`
+- `scripts/extract_state.py`
+- `scripts/hook_report.py`
+- `scripts/update_story_state.py`
+- `scripts/build_revision_plan.py`
+- `scripts/suggest_spot_fixes.py`
+- `scripts/snapshot_story_state.py`
+- `scripts/diff_story_state.py`
+- `scripts/smoke_test.sh`
+- `scripts/package_skill.sh`
+
+## Use bundled references / 参考文档
 
 Read these only when needed:
 
@@ -326,7 +454,7 @@ Read these only when needed:
 - `references/canon-side-story.md` — how to handle prequels / sequels / alternate lines
 - `references/style-learning.md` — how to learn and apply style without overfitting
 
-## Output expectations
+## Output expectations / 输出期望
 
 When responding in chat, prefer concise operational structure:
 
@@ -342,6 +470,6 @@ When producing audits, use severity:
 - `minor` — style, clarity, repetition, local pacing
 - `note` — optional enhancement
 
-## Design goal
+## Design goal / 设计目标
 
 This skill is not a magic novel writer. It is a discipline layer that makes long-form AI writing more stable, inspectable, and maintainable.

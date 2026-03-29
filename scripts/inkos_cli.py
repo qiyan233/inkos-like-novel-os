@@ -8,8 +8,8 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent
 
 
-def run(cmd):
-    result = subprocess.run(cmd)
+def run(cmd, **kwargs):
+    result = subprocess.run(cmd, **kwargs)
     raise SystemExit(result.returncode)
 
 
@@ -212,7 +212,10 @@ def main():
             extra.append(args.version_suffix)
         run(sh('package_skill.sh', extra))
     elif args.command == 'smoke-test':
-        run(sh('smoke_test.sh', []))
+        import os
+        env = os.environ.copy()
+        env['PYTHON_BIN'] = sys.executable
+        run(sh('smoke_test.sh', []), env=env)
     else:
         parser.print_help()
         raise SystemExit(1)

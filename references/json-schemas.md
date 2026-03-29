@@ -1,5 +1,9 @@
 # JSON Schemas
 
+## CLI-first note / CLI 优先说明
+
+这些 JSON 契约既可由底层脚本直接输出，也可通过 `python3 scripts/inkos_cli.py ... --json` 统一获取。对普通使用者，推荐优先走 CLI。
+
 这些不是 JSON Schema draft 文件，而是当前脚本输出的稳定 JSON 契约说明。
 
 ## 1. `inkos.audit-report.v1`

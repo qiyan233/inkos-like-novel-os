@@ -1,5 +1,9 @@
 # Workflow Playbooks
 
+## CLI-first note / CLI 优先说明
+
+推荐优先使用 `python3 scripts/inkos_cli.py ...` 作为统一入口；底层脚本仍可直接调用，但更适合 advanced usage、调试或单独集成。
+
 ## Playbook 1: Write next chapter
 
 1. Read `story_bible.md`, `book_rules.md`, `outline.md`, `current_state.md`
