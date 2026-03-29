@@ -1,5 +1,28 @@
 # Changelog
 
+## v0.4.2 — 2026-03-29
+
+### Changed
+
+- 进一步统一仓库入口叙事，明确以 `python3 scripts/inkos_cli.py ...` 作为推荐主入口
+- README、docs、examples、`SKILL.md` 与关键 `references/` 文档现在都优先展示 CLI 工作流
+- 新增 `docs/cli.md`，补充 CLI Quickstart 与 CLI / 底层脚本的使用边界说明
+
+### Fixed
+
+- 修复 `scripts/inkos_cli.py smoke-test` 调用链，使 CLI 入口可以正确传递 Python 解释器环境给 smoke test
+- 修复 `snapshot_story_state.py` 中已弃用的 UTC 时间写法，消除 `datetime.utcnow()` deprecation warning
+- 修正文档中的部分版本链接与入口表述不一致问题
+
+### Notes
+
+- 这是一个以入口一致性和使用体验为重点的维护版本
+- 当前推荐工作流：先走 CLI，底层脚本作为 advanced / lower-level usage
+
+### Assets
+
+- `inkos-like-novel-os-v0.4.2.skill`
+
 ## v0.4.1 — 2026-03-28
 
 ### Added

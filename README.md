@@ -1,8 +1,8 @@
 # inkos-like-novel-os
 
-[![CI](https://img.shields.io/github/actions/workflow/status/qiyan233/inkos-like-novel-os/ci.yml?branch=main&label=CI)](https://github.com/qiyan233/inkos-like-novel-os/actions/workflows/ci.yml) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE) [![Version](https://img.shields.io/badge/version-v0.4.1-blue)](https://github.com/qiyan233/inkos-like-novel-os/releases/tag/v0.4.1)
+[![CI](https://img.shields.io/github/actions/workflow/status/qiyan233/inkos-like-novel-os/ci.yml?branch=main&label=CI)](https://github.com/qiyan233/inkos-like-novel-os/actions/workflows/ci.yml) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE) [![Version](https://img.shields.io/badge/version-v0.4.2-blue)](https://github.com/qiyan233/inkos-like-novel-os/releases/tag/v0.4.2)
 
-当前版本：**0.4.1**
+当前版本：**0.4.2**
 
 完整变更记录见 [CHANGELOG.md](CHANGELOG.md)。
 
@@ -154,7 +154,7 @@ python3 scripts/inkos_cli.py smoke-test
 - `build_next_chapter_context.py` 现在可自动装入 `character_knowledge.md`
 - 扩展 smoke test，覆盖 knowledge-check / hook-report / extract-state 全链路
 
-如果只想看本次发布说明，可直接看 [v0.4.0 Release](https://github.com/qiyan233/inkos-like-novel-os/releases/tag/v0.4.1)。
+如果只想看本次发布说明，可直接看 [v0.4.2 Release](https://github.com/qiyan233/inkos-like-novel-os/releases/tag/v0.4.2)。
 
 ## 适用场景
 
@@ -498,24 +498,42 @@ python3 scripts/inkos_cli.py state-update ...
 - `references/audit-rules.md`
 - `references/revision-workflow.md`
 
-### 统一 CLI 示例 / Unified CLI examples
-
-```bash
-python3 scripts/inkos_cli.py init /path/to/project "书名"
-python3 scripts/inkos_cli.py context --project /path/to/project --json
-python3 scripts/inkos_cli.py audit --project /path/to/project --chapter-file /path/to/project/chapters/ch12.md --json
-python3 scripts/inkos_cli.py knowledge-check --project /path/to/project --chapter-file /path/to/project/chapters/ch12.md --json
-python3 scripts/inkos_cli.py extract-state --project /path/to/project --chapter-file /path/to/project/chapters/ch12.md --json
-python3 scripts/inkos_cli.py hook-report --project /path/to/project --stale-after 5 --json
-python3 scripts/inkos_cli.py state-update --project /path/to/project --chapter 12 --title "沉默的代价" --summary "..." --json
-python3 scripts/inkos_cli.py revision-plan --project /path/to/project --chapter-file /path/to/project/chapters/ch12.md --json
-python3 scripts/inkos_cli.py spot-fixes --project /path/to/project --chapter-file /path/to/project/chapters/ch12.md --json
-python3 scripts/inkos_cli.py snapshot --project /path/to/project --chapter 12 --label accepted --json
-python3 scripts/inkos_cli.py diff --project /path/to/project --from latest --to current --json
-python3 scripts/inkos_cli.py smoke-test
-```
-
-CLI 现在是文档中的默认入口；底层脚本主要用于高级调试、脚本集成和逐个能力验证。
+### 统一 CLI 示例 / Unified CLI examples
+
+
+
+```bash
+
+python3 scripts/inkos_cli.py init /path/to/project "书名"
+
+python3 scripts/inkos_cli.py context --project /path/to/project --json
+
+python3 scripts/inkos_cli.py audit --project /path/to/project --chapter-file /path/to/project/chapters/ch12.md --json
+
+python3 scripts/inkos_cli.py knowledge-check --project /path/to/project --chapter-file /path/to/project/chapters/ch12.md --json
+
+python3 scripts/inkos_cli.py extract-state --project /path/to/project --chapter-file /path/to/project/chapters/ch12.md --json
+
+python3 scripts/inkos_cli.py hook-report --project /path/to/project --stale-after 5 --json
+
+python3 scripts/inkos_cli.py state-update --project /path/to/project --chapter 12 --title "沉默的代价" --summary "..." --json
+
+python3 scripts/inkos_cli.py revision-plan --project /path/to/project --chapter-file /path/to/project/chapters/ch12.md --json
+
+python3 scripts/inkos_cli.py spot-fixes --project /path/to/project --chapter-file /path/to/project/chapters/ch12.md --json
+
+python3 scripts/inkos_cli.py snapshot --project /path/to/project --chapter 12 --label accepted --json
+
+python3 scripts/inkos_cli.py diff --project /path/to/project --from latest --to current --json
+
+python3 scripts/inkos_cli.py smoke-test
+
+```
+
+
+
+CLI 现在是文档中的默认入口；底层脚本主要用于高级调试、脚本集成和逐个能力验证。
+
 
 
 ## 修订与状态版本化
