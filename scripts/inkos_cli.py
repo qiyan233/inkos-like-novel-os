@@ -1,11 +1,14 @@
 #!/usr/bin/env python3
 import argparse
+import shutil
 import subprocess
 import sys
 from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parent
+PROJECT_ROOT = ROOT.parent
+TEMPLATE_DIR = PROJECT_ROOT / 'assets' / 'project-template'
 
 
 def run(cmd, **kwargs):
@@ -19,6 +22,24 @@ def py(script, args):
 
 def sh(script, args):
     return ['bash', str(ROOT / script)] + args
+
+
+def init_project(project, title):
+    project = Path(project)
+    project.mkdir(parents=True, exist_ok=True)
+    shutil.copytree(TEMPLATE_DIR, project, dirs_exist_ok=True)
+    (project / 'chapters').mkdir(parents=True, exist_ok=True)
+    (project / 'reviews').mkdir(parents=True, exist_ok=True)
+
+    for name in ['README-project.md', 'story_bible.md', 'book_rules.md', 'outline.md', 'current_state.md']:
+        path = project / name
+        if not path.exists():
+            continue
+        text = path.read_text(encoding='utf-8')
+        path.write_text(text.replace('{{BOOK_TITLE}}', title), encoding='utf-8')
+
+    print('Initialized novel project at: %s' % project)
+    print('Title: %s' % title)
 
 
 def main():
@@ -109,7 +130,7 @@ def main():
     args = parser.parse_args()
 
     if args.command == 'init':
-        run(sh('init_novel_project.sh', [args.project, args.title]))
+        init_project(args.project, args.title)
     elif args.command == 'context':
         if args.recent_chapters < 0:
             raise SystemExit('--recent-chapters must be >= 0')
@@ -205,17 +226,14 @@ def main():
             cmd.append('--json')
         run(cmd)
     elif args.command == 'package':
-        extra = []
+        cmd = py('package_skill.py', [])
         if args.outdir:
-            extra.append(args.outdir)
+            cmd.append(args.outdir)
         if args.version_suffix:
-            extra.append(args.version_suffix)
-        run(sh('package_skill.sh', extra))
+            cmd.append(args.version_suffix)
+        run(cmd)
     elif args.command == 'smoke-test':
-        import os
-        env = os.environ.copy()
-        env['PYTHON_BIN'] = sys.executable
-        run(sh('smoke_test.sh', []), env=env)
+        run(py('smoke_test.py', ['--invoked-by-cli']))
     else:
         parser.print_help()
         raise SystemExit(1)

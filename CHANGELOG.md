@@ -1,5 +1,36 @@
 # Changelog
 
+## v0.4.3 — 2026-04-04
+
+### Added
+
+- 新增 `scripts/smoke_test.py`，提供跨平台的 Python 回归入口，覆盖 `init → context → audit → state-update → package → smoke-test` 主链路
+- 新增 `scripts/package_skill.py`，提供跨平台的 `.skill` 打包入口，并支持基于 `VERSION` 自动输出带版本号的产物
+- 新增 `AGENTS.md`，记录本轮协作中补充的版本同步规则
+
+### Changed
+
+- `scripts/inkos_cli.py` 现在对 `init`、`package`、`smoke-test` 优先走 Python 路径，减少对 Bash 环境的依赖
+- `scripts/update_story_state.py` 现在会在写入章节摘要的同时同步维护 `current_state.md`，记录最新接受章节位置与 compact accepted-update 区块
+- `SKILL.md` 与 `README.md` 同步更新为 Python / CLI-first 入口叙事，并补充 `current_state.md` 新同步行为说明
+- `VERSION` 已更新为 `0.4.3`
+
+### Fixed
+
+- 修复 Windows 环境下 `python scripts/inkos_cli.py init ...` 因缺少 `bash` 而直接失败的问题
+- 修复 Windows 环境下 `python scripts/inkos_cli.py smoke-test` 无法启动 shell 回归脚本的问题
+- 修复 Windows 环境下 `python scripts/inkos_cli.py package ...` 无法打包 `.skill` 的问题
+- 修复 `state-update` 未将最新接受章节同步回 `current_state.md`，导致状态源逐渐分叉的问题
+
+### Notes
+
+- 这是一个以跨平台 CLI 可用性、skill 主契约一致性和状态同步完整性为重点的维护版本
+- 当前推荐入口仍然是 `python3 scripts/inkos_cli.py ...`；shell 脚本入口保留为兼容路径
+
+### Assets
+
+- `inkos-like-novel-os-v0.4.3.skill`
+
 ## v0.4.2 — 2026-03-29
 
 ### Changed

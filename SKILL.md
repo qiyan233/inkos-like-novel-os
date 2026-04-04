@@ -5,7 +5,7 @@ description: Novel-production operating system for long-form fiction, web novels
 
 # inkos-like-novel-os
 
-Version: 0.4.0
+Version: 0.4.3
 
 Build and run long-form fiction as a stateful pipeline, not a one-shot prompt.
 
@@ -78,6 +78,7 @@ bash scripts/init_novel_project.sh /path/to/project "Book Title"
 ```
 
 This copies the template and creates the standard directory layout.
+For cross-platform usage, prefer `python3 scripts/inkos_cli.py init ...`.
 
 #### 2) Build next-chapter context / 构建下一章上下文
 
@@ -301,6 +302,8 @@ python3 scripts/update_story_state.py \
   --emotion "Lin Jin: suspicion hardens into anger"
 ```
 
+This updates `chapter_summaries.md` and also syncs `current_state.md` with the latest accepted chapter position plus a compact accepted-update block.
+
 ### 8) Hook pressure review / 钩子压力复核
 
 When many hooks are active, run:
@@ -416,7 +419,7 @@ Common commands:
 - `python3 scripts/inkos_cli.py knowledge-check ...` — detect knowledge-boundary / POV leaks
 - `python3 scripts/inkos_cli.py extract-state ...` — extract candidate state updates
 - `python3 scripts/inkos_cli.py hook-report ...` — summarize hook lifecycle state
-- `python3 scripts/inkos_cli.py state-update ...` — append structured story-state deltas
+- `python3 scripts/inkos_cli.py state-update ...` — append structured story-state deltas and sync the latest accepted update into `current_state.md`
 - `python3 scripts/inkos_cli.py revision-plan ...` — build revision plan from chapter or audit
 - `python3 scripts/inkos_cli.py spot-fixes ...` — suggest low-risk local fixes
 - `python3 scripts/inkos_cli.py snapshot ...` — create a state snapshot
@@ -437,8 +440,10 @@ Advanced / lower-level usage:
 - `scripts/suggest_spot_fixes.py`
 - `scripts/snapshot_story_state.py`
 - `scripts/diff_story_state.py`
-- `scripts/smoke_test.sh`
-- `scripts/package_skill.sh`
+- `scripts/smoke_test.py`
+- `scripts/package_skill.py`
+- `scripts/smoke_test.sh` (legacy shell entry)
+- `scripts/package_skill.sh` (legacy shell entry)
 
 ## Use bundled references / 参考文档
 

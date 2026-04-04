@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import argparse
 import json
+import re
 from pathlib import Path
 
 from inkos_common import iso_now, require_project_markers, write_json
@@ -15,9 +16,41 @@ def append_block(path, text):
         f.write(text.rstrip() + '\n')
 
 
+def upsert_section(text, heading, body_lines):
+    body = '\n'.join(body_lines).strip()
+    block = '## %s\n%s\n' % (heading, body)
+    pattern = r'(?ms)^##\s+%s\s*$.*?(?=^##\s+|\Z)' % re.escape(heading)
+    if re.search(pattern, text):
+        updated = re.sub(pattern, block, text, count=1)
+    else:
+        updated = text.rstrip() + '\n\n' + block if text.strip() else block
+    return updated.rstrip() + '\n'
+
+
+def sync_current_state(path, chapter, title, summary, state_changes):
+    path = Path(path)
+    text = path.read_text(encoding='utf-8') if path.exists() else ''
+    timeline_value = 'ch%s accepted - %s' % (chapter, title)
+    text = upsert_section(text, 'Timeline position', ['- %s' % timeline_value])
+
+    latest_update = [
+        '- chapter: %s' % chapter,
+        '- title: %s' % title,
+        '- summary: %s' % summary,
+        '- state changes:',
+    ]
+    if state_changes:
+        latest_update.extend(['  - %s' % item for item in state_changes])
+    else:
+        latest_update.append('  - none')
+    text = upsert_section(text, 'Latest accepted update', latest_update)
+    path.write_text(text, encoding='utf-8')
+
+
 def apply_update(project, chapter, title, summary, state_changes, hook_open, hook_advance, hook_close, relationships, emotions):
     project = require_project_markers(project)
     summary_path = project / 'chapter_summaries.md'
+    current_state_path = project / 'current_state.md'
     hooks_path = project / 'pending_hooks.md'
     matrix_path = project / 'character_matrix.md'
     emotion_path = project / 'emotional_arcs.md'
@@ -49,6 +82,9 @@ def apply_update(project, chapter, title, summary, state_changes, hook_open, hoo
 
     append_block(summary_path, '\n'.join(chapter_block))
     updated_files.append(str(summary_path))
+
+    sync_current_state(current_state_path, chapter, title, summary, state_changes)
+    updated_files.append(str(current_state_path))
 
     if hook_open or hook_advance or hook_close:
         for hook in hook_open:
