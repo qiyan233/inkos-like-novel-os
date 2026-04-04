@@ -37,4 +37,4 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          bash scripts/smoke_test.sh
+          python scripts/smoke_test.py

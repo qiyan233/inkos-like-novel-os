@@ -196,14 +196,19 @@ STATE_JSON="$(run_python "$ROOT/scripts/update_story_state.py" \
   --relationship "林烬 -> 徐安：出现试探与怀疑" \
   --emotion "林烬：警觉上升" \
   --json)"
-printf '%s' "$STATE_JSON" | run_python -c 'import json,sys; data=json.load(sys.stdin); paths=data["updated_files"]; assert any(p.endswith("chapter_summaries.md") for p in paths); assert any(p.endswith("pending_hooks.md") for p in paths); assert any(p.endswith("character_matrix.md") for p in paths); assert any(p.endswith("emotional_arcs.md") for p in paths)'
+printf '%s' "$STATE_JSON" | run_python -c 'import json,sys; data=json.load(sys.stdin); paths=data["updated_files"]; assert any(p.endswith("chapter_summaries.md") for p in paths); assert any(p.endswith("current_state.md") for p in paths); assert any(p.endswith("pending_hooks.md") for p in paths); assert any(p.endswith("character_matrix.md") for p in paths); assert any(p.endswith("emotional_arcs.md") for p in paths)'
+grep -q 'chapter: 1' "$PROJECT/current_state.md"
+grep -q 'summary: 林烬察觉玉佩疑似被调包，并开始怀疑有人提前动过手脚。' "$PROJECT/current_state.md"
+grep -q '林烬确认手中的玉佩手感异常，怀疑其并非原物。' "$PROJECT/current_state.md"
 STATE_JSON_MIN="$(run_python "$ROOT/scripts/update_story_state.py" \
   --project "$PROJECT" \
   --chapter 2 \
   --title "第二章" \
   --summary "仅摘要更新" \
   --json)"
-printf '%s' "$STATE_JSON_MIN" | run_python -c 'import json,sys; data=json.load(sys.stdin); assert len(data["updated_files"]) == 1, data["updated_files"]; assert data["updated_files"][0].endswith("chapter_summaries.md")'
+printf '%s' "$STATE_JSON_MIN" | run_python -c 'import json,sys; data=json.load(sys.stdin); paths=data["updated_files"]; assert len(paths) == 2, paths; assert any(p.endswith("chapter_summaries.md") for p in paths); assert any(p.endswith("current_state.md") for p in paths)'
+grep -q 'chapter: 2' "$PROJECT/current_state.md"
+grep -q 'summary: 仅摘要更新' "$PROJECT/current_state.md"
 printf 'story state update ok\n'
 
 printf '\n===== hook_report =====\n'
