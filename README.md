@@ -1,8 +1,8 @@
 # inkos-like-novel-os
 
-[![CI](https://img.shields.io/github/actions/workflow/status/qiyan233/inkos-like-novel-os/ci.yml?branch=main&label=CI)](https://github.com/qiyan233/inkos-like-novel-os/actions/workflows/ci.yml) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE) [![Version](https://img.shields.io/badge/version-v0.4.3-blue)](CHANGELOG.md)
+[![CI](https://img.shields.io/github/actions/workflow/status/qiyan233/inkos-like-novel-os/ci.yml?branch=main&label=CI)](https://github.com/qiyan233/inkos-like-novel-os/actions/workflows/ci.yml) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE) [![Version](https://img.shields.io/badge/version-v0.5.0-blue)](CHANGELOG.md)
 
-当前版本：**0.4.3**
+当前版本：**0.5.0**
 
 完整变更记录见 [CHANGELOG.md](CHANGELOG.md)。
 
@@ -144,15 +144,15 @@ python3 scripts/inkos_cli.py smoke-test
 ## 最新更新
 
 
-### v0.4.0
+### v0.5.0
 
-- 新增 `knowledge_check.py`：检查人物认知边界、POV 泄露和“角色提前知道真相”问题
-- 新增 `hook_report.py`：统计伏笔状态并标出 stale hooks，帮助控制长期连载的 hook 积压
-- 新增 `extract_state.py`：从章节正文提取候选章节摘要、状态变化、关系变化、情绪变化和 hook 更新
-- `inkos_cli.py` 新增 `knowledge-check` / `hook-report` / `extract-state` 子命令
-- 项目模板新增 `character_knowledge.md`，并强化 `pending_hooks.md` / `chapter_summaries.md` 的结构
-- `build_next_chapter_context.py` 现在可自动装入 `character_knowledge.md`
-- 扩展 smoke test，覆盖 knowledge-check / hook-report / extract-state 全链路
+- 新增 `write-next` 工作流入口：把下一章写作准备整理成结构化 packet，而不是只给一段大块 context
+- 新增 `revise` 工作流入口：把 `knowledge-check + audit + revision-plan + spot-fixes` 串成单次修订闭环
+- 新增 `build_write_next_packet.py` / `run_revision_cycle.py`
+- `write-next` 现在可输出 `chapter_file_hint`、`plan_template` 并支持 `--write-report`
+- `revise` 现在会附带 hook pressure / stale hook 摘要，并支持 `--write-report`
+- smoke test 现在覆盖 `write-next / revise`
+- CLI 从“统一脚本入口”进一步升级为更完整的工作流入口
 
 如果只想看本次发布说明，可直接看 [CHANGELOG.md](CHANGELOG.md)。
 
@@ -191,8 +191,10 @@ python3 scripts/inkos_cli.py smoke-test
 
 - `init_novel_project.sh` — 初始化一个小说项目骨架，并创建标准工作目录
 - `update_story_state.py` — 追加章节状态变更（章节摘要、伏笔、关系、情绪变化等），同步 `current_state.md` 的最新接受章节信息，并可输出稳定 JSON 更新报告
+- `build_write_next_packet.py` — 基于 truth files、outline、hooks 和 current state 构建下一章结构化工作包
 - `audit_chapter.py` — 对章节做启发式但结构化的规则审计，输出稳定 JSON 或 Markdown 报告
 - `build_next_chapter_context.py` — 从 truth files 自动拼装“下一章写作上下文”，并支持稳定 JSON 输出
+- `run_revision_cycle.py` — 统一输出 knowledge-check、audit、revision plan 与 spot-fix 建议
 - `inkos_cli.py` — 轻量 CLI 封装，统一 init/context/audit/knowledge-check/extract-state/hook-report/state-update/revision-plan/spot-fixes/snapshot/diff/package/smoke-test 入口
 - `smoke_test.py` — 跨平台快速回归测试整个 init → context → audit → update → revision-plan → spot-fixes → snapshot/diff / package 链路
 - `package_skill.py` — 跨平台稳定打包 `.skill` 文件，并在存在 `VERSION` 时自动输出带版本号的 `.skill` 副本
@@ -312,6 +314,18 @@ python3 scripts/inkos_cli.py context \
 
 
 
+### 2.5. write-next — 生成下一章工作包 / Build write-next packet
+
+```bash
+
+python3 scripts/inkos_cli.py write-next \
+
+  --project /path/to/project \
+
+  --json
+
+```
+
 ### 3. audit — 审计章节 / Audit a chapter
 
 
@@ -404,6 +418,20 @@ python3 scripts/inkos_cli.py smoke-test
 
 
 
+### 7. revise — 跑修订闭环 / Run revision cycle
+
+```bash
+
+python3 scripts/inkos_cli.py revise \
+
+  --project /path/to/project \
+
+  --chapter-file /path/to/project/chapters/ch12.md \
+
+  --json
+
+```
+
 ### 底层脚本 / Advanced usage
 
 
@@ -416,11 +444,15 @@ python3 scripts/inkos_cli.py smoke-test
 
 - `python3 scripts/build_next_chapter_context.py ...`
 
+- `python3 scripts/build_write_next_packet.py ...`
+
 - `python3 scripts/audit_chapter.py ...`
 
 - `python3 scripts/extract_state.py ...`
 
 - `python3 scripts/update_story_state.py ...`
+
+- `python3 scripts/run_revision_cycle.py ...`
 
 - `python3 scripts/smoke_test.py`
 
@@ -443,43 +475,43 @@ python3 scripts/inkos_cli.py smoke-test
 
 
 
-1. 先生成上下文
+1. 先生成下一章工作包
 
 
 
 ```bash
 
-python3 scripts/inkos_cli.py context --project /path/to/project
+python3 scripts/inkos_cli.py write-next --project /path/to/project --json
 
 ```
 
 
 
-2. 用生成的上下文去起草章节
+2. 用 `write-next` 里的 chapter function / scene beats 去起草章节
 
-3. 起草完成后跑审计
+3. 起草完成后跑修订闭环
 
 
 
 ```bash
 
-python3 scripts/inkos_cli.py audit \
+python3 scripts/inkos_cli.py revise \
 
   --project /path/to/project \
 
-  --chapter-file /path/to/project/chapters/ch12.md
+  --chapter-file /path/to/project/chapters/ch12.md \
+
+  --json
 
 ```
 
 
 
-4. 如涉及悬疑/隐藏真相，先跑 knowledge-check
+4. 根据 `revise` 结果先修 blocking / major 问题
 
-5. 根据审计结果做 spot-fix
+5. 用 extract-state 生成候选状态更新
 
-6. 用 extract-state 生成候选状态更新
-
-7. 接受后更新状态
+6. 接受后更新状态
 
 
 
@@ -514,6 +546,8 @@ python3 scripts/inkos_cli.py init /path/to/project "书名"
 
 python3 scripts/inkos_cli.py context --project /path/to/project --json
 
+python3 scripts/inkos_cli.py write-next --project /path/to/project --json
+
 python3 scripts/inkos_cli.py audit --project /path/to/project --chapter-file /path/to/project/chapters/ch12.md --json
 
 python3 scripts/inkos_cli.py knowledge-check --project /path/to/project --chapter-file /path/to/project/chapters/ch12.md --json
@@ -527,6 +561,8 @@ python3 scripts/inkos_cli.py state-update --project /path/to/project --chapter 1
 python3 scripts/inkos_cli.py revision-plan --project /path/to/project --chapter-file /path/to/project/chapters/ch12.md --json
 
 python3 scripts/inkos_cli.py spot-fixes --project /path/to/project --chapter-file /path/to/project/chapters/ch12.md --json
+
+python3 scripts/inkos_cli.py revise --project /path/to/project --chapter-file /path/to/project/chapters/ch12.md --json
 
 python3 scripts/inkos_cli.py snapshot --project /path/to/project --chapter 12 --label accepted --json
 
@@ -697,7 +733,7 @@ python3 scripts/update_story_state.py \
 
 当前版本是：
 
-> **接近 InkOS 的 skill 骨架 / 基础设施层**
+> **从 InkOS 风格 skill 骨架升级到更可运行的 workflow 层**
 
 已经包含：
 
@@ -707,7 +743,9 @@ python3 scripts/update_story_state.py \
 - 工作流说明
 - 初始化 / 更新脚本
 - 上下文组装脚本
+- write-next 工作包入口
 - 启发式但结构化的章节审计脚本
+- revise 修订闭环入口
 - 稳定 JSON schema 输出
 - 轻量 CLI
 - smoke test
@@ -715,7 +753,6 @@ python3 scripts/update_story_state.py \
 
 还没包含：
 
-- 完整 CLI（如 `write next / audit / revise`）
 - 真正的 LLM 写作执行器
 - 守护进程 / 通知 / 多 agent 调度
 - 更强的规则引擎和自动修订系统
@@ -736,6 +773,8 @@ python3 scripts/update_story_state.py \
 - [x] story-state snapshot / diff
 - [x] 稳定 JSON 契约（v1）
 - [x] 轻量 CLI 封装
+- [x] write-next 工作流入口
+- [x] revise 工作流入口
 - [x] `.skill` 打包与版本化产物
 - [x] smoke test 回归
 
@@ -743,9 +782,9 @@ python3 scripts/update_story_state.py \
 
 - [ ] 更强的规则引擎与更细粒度审计
 - [ ] 场景级 rewrite / patch 辅助
-- [ ] 更完整的 write-next / revise 工作流入口
 - [ ] knowledge-check 与 truth files 的更深联动
 - [ ] 更多 worked examples / 示例项目
+- [ ] 更完整的 LLM 写作执行器接入
 
 ## 发布说明
 

@@ -1,3 +1,7 @@
 scripts/__pycache__/
 *.pyc
 .DS_Store
+.ace-tool/
+dist/
+.smoke-work/
+.package-work/

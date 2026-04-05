@@ -166,6 +166,50 @@ def main():
             raise AssertionError('current_state missing synced state change')
         print('story state update ok')
 
+        print('===== write-next entrypoint =====')
+        write_next = run_cli('write-next', '--project', str(project), '--json', check=False)
+        if write_next.returncode != 0:
+            raise SystemExit(write_next.stderr.strip() or write_next.stdout.strip() or 'cli write-next failed')
+        write_next_data = json.loads(write_next.stdout)
+        if write_next_data['schema_version'] != 'inkos.write-next.v1':
+            raise AssertionError('write-next schema mismatch')
+        if write_next_data['chapter'] != 2:
+            raise AssertionError(f'write-next chapter mismatch: {write_next_data["chapter"]}')
+        if not write_next_data['chapter_function']['primary_goal']:
+            raise AssertionError('write-next missing primary goal')
+        if not write_next_data['suggested_scene_beats']:
+            raise AssertionError('write-next missing scene beats')
+        if not write_next_data['chapter_file_hint'].endswith('ch02.md'):
+            raise AssertionError('write-next missing chapter file hint')
+        if 'Primary goal' not in write_next_data['plan_template']:
+            raise AssertionError('write-next missing plan template')
+        write_next_report = run_cli('write-next', '--project', str(project), '--json', '--write-report', check=False)
+        if write_next_report.returncode != 0:
+            raise SystemExit(write_next_report.stderr.strip() or write_next_report.stdout.strip() or 'cli write-next write-report failed')
+        write_next_report_data = json.loads(write_next_report.stdout)
+        if not write_next_report_data.get('report_path'):
+            raise AssertionError('write-next missing report path')
+        if not Path(write_next_report_data['report_path']).exists():
+            raise AssertionError('write-next report file missing on disk')
+        print('write-next entrypoint ok')
+
+        print('===== revise entrypoint =====')
+        revise = run_cli('revise', '--project', str(project), '--chapter-file', str(project / 'chapters' / 'ch01.md'), '--json', check=False)
+        if revise.returncode != 0:
+            raise SystemExit(revise.stderr.strip() or revise.stdout.strip() or 'cli revise failed')
+        revise_data = json.loads(revise.stdout)
+        if revise_data['schema_version'] != 'inkos.revision-cycle.v1':
+            raise AssertionError('revise schema mismatch')
+        if revise_data['summary']['knowledge_check_run'] is not True:
+            raise AssertionError('revise should run knowledge check by default')
+        if 'audit' not in revise_data or 'revision_plan' not in revise_data or 'spot_fixes' not in revise_data:
+            raise AssertionError('revise output missing workflow sections')
+        if 'hook_pressure' not in revise_data:
+            raise AssertionError('revise missing hook pressure')
+        if 'stale_hook_count' not in revise_data['summary']:
+            raise AssertionError('revise missing stale hook count')
+        print('revise entrypoint ok')
+
         print('===== package entrypoint =====')
         dist = tmp / 'dist'
         package = run_cli('package', str(dist), 'test-build', check=False)

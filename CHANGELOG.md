@@ -1,5 +1,29 @@
 # Changelog
 
+## v0.5.0 — 2026-04-05
+
+### Added
+
+- 新增 `scripts/build_write_next_packet.py`，用于把下一章写作准备整理成结构化 `write-next` packet
+- 新增 `scripts/run_revision_cycle.py`，用于统一输出 knowledge-check、audit、revision plan 与 spot-fix 建议
+- `scripts/inkos_cli.py` 新增 `write-next` / `revise` 工作流级命令
+
+### Changed
+
+- 仓库定位从“统一脚本入口”进一步升级为更可运行的 workflow 层
+- `README.md`、`docs/cli.md`、`references/json-schemas.md` 开始以 `write-next / revise` 作为 0.5.0 的主要升级点
+- `smoke_test.py` / `smoke_test.sh` 现在覆盖 `write-next / revise`
+- `VERSION` 与 `SKILL.md` 已同步更新为 `0.5.0`
+
+### Notes
+
+- 这是一个以完整工作流入口为重点的功能版本，不再只是维护性小修
+- 当前推荐主线：`write-next -> draft -> revise -> extract-state -> state-update`
+
+### Assets
+
+- `inkos-like-novel-os-v0.5.0.skill`
+
 ## v0.4.3 — 2026-04-04
 
 ### Added

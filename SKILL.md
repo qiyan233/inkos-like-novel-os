@@ -5,7 +5,7 @@ description: Novel-production operating system for long-form fiction, web novels
 
 # inkos-like-novel-os
 
-Version: 0.4.3
+Version: 0.5.0
 
 Build and run long-form fiction as a stateful pipeline, not a one-shot prompt.
 
@@ -99,6 +99,26 @@ python3 scripts/build_next_chapter_context.py \
   --recent-chapters 3 \
   --json
 ```
+
+#### 3) Build write-next packet / 构建下一章工作包
+
+推荐：
+
+```bash
+python3 scripts/inkos_cli.py write-next \
+  --project /path/to/project \
+  --json
+```
+
+Lower-level usage / 底层脚本方式：
+
+```bash
+python3 scripts/build_write_next_packet.py \
+  --project /path/to/project \
+  --json
+```
+
+Use this when you want a more structured handoff than raw context: chapter goal, active hooks, constraints, state targets, and suggested scene beats.
 
 ## Workflow / 工作流
 
@@ -345,14 +365,12 @@ Use when the user says things like:
 
 Sequence:
 
-1. load context
-2. plan
+1. run `write-next`
+2. plan from chapter function and scene beats
 3. draft
-4. knowledge-check if needed
-5. audit
-6. spot-fix
-7. extract candidate state
-8. update state
+4. run `revise` or, if needed, knowledge-check + audit separately
+5. extract candidate state
+6. update state
 
 ### Audit-only mode / 仅审计模式
 
@@ -415,6 +433,7 @@ Common commands:
 
 - `python3 scripts/inkos_cli.py init ...` — scaffold a new novel project
 - `python3 scripts/inkos_cli.py context ...` — assemble next-chapter context
+- `python3 scripts/inkos_cli.py write-next ...` — build a structured write-next packet
 - `python3 scripts/inkos_cli.py audit ...` — run a chapter audit
 - `python3 scripts/inkos_cli.py knowledge-check ...` — detect knowledge-boundary / POV leaks
 - `python3 scripts/inkos_cli.py extract-state ...` — extract candidate state updates
@@ -422,6 +441,7 @@ Common commands:
 - `python3 scripts/inkos_cli.py state-update ...` — append structured story-state deltas and sync the latest accepted update into `current_state.md`
 - `python3 scripts/inkos_cli.py revision-plan ...` — build revision plan from chapter or audit
 - `python3 scripts/inkos_cli.py spot-fixes ...` — suggest low-risk local fixes
+- `python3 scripts/inkos_cli.py revise ...` — run the revision workflow as one cycle
 - `python3 scripts/inkos_cli.py snapshot ...` — create a state snapshot
 - `python3 scripts/inkos_cli.py diff ...` — diff snapshots or current state
 - `python3 scripts/inkos_cli.py smoke-test` — run smoke tests
@@ -431,6 +451,7 @@ Advanced / lower-level usage:
 
 - `scripts/init_novel_project.sh`
 - `scripts/build_next_chapter_context.py`
+- `scripts/build_write_next_packet.py`
 - `scripts/audit_chapter.py`
 - `scripts/knowledge_check.py`
 - `scripts/extract_state.py`
@@ -438,6 +459,7 @@ Advanced / lower-level usage:
 - `scripts/update_story_state.py`
 - `scripts/build_revision_plan.py`
 - `scripts/suggest_spot_fixes.py`
+- `scripts/run_revision_cycle.py`
 - `scripts/snapshot_story_state.py`
 - `scripts/diff_story_state.py`
 - `scripts/smoke_test.py`

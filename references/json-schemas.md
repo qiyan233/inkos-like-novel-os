@@ -125,6 +125,66 @@
 - `emotions[]`
 - `write_mode`
 
+## 7. `inkos.write-next.v1`
+
+来源：`scripts/build_write_next_packet.py --json`
+
+核心字段：
+- `schema_version`
+- `tool`
+- `generated_at`
+- `project`
+- `chapter`
+- `chapter_file_hint`
+- `files_loaded[]`
+- `chapter_function`
+- `required_inputs`
+- `suggested_scene_beats[]`
+- `plan_template`
+- `context_packet`
+- `next_actions[]`
+- `report_path`（仅 `--write-report` 时出现）
+
+### `chapter_function`
+- `primary_goal`
+- `pressure[]`
+- `planned_payoff_or_partial_payoff`
+
+### `required_inputs`
+- `suggested_pov`
+- `active_hooks[]`
+- `open_conflicts[]`
+- `constraints[]`
+- `state_targets[]`
+
+## 8. `inkos.revision-cycle.v1`
+
+来源：`scripts/run_revision_cycle.py --json`
+
+核心字段：
+- `schema_version`
+- `tool`
+- `generated_at`
+- `project`
+- `chapter`
+- `status`
+- `summary`
+- `recommended_sequence[]`
+- `hook_pressure`
+- `knowledge_check`
+- `audit`
+- `revision_plan`
+- `spot_fixes`
+- `report_path`（仅 `--write-report` 时出现）
+
+### `summary`
+- `knowledge_check_run`
+- `blocking_item_count`
+- `audit_overall`
+- `spot_fix_count`
+- `human_review_needed`
+- `stale_hook_count`
+
 ## 稳定性原则
 
 - 先新增字段，再考虑移除字段

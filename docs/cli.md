@@ -4,6 +4,11 @@
 
 它不会改变底层脚本的职责，而是把常见工作流命令集中到一个地方，方便你在 README、docs、demo 和日常使用里走同一条路径。
 
+从 `0.5.0` 开始，CLI 也开始提供更完整的**工作流级入口**：
+
+- `write-next`：把下一章写作准备整理成结构化 packet
+- `revise`：把 `knowledge-check + audit + revision-plan + spot-fixes` 串成单次修订闭环
+
 ## 什么时候优先用 CLI / When to prefer CLI
 
 优先用 CLI：
@@ -35,6 +40,27 @@ python3 scripts/inkos_cli.py init /path/to/project "书名"
 python3 scripts/inkos_cli.py context --project /path/to/project
 ```
 
+### 生成下一章工作包 / Build write-next packet
+
+```bash
+python3 scripts/inkos_cli.py write-next --project /path/to/project --json
+```
+
+这个命令会在 `context` 的基础上补齐：
+
+- 目标章节编号
+- 建议章节文件路径
+- chapter function
+- active hooks / constraints / state targets
+- suggested scene beats
+- 可直接复用的 `plan_template`
+
+如果你想把结果落到 `reviews/` 里供后续自动化或人工 review 使用：
+
+```bash
+python3 scripts/inkos_cli.py write-next --project /path/to/project --json --write-report
+```
+
 ### 审计章节 / Audit chapter
 
 ```bash
@@ -62,6 +88,33 @@ python3 scripts/inkos_cli.py state-update \
   --summary "..."
 ```
 
+### 跑修订闭环 / Run revision cycle
+
+```bash
+python3 scripts/inkos_cli.py revise \
+  --project /path/to/project \
+  --chapter-file /path/to/project/chapters/ch01.md \
+  --json
+```
+
+这个命令会统一输出：
+
+- knowledge-check 结果
+- audit 报告
+- revision plan
+- spot-fix suggestions
+- hook pressure / stale hooks 概览
+
+如果你要把完整修订闭环结果存档到 `reviews/`：
+
+```bash
+python3 scripts/inkos_cli.py revise \
+  --project /path/to/project \
+  --chapter-file /path/to/project/chapters/ch01.md \
+  --json \
+  --write-report
+```
+
 ### 跑回归 / Run smoke tests
 
 ```bash
@@ -71,5 +124,5 @@ python3 scripts/inkos_cli.py smoke-test
 ## 补充说明 / Notes
 
 - 这次调整**不要求**把 CLI 做成 pip 包。
-- 当前目标只是把 CLI 提升为更正式、可被自然引用的入口。
-- 底层脚本仍然是实际能力实现层，CLI 只是轻量封装。
+- 当前目标是把 CLI 提升为更正式、可被自然引用的**工作流入口**。
+- 底层脚本仍然是实际能力实现层，CLI 负责组织更完整的使用路径。

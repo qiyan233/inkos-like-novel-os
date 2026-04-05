@@ -211,6 +211,16 @@ grep -q 'chapter: 2' "$PROJECT/current_state.md"
 grep -q 'summary: 仅摘要更新' "$PROJECT/current_state.md"
 printf 'story state update ok\n'
 
+printf '\n===== write-next =====\n'
+W_JSON="$(run_python "$ROOT/scripts/build_write_next_packet.py" --project "$PROJECT" --json)"
+printf '%s' "$W_JSON" | run_python -c 'import json,sys; data=json.load(sys.stdin); assert data["schema_version"] == "inkos.write-next.v1"; assert data["chapter"] == 3; assert data["chapter_function"]["primary_goal"]; assert data["suggested_scene_beats"]; print("write-next ok")' >/dev/null
+printf 'write-next ok\n'
+
+printf '\n===== revise =====\n'
+R_JSON="$(run_python "$ROOT/scripts/run_revision_cycle.py" --project "$PROJECT" --chapter-file "$PROJECT/chapters/ch01.md" --json)"
+printf '%s' "$R_JSON" | run_python -c 'import json,sys; data=json.load(sys.stdin); assert data["schema_version"] == "inkos.revision-cycle.v1"; assert data["summary"]["knowledge_check_run"] is True; assert "audit" in data and "revision_plan" in data and "spot_fixes" in data; print("revise ok")' >/dev/null
+printf 'revise ok\n'
+
 printf '\n===== hook_report =====\n'
 H_JSON="$(run_python "$ROOT/scripts/hook_report.py" --project "$PROJECT" --stale-after 1 --json)"
 printf '%s' "$H_JSON" | run_python -c 'import json,sys; data=json.load(sys.stdin); assert data["summary"]["hook_count"] >= 1; assert "open" in data["summary"]["counts"]; print("hook report ok")' >/dev/null

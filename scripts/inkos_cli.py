@@ -59,6 +59,14 @@ def main():
     p.add_argument('--max-chars-per-file', type=int, default=1800)
     p.add_argument('--json', action='store_true')
 
+    p = sub.add_parser('write-next', help='Build a structured write-next packet for the next chapter.')
+    p.add_argument('--project', required=True)
+    p.add_argument('--chapter', type=int)
+    p.add_argument('--recent-chapters', type=int, default=3)
+    p.add_argument('--max-chars-per-file', type=int, default=1800)
+    p.add_argument('--json', action='store_true')
+    p.add_argument('--write-report', action='store_true')
+
     p = sub.add_parser('audit', help='Audit a chapter.')
     p.add_argument('--project', required=True)
     p.add_argument('--chapter-file', required=True)
@@ -108,6 +116,13 @@ def main():
     p.add_argument('--json', action='store_true')
     p.add_argument('--write-report', action='store_true')
 
+    p = sub.add_parser('revise', help='Run knowledge-check, audit, revision-plan, and spot-fixes as one workflow.')
+    p.add_argument('--project', required=True)
+    p.add_argument('--chapter-file', required=True)
+    p.add_argument('--skip-knowledge-check', action='store_true')
+    p.add_argument('--json', action='store_true')
+    p.add_argument('--write-report', action='store_true')
+
     p = sub.add_parser('snapshot', help='Create a versioned story-state snapshot.')
     p.add_argument('--project', required=True)
     p.add_argument('--label')
@@ -139,6 +154,19 @@ def main():
         cmd = py('build_next_chapter_context.py', ['--project', args.project, '--recent-chapters', str(args.recent_chapters), '--max-chars-per-file', str(args.max_chars_per_file)])
         if args.json:
             cmd.append('--json')
+        run(cmd)
+    elif args.command == 'write-next':
+        if args.recent_chapters < 0:
+            raise SystemExit('--recent-chapters must be >= 0')
+        if args.max_chars_per_file < 0:
+            raise SystemExit('--max-chars-per-file must be >= 0')
+        cmd = py('build_write_next_packet.py', ['--project', args.project, '--recent-chapters', str(args.recent_chapters), '--max-chars-per-file', str(args.max_chars_per_file)])
+        if args.chapter is not None:
+            cmd.extend(['--chapter', str(args.chapter)])
+        if args.json:
+            cmd.append('--json')
+        if args.write_report:
+            cmd.append('--write-report')
         run(cmd)
     elif args.command == 'audit':
         cmd = py('audit_chapter.py', ['--project', args.project, '--chapter-file', args.chapter_file])
@@ -204,6 +232,15 @@ def main():
             cmd.extend(['--chapter-file', args.chapter_file])
         if args.audit_report:
             cmd.extend(['--audit-report', args.audit_report])
+        if args.json:
+            cmd.append('--json')
+        if args.write_report:
+            cmd.append('--write-report')
+        run(cmd)
+    elif args.command == 'revise':
+        cmd = py('run_revision_cycle.py', ['--project', args.project, '--chapter-file', args.chapter_file])
+        if args.skip_knowledge_check:
+            cmd.append('--skip-knowledge-check')
         if args.json:
             cmd.append('--json')
         if args.write_report:
