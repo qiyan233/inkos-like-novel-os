@@ -1,10 +1,10 @@
-# demo-novel
+﻿# demo-novel
 
 这是一个**最小但完整**的示例项目，用来展示这个仓库的核心闭环：
 
 `context -> draft -> audit -> extract-state -> state-update`
 
-> 推荐入口 / Recommended entrypoint：`python3 scripts/inkos_cli.py ...`
+> 推荐入口 / Recommended entrypoint：`python scripts/inkos_cli.py ...`
 
 故事设定是一个两章规模的古风悬疑开局：主角林烬发现徐家旧玉佩疑似被调包，但还不能直接确认幕后人。
 
@@ -27,7 +27,7 @@
 生成下一章上下文：
 
 ```bash
-python3 scripts/inkos_cli.py context --project examples/demo-novel
+python scripts/inkos_cli.py context --project examples/demo-novel
 ```
 
 脚本会读取如下一批 truth files：
@@ -48,7 +48,7 @@ python3 scripts/inkos_cli.py context --project examples/demo-novel
 对现有章节跑审计：
 
 ```bash
-python3 scripts/inkos_cli.py audit --project examples/demo-novel --chapter-file examples/demo-novel/chapters/ch02.md --json
+python scripts/inkos_cli.py audit --project examples/demo-novel --chapter-file examples/demo-novel/chapters/ch02.md --json
 ```
 
 这个结果不等于文学评价，而是帮助你检查：
@@ -62,7 +62,7 @@ python3 scripts/inkos_cli.py audit --project examples/demo-novel --chapter-file 
 从章节正文中提取候选状态更新：
 
 ```bash
-python3 scripts/inkos_cli.py extract-state --project examples/demo-novel --chapter-file examples/demo-novel/chapters/ch02.md --json
+python scripts/inkos_cli.py extract-state --project examples/demo-novel --chapter-file examples/demo-novel/chapters/ch02.md --json
 ```
 
 这里的输出是**候选项**，例如：
@@ -77,7 +77,7 @@ python3 scripts/inkos_cli.py extract-state --project examples/demo-novel --chapt
 确认候选项后，再写回 truth files：
 
 ```bash
-python3 scripts/inkos_cli.py state-update \
+python scripts/inkos_cli.py state-update \
   --project examples/demo-novel \
   --chapter 2 \
   --title "第二章 雨夜试探" \
@@ -100,10 +100,10 @@ python3 scripts/inkos_cli.py state-update \
 
 如果你在调试某个单独能力，也仍然可以直接运行：
 
-- `python3 scripts/build_next_chapter_context.py --project examples/demo-novel`
-- `python3 scripts/audit_chapter.py --project examples/demo-novel --chapter-file examples/demo-novel/chapters/ch02.md --json`
-- `python3 scripts/extract_state.py --project examples/demo-novel --chapter-file examples/demo-novel/chapters/ch02.md --json`
-- `python3 scripts/update_story_state.py ...`
+- `python scripts/build_next_chapter_context.py --project examples/demo-novel`
+- `python scripts/audit_chapter.py --project examples/demo-novel --chapter-file examples/demo-novel/chapters/ch02.md --json`
+- `python scripts/extract_state.py --project examples/demo-novel --chapter-file examples/demo-novel/chapters/ch02.md --json`
+- `python scripts/update_story_state.py ...`
 
 ## 为什么这里只放两章
 
@@ -121,3 +121,4 @@ python3 scripts/inkos_cli.py state-update \
 - [docs/cli.md](../../docs/cli.md)
 - [docs/project-template.md](../../docs/project-template.md)
 - [docs/user-paths.md](../../docs/user-paths.md)
+

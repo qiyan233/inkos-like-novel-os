@@ -1,4 +1,4 @@
-## 变更说明
+﻿## 变更说明
 
 - 
 
@@ -25,9 +25,10 @@
 ## 验证方式
 
 - [ ] `bash scripts/smoke_test.sh`
-- [ ] `python3 -m py_compile scripts/*.py`
+- [ ] `python -m py_compile scripts/*.py`
 - [ ] 仅文档改动，未运行脚本
 
 ## 补充信息
 
 如涉及行为变化、JSON 契约变化、兼容性影响或后续工作，请在这里说明。
+

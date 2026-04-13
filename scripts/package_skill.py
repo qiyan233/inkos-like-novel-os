@@ -4,6 +4,7 @@ import shutil
 import zipfile
 from pathlib import Path
 
+from inkos_common import configure_stdio_utf8
 
 ROOT = Path(__file__).resolve().parent.parent
 SKILL_NAME = 'inkos-like-novel-os'
@@ -20,6 +21,8 @@ IGNORE_FILE_SUFFIXES = {
 IGNORE_FILE_NAMES = {
     '.DS_Store',
 }
+
+configure_stdio_utf8()
 
 
 def normalize_tag(tag):

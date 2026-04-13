@@ -5,10 +5,13 @@ import subprocess
 import sys
 from pathlib import Path
 
+from inkos_common import configure_stdio_utf8
 
 ROOT = Path(__file__).resolve().parent
 PROJECT_ROOT = ROOT.parent
 TEMPLATE_DIR = PROJECT_ROOT / 'assets' / 'project-template'
+
+configure_stdio_utf8()
 
 
 def run(cmd, **kwargs):
@@ -45,7 +48,7 @@ def init_project(project, title):
 def main():
     parser = argparse.ArgumentParser(
         description='Unified CLI entrypoint for inkos-like-novel-os workflows.',
-        epilog='Recommended local invocation: python3 scripts/inkos_cli.py <command> ...',
+        epilog='Recommended local invocation: python scripts/inkos_cli.py <command> ...',
     )
     sub = parser.add_subparsers(dest='command')
 
@@ -55,6 +58,7 @@ def main():
 
     p = sub.add_parser('context', help='Build next-chapter context.')
     p.add_argument('--project', required=True)
+    p.add_argument('--chapter', type=int)
     p.add_argument('--recent-chapters', type=int, default=3)
     p.add_argument('--max-chars-per-file', type=int, default=1800)
     p.add_argument('--json', action='store_true')
@@ -152,6 +156,8 @@ def main():
         if args.max_chars_per_file < 0:
             raise SystemExit('--max-chars-per-file must be >= 0')
         cmd = py('build_next_chapter_context.py', ['--project', args.project, '--recent-chapters', str(args.recent_chapters), '--max-chars-per-file', str(args.max_chars_per_file)])
+        if args.chapter is not None:
+            cmd.extend(['--chapter', str(args.chapter)])
         if args.json:
             cmd.append('--json')
         run(cmd)

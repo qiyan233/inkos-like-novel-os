@@ -1,33 +1,47 @@
 #!/usr/bin/env python3
 import json
+import os
 import shutil
 import subprocess
 import sys
 from pathlib import Path
 
+from inkos_common import configure_stdio_utf8
 
 ROOT = Path(__file__).resolve().parent.parent
 CLI = ROOT / 'scripts' / 'inkos_cli.py'
 PYTHON = sys.executable
 
+configure_stdio_utf8()
+
 
 def run_cli(*args, check=True, capture_output=True, text=True, cwd=None):
+    env = dict(os.environ)
+    env['PYTHONUTF8'] = '1'
     return subprocess.run(
         [PYTHON, str(CLI), *args],
         check=check,
         capture_output=capture_output,
         text=text,
+        encoding='utf-8',
+        errors='replace',
         cwd=cwd or str(ROOT),
+        env=env,
     )
 
 
 def run_script(script_name, *args):
+    env = dict(os.environ)
+    env['PYTHONUTF8'] = '1'
     return subprocess.run(
         [PYTHON, str(ROOT / 'scripts' / script_name), *args],
         check=True,
         capture_output=True,
         text=True,
+        encoding='utf-8',
+        errors='replace',
         cwd=str(ROOT),
+        env=env,
     )
 
 
@@ -128,6 +142,30 @@ def main():
         run_script('build_next_chapter_context.py', '--project', str(project))
         print('context build ok')
 
+        print('===== single chapter context regression =====')
+        (project / 'outline.md').write_text(
+            """# Outline — 测试长篇
+
+## Chapter targets
+- ch1: 第一章目标
+- ch2: 第二章目标
+- ch3: 第三章目标
+- ch4: 第四章目标
+- ch5: 第五章目标
+""",
+            encoding='utf-8',
+        )
+        context_data = json.loads(run_cli('context', '--project', str(project), '--chapter', '2', '--json').stdout)
+        if context_data['target_chapter'] != 2:
+            raise AssertionError('context target_chapter mismatch')
+        if 'Draft exactly one chapter only: chapter 2.' not in context_data['single_chapter_contract']:
+            raise AssertionError('context missing single-chapter contract')
+        if 'ch2: 第二章目标' not in context_data['sections'].get('outline.md', ''):
+            raise AssertionError('context missing target outline excerpt')
+        if 'ch4: 第四章目标' in context_data['sections'].get('outline.md', ''):
+            raise AssertionError('context leaked too many chapter targets')
+        print('single chapter context ok')
+
         print('===== audit_chapter =====')
         run_script('audit_chapter.py', '--project', str(project), '--chapter-file', str(project / 'chapters' / 'ch01.md'), '--json')
         print('chapter audit ok')
@@ -183,6 +221,8 @@ def main():
             raise AssertionError('write-next missing chapter file hint')
         if 'Primary goal' not in write_next_data['plan_template']:
             raise AssertionError('write-next missing plan template')
+        if not any('只输出第 2 章正文。' == item for item in write_next_data['single_chapter_contract']):
+            raise AssertionError('write-next missing single chapter contract')
         write_next_report = run_cli('write-next', '--project', str(project), '--json', '--write-report', check=False)
         if write_next_report.returncode != 0:
             raise SystemExit(write_next_report.stderr.strip() or write_next_report.stdout.strip() or 'cli write-next write-report failed')

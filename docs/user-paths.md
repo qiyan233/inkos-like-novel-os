@@ -1,4 +1,4 @@
-# 用户路径 / User Paths
+﻿# 用户路径 / User Paths
 
 这里不讲大而空的理念，只给你三条最常见的上手路径。
 
@@ -8,7 +8,7 @@
 
 1. 读 [README](../README.md)
 2. 读 [快速上手](getting-started.md)
-3. 跑 `python3 scripts/inkos_cli.py smoke-test`
+3. 跑 `python scripts/inkos_cli.py smoke-test`
 4. 打开 [examples/demo-novel](../examples/demo-novel/README.md)
 5. 按需补看 [CLI 入口](cli.md)
 
@@ -19,7 +19,7 @@
 建议顺序：
 
 1. 看 [安装与环境](installation.md)
-2. 用 `python3 scripts/inkos_cli.py init /path/to/project "书名"` 初始化
+2. 用 `python scripts/inkos_cli.py init /path/to/project "书名"` 初始化
 3. 参考 [project-template.md](project-template.md) 补 truth files
 4. 用 `context -> draft -> audit -> extract-state -> state-update` 跑第一章
 5. 需要逐脚本调试时，再回到底层脚本路径
@@ -62,3 +62,4 @@
 - [快速上手](getting-started.md)
 - [CLI 入口](cli.md)
 - [常见问题](faq.md)
+

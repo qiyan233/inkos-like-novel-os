@@ -1,16 +1,16 @@
-# 安装与环境 / Installation
+﻿# 安装与环境 / Installation
 
 如果你只想先跑起来，按下面做就够了。
 
-> 推荐入口 / Recommended entrypoint：`python3 scripts/inkos_cli.py ...`
+> 推荐入口 / Recommended entrypoint：`python scripts/inkos_cli.py ...`
 
 ## 方式一：直接使用仓库 / Use the repo directly
 
 ```bash
 git clone https://github.com/qiyan233/inkos-like-novel-os.git
 cd inkos-like-novel-os
-python3 scripts/inkos_cli.py --help
-python3 scripts/inkos_cli.py smoke-test
+python scripts/inkos_cli.py --help
+python scripts/inkos_cli.py smoke-test
 ```
 
 适合你想：
@@ -42,8 +42,8 @@ bash scripts/package_skill.sh
 建议第一次 clone 后先做两步：
 
 ```bash
-python3 -m py_compile scripts/*.py
-python3 scripts/inkos_cli.py smoke-test
+python -m py_compile scripts/*.py
+python scripts/inkos_cli.py smoke-test
 ```
 
 如果你更习惯直接调底层脚本，也可以继续使用：
@@ -58,3 +58,4 @@ bash scripts/smoke_test.sh
 - [用户路径](user-paths.md)
 - [CLI 入口](cli.md)
 - [示例项目模板说明](project-template.md)
+

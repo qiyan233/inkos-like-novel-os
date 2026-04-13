@@ -123,6 +123,21 @@ printf '\n===== build_next_chapter_context =====\n'
 run_python "$ROOT/scripts/build_next_chapter_context.py" --project "$PROJECT" >/dev/null
 printf 'context build ok\n'
 
+printf '\n===== single chapter context regression =====\n'
+cat > "$PROJECT/outline.md" <<'OUTLINE'
+# Outline — 测试长篇
+
+## Chapter targets
+- ch1: 第一章目标
+- ch2: 第二章目标
+- ch3: 第三章目标
+- ch4: 第四章目标
+- ch5: 第五章目标
+OUTLINE
+CTX_CHAPTER_JSON="$(run_python "$ROOT/scripts/build_next_chapter_context.py" --project "$PROJECT" --chapter 2 --json)"
+printf '%s' "$CTX_CHAPTER_JSON" | run_python -c 'import json,sys; data=json.load(sys.stdin); assert data["target_chapter"] == 2; assert "Draft exactly one chapter only: chapter 2." in data["single_chapter_contract"]; text=data["sections"].get("outline.md",""); assert "ch2: 第二章目标" in text; assert "ch4: 第四章目标" not in text'
+printf 'single chapter context ok\n'
+
 printf '\n===== context max-chars regression =====\n'
 LONG_SUMMARIES="$PROJECT/chapter_summaries.md"
 : > "$LONG_SUMMARIES"
@@ -213,7 +228,7 @@ printf 'story state update ok\n'
 
 printf '\n===== write-next =====\n'
 W_JSON="$(run_python "$ROOT/scripts/build_write_next_packet.py" --project "$PROJECT" --json)"
-printf '%s' "$W_JSON" | run_python -c 'import json,sys; data=json.load(sys.stdin); assert data["schema_version"] == "inkos.write-next.v1"; assert data["chapter"] == 3; assert data["chapter_function"]["primary_goal"]; assert data["suggested_scene_beats"]; print("write-next ok")' >/dev/null
+printf '%s' "$W_JSON" | run_python -c 'import json,sys; data=json.load(sys.stdin); assert data["schema_version"] == "inkos.write-next.v1"; assert data["chapter"] == 3; assert data["chapter_function"]["primary_goal"]; assert data["suggested_scene_beats"]; assert "只输出第 3 章正文。" in data["single_chapter_contract"]; print("write-next ok")' >/dev/null
 printf 'write-next ok\n'
 
 printf '\n===== revise =====\n'

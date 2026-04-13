@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import json
 import re
+import sys
 from datetime import datetime
 from pathlib import Path
 
@@ -14,6 +15,22 @@ DEFAULT_PROJECT_MARKERS = [
     'outline.md',
     'current_state.md',
 ]
+
+
+def configure_stdio_utf8():
+    for stream in (getattr(sys, 'stdout', None), getattr(sys, 'stderr', None)):
+        if stream is None:
+            continue
+        reconfigure = getattr(stream, 'reconfigure', None)
+        if not callable(reconfigure):
+            continue
+        try:
+            reconfigure(encoding='utf-8', errors='replace')
+        except Exception:
+            pass
+
+
+configure_stdio_utf8()
 
 
 def iso_now():
@@ -161,3 +178,28 @@ def parse_chapter_number(label):
     if match:
         return int(match.group(1))
     return None
+
+
+def infer_next_chapter_from_project(project, explicit_chapter=None):
+    if explicit_chapter is not None:
+        return int(explicit_chapter)
+
+    project = Path(project)
+    numbers = []
+
+    summaries = read_text(project / 'chapter_summaries.md')
+    for heading, _section in chapter_sections(summaries, CHAPTER_HEADING_RE):
+        chapter = parse_chapter_number(heading)
+        if chapter is not None:
+            numbers.append(chapter)
+
+    chapters_dir = project / 'chapters'
+    if chapters_dir.exists():
+        for path in chapters_dir.iterdir():
+            if not path.is_file():
+                continue
+            chapter = parse_chapter_number(path.stem) or parse_chapter_number(path.name)
+            if chapter is not None:
+                numbers.append(chapter)
+
+    return max(numbers) + 1 if numbers else 1

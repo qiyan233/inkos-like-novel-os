@@ -1,4 +1,4 @@
-# Worked Examples
+﻿# Worked Examples
 
 > CLI-first / CLI 优先：示例里的推荐命令优先展示 `scripts/inkos_cli.py`，底层脚本调用仅作为补充。
 
@@ -101,7 +101,7 @@ bash scripts/init_novel_project.sh /path/to/project "玉佩疑云"
 ### 审计命令
 
 ```bash
-python3 scripts/audit_chapter.py \
+python scripts/audit_chapter.py \
   --project /path/to/project \
   --chapter-file /path/to/project/chapters/ch01.md
 ```
@@ -135,7 +135,7 @@ python3 scripts/audit_chapter.py \
 ### 更新命令
 
 ```bash
-python3 scripts/update_story_state.py \
+python scripts/update_story_state.py \
   --project /path/to/project \
   --chapter 1 \
   --title "第一章" \
@@ -208,3 +208,4 @@ python3 scripts/update_story_state.py \
 ### 判断原则
 
 > 小问题修句，大问题修场景；不是所有不顺眼都值得重写。
+

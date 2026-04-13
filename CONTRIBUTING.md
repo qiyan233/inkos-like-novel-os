@@ -1,4 +1,4 @@
-# 贡献指南
+﻿# 贡献指南
 
 感谢你关注 `inkos-like-novel-os`。
 
@@ -35,7 +35,7 @@ bash scripts/smoke_test.sh
 如无法完整跑 smoke test，至少建议检查：
 
 ```bash
-python3 -m py_compile scripts/*.py
+python -m py_compile scripts/*.py
 ```
 
 并确认以下文件仍然存在且链接正常：
@@ -71,3 +71,4 @@ python3 -m py_compile scripts/*.py
 ## 安全问题
 
 如果你发现安全问题、敏感文件处理问题或供应链风险，请不要先公开开 Issue，优先参考 [SECURITY.md](SECURITY.md) 进行私下报告。
+

@@ -1,8 +1,8 @@
-# Workflow Playbooks
+﻿# Workflow Playbooks
 
 ## CLI-first note / CLI 优先说明
 
-推荐优先使用 `python3 scripts/inkos_cli.py ...` 作为统一入口；底层脚本仍可直接调用，但更适合 advanced usage、调试或单独集成。
+推荐优先使用 `python scripts/inkos_cli.py ...` 作为统一入口；底层脚本仍可直接调用，但更适合 advanced usage、调试或单独集成。
 
 ## Playbook 1: Write next chapter
 
@@ -60,3 +60,4 @@ Use when the user wants control over risky changes.
 5. Review summary / hooks / relationship / emotion candidates
 6. Feed approved items into `update_story_state.py`
 7. If many hooks remain open, run `hook-report` to review backlog pressure
+

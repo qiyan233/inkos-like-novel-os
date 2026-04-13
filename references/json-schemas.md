@@ -1,8 +1,8 @@
-# JSON Schemas
+﻿# JSON Schemas
 
 ## CLI-first note / CLI 优先说明
 
-这些 JSON 契约既可由底层脚本直接输出，也可通过 `python3 scripts/inkos_cli.py ... --json` 统一获取。对普通使用者，推荐优先走 CLI。
+这些 JSON 契约既可由底层脚本直接输出，也可通过 `python scripts/inkos_cli.py ... --json` 统一获取。对普通使用者，推荐优先走 CLI。
 
 这些不是 JSON Schema draft 文件，而是当前脚本输出的稳定 JSON 契约说明。
 
@@ -139,6 +139,7 @@
 - `files_loaded[]`
 - `chapter_function`
 - `required_inputs`
+- `single_chapter_contract[]`
 - `suggested_scene_beats[]`
 - `plan_template`
 - `context_packet`
@@ -190,3 +191,4 @@
 - 先新增字段，再考虑移除字段
 - `schema_version` 升级时，尽量保留旧字段语义
 - CLI 与后续自动修订脚本应优先依赖这些 JSON 输出，而不是解析 Markdown 文本
+

@@ -1,4 +1,4 @@
----
+﻿---
 name: inkos-like-novel-os
 description: Novel-production operating system for long-form fiction, web novels, serials, fanfiction, and side stories. Use when designing or running a structured writing pipeline with persistent world state, chapter summaries, hooks, character matrices, continuity audits, rewrite/revise loops, style guides, or per-book rules. Best for requests like building an InkOS-like skill, creating a long-novel workflow, keeping multi-chapter story consistency, generating/auditing/revising chapters, or maintaining story files across many chapters.
 ---
@@ -56,7 +56,7 @@ Expected files:
 默认优先使用统一入口：
 
 ```bash
-python3 scripts/inkos_cli.py <command> ...
+python scripts/inkos_cli.py <command> ...
 ```
 
 这样更适合日常使用、文档引用和后续自动化；底层脚本仍可直接调用，但建议视为 advanced / lower-level usage。
@@ -68,7 +68,7 @@ python3 scripts/inkos_cli.py <command> ...
 推荐：
 
 ```bash
-python3 scripts/inkos_cli.py init /path/to/project "Book Title"
+python scripts/inkos_cli.py init /path/to/project "Book Title"
 ```
 
 Lower-level usage / 底层脚本方式：
@@ -78,14 +78,14 @@ bash scripts/init_novel_project.sh /path/to/project "Book Title"
 ```
 
 This copies the template and creates the standard directory layout.
-For cross-platform usage, prefer `python3 scripts/inkos_cli.py init ...`.
+For cross-platform usage, prefer `python scripts/inkos_cli.py init ...`.
 
 #### 2) Build next-chapter context / 构建下一章上下文
 
 推荐：
 
 ```bash
-python3 scripts/inkos_cli.py context \
+python scripts/inkos_cli.py context \
   --project /path/to/project \
   --recent-chapters 3 \
   --json
@@ -94,7 +94,7 @@ python3 scripts/inkos_cli.py context \
 Lower-level usage / 底层脚本方式：
 
 ```bash
-python3 scripts/build_next_chapter_context.py \
+python scripts/build_next_chapter_context.py \
   --project /path/to/project \
   --recent-chapters 3 \
   --json
@@ -105,7 +105,7 @@ python3 scripts/build_next_chapter_context.py \
 推荐：
 
 ```bash
-python3 scripts/inkos_cli.py write-next \
+python scripts/inkos_cli.py write-next \
   --project /path/to/project \
   --json
 ```
@@ -113,12 +113,12 @@ python3 scripts/inkos_cli.py write-next \
 Lower-level usage / 底层脚本方式：
 
 ```bash
-python3 scripts/build_write_next_packet.py \
+python scripts/build_write_next_packet.py \
   --project /path/to/project \
   --json
 ```
 
-Use this when you want a more structured handoff than raw context: chapter goal, active hooks, constraints, state targets, and suggested scene beats.
+Use this when you want a more structured handoff than raw context: chapter goal, active hooks, constraints, state targets, suggested scene beats, and a single-chapter output contract.
 
 ## Workflow / 工作流
 
@@ -169,6 +169,7 @@ Prefer:
 - sensory evidence
 - state changes that can be tracked later
 - character knowledge limited to what they have seen, inferred, or been told
+- exactly one target chapter per draft
 
 Avoid:
 
@@ -178,6 +179,9 @@ Avoid:
 - report-speak in narrative prose
 - broad whole-crowd reactions unless earned
 - full-chapter rewrites when only a few lines are broken
+- drafting chapter N and chapter N+1 in the same response
+- multiple chapter headings in one draft
+- continuing into later chapters after the current chapter has already landed its ending beat
 
 ### 4) Knowledge-boundary pass / 信息边界检查
 
@@ -186,7 +190,7 @@ When the chapter depends on mystery, hidden truths, or strict POV, run:
 推荐：
 
 ```bash
-python3 scripts/inkos_cli.py knowledge-check \
+python scripts/inkos_cli.py knowledge-check \
   --project /path/to/project \
   --chapter-file /path/to/project/chapters/ch12.md \
   --json
@@ -195,7 +199,7 @@ python3 scripts/inkos_cli.py knowledge-check \
 Lower-level usage / 底层脚本方式：
 
 ```bash
-python3 scripts/knowledge_check.py \
+python scripts/knowledge_check.py \
   --project /path/to/project \
   --chapter-file /path/to/project/chapters/ch12.md \
   --json
@@ -226,7 +230,7 @@ Minimum audit set:
 Recommended command:
 
 ```bash
-python3 scripts/inkos_cli.py audit \
+python scripts/inkos_cli.py audit \
   --project /path/to/project \
   --chapter-file /path/to/project/chapters/ch12.md \
   --json
@@ -235,7 +239,7 @@ python3 scripts/inkos_cli.py audit \
 Lower-level usage / 底层脚本方式：
 
 ```bash
-python3 scripts/audit_chapter.py \
+python scripts/audit_chapter.py \
   --project /path/to/project \
   --chapter-file /path/to/project/chapters/ch12.md \
   --json
@@ -269,7 +273,7 @@ After a chapter is accepted, first extract candidate updates:
 推荐：
 
 ```bash
-python3 scripts/inkos_cli.py extract-state \
+python scripts/inkos_cli.py extract-state \
   --project /path/to/project \
   --chapter-file /path/to/project/chapters/ch12.md \
   --json
@@ -278,7 +282,7 @@ python3 scripts/inkos_cli.py extract-state \
 Lower-level usage / 底层脚本方式：
 
 ```bash
-python3 scripts/extract_state.py \
+python scripts/extract_state.py \
   --project /path/to/project \
   --chapter-file /path/to/project/chapters/ch12.md \
   --json
@@ -297,7 +301,7 @@ Then feed approved items into:
 推荐：
 
 ```bash
-python3 scripts/inkos_cli.py state-update \
+python scripts/inkos_cli.py state-update \
   --project /path/to/project \
   --chapter 12 \
   --title "The Price of Silence" \
@@ -311,7 +315,7 @@ python3 scripts/inkos_cli.py state-update \
 Lower-level usage / 底层脚本方式：
 
 ```bash
-python3 scripts/update_story_state.py \
+python scripts/update_story_state.py \
   --project /path/to/project \
   --chapter 12 \
   --title "The Price of Silence" \
@@ -331,7 +335,7 @@ When many hooks are active, run:
 推荐：
 
 ```bash
-python3 scripts/inkos_cli.py hook-report \
+python scripts/inkos_cli.py hook-report \
   --project /path/to/project \
   --stale-after 5 \
   --json
@@ -340,7 +344,7 @@ python3 scripts/inkos_cli.py hook-report \
 Lower-level usage / 底层脚本方式：
 
 ```bash
-python3 scripts/hook_report.py \
+python scripts/hook_report.py \
   --project /path/to/project \
   --stale-after 5 \
   --json
@@ -371,6 +375,8 @@ Sequence:
 4. run `revise` or, if needed, knowledge-check + audit separately
 5. extract candidate state
 6. update state
+
+In this mode, the draft should be **exactly one chapter**, not a chapter bundle.
 
 ### Audit-only mode / 仅审计模式
 
@@ -431,21 +437,21 @@ Good pattern:
 
 Common commands:
 
-- `python3 scripts/inkos_cli.py init ...` — scaffold a new novel project
-- `python3 scripts/inkos_cli.py context ...` — assemble next-chapter context
-- `python3 scripts/inkos_cli.py write-next ...` — build a structured write-next packet
-- `python3 scripts/inkos_cli.py audit ...` — run a chapter audit
-- `python3 scripts/inkos_cli.py knowledge-check ...` — detect knowledge-boundary / POV leaks
-- `python3 scripts/inkos_cli.py extract-state ...` — extract candidate state updates
-- `python3 scripts/inkos_cli.py hook-report ...` — summarize hook lifecycle state
-- `python3 scripts/inkos_cli.py state-update ...` — append structured story-state deltas and sync the latest accepted update into `current_state.md`
-- `python3 scripts/inkos_cli.py revision-plan ...` — build revision plan from chapter or audit
-- `python3 scripts/inkos_cli.py spot-fixes ...` — suggest low-risk local fixes
-- `python3 scripts/inkos_cli.py revise ...` — run the revision workflow as one cycle
-- `python3 scripts/inkos_cli.py snapshot ...` — create a state snapshot
-- `python3 scripts/inkos_cli.py diff ...` — diff snapshots or current state
-- `python3 scripts/inkos_cli.py smoke-test` — run smoke tests
-- `python3 scripts/inkos_cli.py package` — create a clean `.skill` package
+- `python scripts/inkos_cli.py init ...` — scaffold a new novel project
+- `python scripts/inkos_cli.py context ...` — assemble next-chapter context
+- `python scripts/inkos_cli.py write-next ...` — build a structured write-next packet
+- `python scripts/inkos_cli.py audit ...` — run a chapter audit
+- `python scripts/inkos_cli.py knowledge-check ...` — detect knowledge-boundary / POV leaks
+- `python scripts/inkos_cli.py extract-state ...` — extract candidate state updates
+- `python scripts/inkos_cli.py hook-report ...` — summarize hook lifecycle state
+- `python scripts/inkos_cli.py state-update ...` — append structured story-state deltas and sync the latest accepted update into `current_state.md`
+- `python scripts/inkos_cli.py revision-plan ...` — build revision plan from chapter or audit
+- `python scripts/inkos_cli.py spot-fixes ...` — suggest low-risk local fixes
+- `python scripts/inkos_cli.py revise ...` — run the revision workflow as one cycle
+- `python scripts/inkos_cli.py snapshot ...` — create a state snapshot
+- `python scripts/inkos_cli.py diff ...` — diff snapshots or current state
+- `python scripts/inkos_cli.py smoke-test` — run smoke tests
+- `python scripts/inkos_cli.py package` — create a clean `.skill` package
 
 Advanced / lower-level usage:
 
@@ -500,3 +506,4 @@ When producing audits, use severity:
 ## Design goal / 设计目标
 
 This skill is not a magic novel writer. It is a discipline layer that makes long-form AI writing more stable, inspectable, and maintainable.
+

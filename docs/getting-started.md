@@ -1,4 +1,4 @@
-# 快速上手 / Getting Started
+﻿# 快速上手 / Getting Started
 
 
 
@@ -6,7 +6,7 @@
 
 
 
-> 推荐入口 / Recommended entrypoint：`python3 scripts/inkos_cli.py ...`
+> 推荐入口 / Recommended entrypoint：`python scripts/inkos_cli.py ...`
 
 
 ## 这个仓库是什么
@@ -31,7 +31,7 @@
 
 ```bash
 
-python3 scripts/inkos_cli.py init /path/to/project "书名"
+python scripts/inkos_cli.py init /path/to/project "书名"
 
 ```
 
@@ -50,9 +50,9 @@ python3 scripts/inkos_cli.py init /path/to/project "书名"
 
 ```bash
 
-python3 scripts/inkos_cli.py context --project /path/to/project
+python scripts/inkos_cli.py context --project /path/to/project
 
-python3 scripts/inkos_cli.py audit --project /path/to/project --chapter-file /path/to/project/chapters/ch01.md
+python scripts/inkos_cli.py audit --project /path/to/project --chapter-file /path/to/project/chapters/ch01.md
 
 ```
 
@@ -64,7 +64,7 @@ python3 scripts/inkos_cli.py audit --project /path/to/project --chapter-file /pa
 
 ```bash
 
-python3 scripts/inkos_cli.py knowledge-check --project /path/to/project --chapter-file /path/to/project/chapters/ch01.md --json
+python scripts/inkos_cli.py knowledge-check --project /path/to/project --chapter-file /path/to/project/chapters/ch01.md --json
 
 ```
 
@@ -76,7 +76,7 @@ python3 scripts/inkos_cli.py knowledge-check --project /path/to/project --chapte
 
 ```bash
 
-python3 scripts/inkos_cli.py extract-state --project /path/to/project --chapter-file /path/to/project/chapters/ch01.md --json
+python scripts/inkos_cli.py extract-state --project /path/to/project --chapter-file /path/to/project/chapters/ch01.md --json
 
 ```
 
@@ -88,7 +88,7 @@ python3 scripts/inkos_cli.py extract-state --project /path/to/project --chapter-
 
 ```bash
 
-python3 scripts/inkos_cli.py state-update --project /path/to/project --chapter 1 --title "第一章" --summary "..."
+python scripts/inkos_cli.py state-update --project /path/to/project --chapter 1 --title "第一章" --summary "..."
 
 ```
 
@@ -100,7 +100,7 @@ python3 scripts/inkos_cli.py state-update --project /path/to/project --chapter 1
 
 ```bash
 
-python3 scripts/inkos_cli.py smoke-test
+python scripts/inkos_cli.py smoke-test
 
 ```
 
@@ -114,3 +114,4 @@ python3 scripts/inkos_cli.py smoke-test
 - 提交前先看 `CONTRIBUTING.md`
 - 讨论和反馈请遵守 `CODE_OF_CONDUCT.md`
 - 遇到安全问题请参考 `SECURITY.md`
+

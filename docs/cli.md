@@ -1,6 +1,6 @@
-# CLI 入口 / CLI Entrypoint
+﻿# CLI 入口 / CLI Entrypoint
 
-`python3 scripts/inkos_cli.py ...` 是这个仓库当前推荐的**统一主入口 / unified entrypoint**。
+`python scripts/inkos_cli.py ...` 是这个仓库当前推荐的**统一主入口 / unified entrypoint**。
 
 它不会改变底层脚本的职责，而是把常见工作流命令集中到一个地方，方便你在 README、docs、demo 和日常使用里走同一条路径。
 
@@ -31,19 +31,19 @@
 ### 初始化项目 / Initialize
 
 ```bash
-python3 scripts/inkos_cli.py init /path/to/project "书名"
+python scripts/inkos_cli.py init /path/to/project "书名"
 ```
 
 ### 生成上下文 / Build context
 
 ```bash
-python3 scripts/inkos_cli.py context --project /path/to/project
+python scripts/inkos_cli.py context --project /path/to/project
 ```
 
 ### 生成下一章工作包 / Build write-next packet
 
 ```bash
-python3 scripts/inkos_cli.py write-next --project /path/to/project --json
+python scripts/inkos_cli.py write-next --project /path/to/project --json
 ```
 
 这个命令会在 `context` 的基础上补齐：
@@ -54,17 +54,18 @@ python3 scripts/inkos_cli.py write-next --project /path/to/project --json
 - active hooks / constraints / state targets
 - suggested scene beats
 - 可直接复用的 `plan_template`
+- 单章输出约束（避免一口气写出多个章节）
 
 如果你想把结果落到 `reviews/` 里供后续自动化或人工 review 使用：
 
 ```bash
-python3 scripts/inkos_cli.py write-next --project /path/to/project --json --write-report
+python scripts/inkos_cli.py write-next --project /path/to/project --json --write-report
 ```
 
 ### 审计章节 / Audit chapter
 
 ```bash
-python3 scripts/inkos_cli.py audit \
+python scripts/inkos_cli.py audit \
   --project /path/to/project \
   --chapter-file /path/to/project/chapters/ch01.md
 ```
@@ -72,7 +73,7 @@ python3 scripts/inkos_cli.py audit \
 ### 提取候选状态 / Extract candidate state
 
 ```bash
-python3 scripts/inkos_cli.py extract-state \
+python scripts/inkos_cli.py extract-state \
   --project /path/to/project \
   --chapter-file /path/to/project/chapters/ch01.md \
   --json
@@ -81,7 +82,7 @@ python3 scripts/inkos_cli.py extract-state \
 ### 更新 truth files / Update truth files
 
 ```bash
-python3 scripts/inkos_cli.py state-update \
+python scripts/inkos_cli.py state-update \
   --project /path/to/project \
   --chapter 1 \
   --title "第一章" \
@@ -91,7 +92,7 @@ python3 scripts/inkos_cli.py state-update \
 ### 跑修订闭环 / Run revision cycle
 
 ```bash
-python3 scripts/inkos_cli.py revise \
+python scripts/inkos_cli.py revise \
   --project /path/to/project \
   --chapter-file /path/to/project/chapters/ch01.md \
   --json
@@ -108,7 +109,7 @@ python3 scripts/inkos_cli.py revise \
 如果你要把完整修订闭环结果存档到 `reviews/`：
 
 ```bash
-python3 scripts/inkos_cli.py revise \
+python scripts/inkos_cli.py revise \
   --project /path/to/project \
   --chapter-file /path/to/project/chapters/ch01.md \
   --json \
@@ -118,7 +119,7 @@ python3 scripts/inkos_cli.py revise \
 ### 跑回归 / Run smoke tests
 
 ```bash
-python3 scripts/inkos_cli.py smoke-test
+python scripts/inkos_cli.py smoke-test
 ```
 
 ## 补充说明 / Notes
@@ -126,3 +127,4 @@ python3 scripts/inkos_cli.py smoke-test
 - 这次调整**不要求**把 CLI 做成 pip 包。
 - 当前目标是把 CLI 提升为更正式、可被自然引用的**工作流入口**。
 - 底层脚本仍然是实际能力实现层，CLI 负责组织更完整的使用路径。
+

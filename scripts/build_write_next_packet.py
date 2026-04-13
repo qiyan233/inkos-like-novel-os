@@ -10,8 +10,8 @@ from inkos_common import (
     chapter_sections,
     extract_bullets,
     extract_markdown_section,
+    infer_next_chapter_from_project,
     iso_now,
-    parse_chapter_number,
     read_text,
     require_project_markers,
     write_json,
@@ -19,27 +19,7 @@ from inkos_common import (
 
 
 def infer_next_chapter(project, explicit_chapter=None):
-    if explicit_chapter is not None:
-        return explicit_chapter
-
-    project = Path(project)
-    numbers = []
-    summaries = read_text(project / 'chapter_summaries.md')
-    for heading, _section in chapter_sections(summaries, CHAPTER_HEADING_RE):
-        chapter = parse_chapter_number(heading)
-        if chapter is not None:
-            numbers.append(chapter)
-
-    chapters_dir = project / 'chapters'
-    if chapters_dir.exists():
-        for path in chapters_dir.iterdir():
-            if not path.is_file():
-                continue
-            chapter = parse_chapter_number(path.stem) or parse_chapter_number(path.name)
-            if chapter is not None:
-                numbers.append(chapter)
-
-    return max(numbers) + 1 if numbers else 1
+    return infer_next_chapter_from_project(project, explicit_chapter)
 
 
 def find_outline_target(outline_text, chapter):
@@ -161,6 +141,15 @@ def plan_template(chapter, suggested_pov, primary_goal, beats):
     return '\n'.join(lines).strip() + '\n'
 
 
+def single_chapter_contract(chapter):
+    return [
+        '只输出第 %s 章正文。' % chapter,
+        '不要额外输出第 %s 章或更后面的章节。' % (chapter + 1),
+        '不要在同一份草稿里写多个章节标题。',
+        '当前章节结束后立即停止，不要续写下一章。',
+    ]
+
+
 def build_packet(project, chapter=None, recent_chapters=3, max_chars_per_file=1800):
     project = require_project_markers(project)
     chapter = infer_next_chapter(project, chapter)
@@ -204,11 +193,13 @@ def build_packet(project, chapter=None, recent_chapters=3, max_chars_per_file=18
             'constraints': constraints,
             'state_targets': state_targets,
         },
+        'single_chapter_contract': single_chapter_contract(chapter),
         'suggested_scene_beats': beats,
         'plan_template': plan_template(chapter, suggested_pov, primary_goal, beats),
         'context_packet': context_report,
         'next_actions': [
             '先用 chapter_function 和 suggested_scene_beats 写 1-3 条 chapter plan。',
+            '正文必须只写当前目标章节，不要继续写后续章节。',
             '正文完成后按顺序跑 knowledge-check、audit、extract-state、state-update。',
         ],
     }
@@ -241,6 +232,10 @@ def print_markdown(packet):
     else:
         for item in packet['suggested_scene_beats']:
             print('- %s' % item)
+    print()
+    print('## Single Chapter Contract')
+    for item in packet['single_chapter_contract']:
+        print('- %s' % item)
     print()
     print(packet['context_packet']['context'])
 
