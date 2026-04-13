@@ -153,7 +153,7 @@ def single_chapter_contract(chapter):
 def build_packet(project, chapter=None, recent_chapters=3, max_chars_per_file=1800):
     project = require_project_markers(project)
     chapter = infer_next_chapter(project, chapter)
-    context_report = build_context_report(project, recent_chapters, max_chars_per_file)
+    context_report = build_context_report(project, recent_chapters, max_chars_per_file, chapter)
 
     outline_text = read_text(Path(project) / 'outline.md')
     current_state_text = read_text(Path(project) / 'current_state.md')

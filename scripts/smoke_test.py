@@ -205,7 +205,7 @@ def main():
         print('story state update ok')
 
         print('===== write-next entrypoint =====')
-        write_next = run_cli('write-next', '--project', str(project), '--json', check=False)
+        write_next = run_cli('write-next', '--project', str(project), '--chapter', '2', '--json', check=False)
         if write_next.returncode != 0:
             raise SystemExit(write_next.stderr.strip() or write_next.stdout.strip() or 'cli write-next failed')
         write_next_data = json.loads(write_next.stdout)
@@ -213,6 +213,8 @@ def main():
             raise AssertionError('write-next schema mismatch')
         if write_next_data['chapter'] != 2:
             raise AssertionError(f'write-next chapter mismatch: {write_next_data["chapter"]}')
+        if write_next_data['context_packet']['target_chapter'] != 2:
+            raise AssertionError('write-next context target_chapter mismatch')
         if not write_next_data['chapter_function']['primary_goal']:
             raise AssertionError('write-next missing primary goal')
         if not write_next_data['suggested_scene_beats']:
@@ -223,7 +225,7 @@ def main():
             raise AssertionError('write-next missing plan template')
         if not any('只输出第 2 章正文。' == item for item in write_next_data['single_chapter_contract']):
             raise AssertionError('write-next missing single chapter contract')
-        write_next_report = run_cli('write-next', '--project', str(project), '--json', '--write-report', check=False)
+        write_next_report = run_cli('write-next', '--project', str(project), '--chapter', '2', '--json', '--write-report', check=False)
         if write_next_report.returncode != 0:
             raise SystemExit(write_next_report.stderr.strip() or write_next_report.stdout.strip() or 'cli write-next write-report failed')
         write_next_report_data = json.loads(write_next_report.stdout)
