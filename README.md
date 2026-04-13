@@ -1,8 +1,8 @@
 # inkos-like-novel-os
 
-[![CI](https://img.shields.io/github/actions/workflow/status/qiyan233/inkos-like-novel-os/ci.yml?branch=main&label=CI)](https://github.com/qiyan233/inkos-like-novel-os/actions/workflows/ci.yml) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE) [![Version](https://img.shields.io/badge/version-v0.5.0-blue)](CHANGELOG.md)
+[![CI](https://img.shields.io/github/actions/workflow/status/qiyan233/inkos-like-novel-os/ci.yml?branch=main&label=CI)](https://github.com/qiyan233/inkos-like-novel-os/actions/workflows/ci.yml) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE) [![Version](https://img.shields.io/badge/version-v0.5.1-blue)](CHANGELOG.md)
 
-当前版本：**0.5.0**
+当前版本：**0.5.1**
 
 一个面向 **OpenClaw** 的长篇小说工作流 skill。  
 它的重点不是“单次写一章”，而是把长篇 / 连载 / 网文 / 同人写作跑成一个**长期可维护的流程**。
@@ -44,7 +44,7 @@
 
 ## 现在这个版本多了什么
 
-`0.5.0` 开始，这个仓库已经不只是“脚本集合”。
+`0.5.1` 这个版本继续把它往“可运行 workflow skill”方向推进。
 
 这次比较关键的提升是：
 

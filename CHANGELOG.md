@@ -1,5 +1,34 @@
 # Changelog
 
+## v0.5.1 — 2026-04-13
+
+### Added
+
+- 新增 `scripts/reverse_long_document.py`，提供长文档拆解 MVP：章节索引、按章节分块、chunk 级拆解、汇总输出
+- `scripts/inkos_cli.py` 新增 `reverse-longdoc` 入口
+
+### Changed
+
+- `build_next_chapter_context.py` 现在支持显式目标章节与更强的单章输出约束
+- `build_write_next_packet.py` 现在补充 `single_chapter_contract`、`chapter_file_hint`、`plan_template`
+- 活跃文档与 skill 示例中的 `python3` 已统一收口为更兼容 Windows 的 `python`
+- `README.md` 已进一步简化为更偏人类阅读的项目概览，而不是命令手册
+
+### Fixed
+
+- 修复单章起草时上下文把后续多章一并带入，导致一次生成多个章节内容的问题
+- 修复 Windows / GBK 环境下部分子进程输出解码不稳定的问题
+- 修复 `python3` 在 Windows 环境下常见不可用带来的使用门槛
+
+### Notes
+
+- 这是一个以 issue 收口为重点的 follow-up release
+- 当前 open issues 已清空，长文档拆解需求已完成首个可运行版本
+
+### Assets
+
+- `inkos-like-novel-os-v0.5.1.skill`
+
 ## v0.5.0 — 2026-04-05
 
 ### Added

@@ -5,7 +5,7 @@ description: Novel-production operating system for long-form fiction, web novels
 
 # inkos-like-novel-os
 
-Version: 0.5.0
+Version: 0.5.1
 
 Build and run long-form fiction as a stateful pipeline, not a one-shot prompt.
 
