@@ -250,6 +250,56 @@ def main():
             raise AssertionError('revise missing stale hook count')
         print('revise entrypoint ok')
 
+        print('===== reverse-longdoc entrypoint =====')
+        longdoc_source = tmp / 'longdoc-source.md'
+        longdoc_workspace = tmp / 'reverse-project'
+        longdoc_source.write_text(
+            """# 示例长文档
+
+第一章 初到旧宅
+林烬第一次进旧宅时，就觉得走廊深处有人盯着自己。他怀疑这地方藏着旧事。
+
+第二章 雨夜账册
+雨夜里他翻到账册，确认其中有被改写过的痕迹，也知道徐安在隐瞒一部分线索。
+
+第三章 回廊试探
+他试探徐安，但没有直接摊牌，只是进一步怀疑玉佩在入库前就已经被动过。
+""",
+            encoding='utf-8',
+        )
+        reverse = run_cli(
+            'reverse-longdoc',
+            '--source',
+            str(longdoc_source),
+            '--workspace',
+            str(longdoc_workspace),
+            '--chapters-per-file',
+            '2',
+            '--json',
+            check=False,
+        )
+        if reverse.returncode != 0:
+            raise SystemExit(reverse.stderr.strip() or reverse.stdout.strip() or 'cli reverse-longdoc failed')
+        reverse_data = json.loads(reverse.stdout)
+        if reverse_data['schema_version'] != 'inkos.longdoc-reverse.v1':
+            raise AssertionError('reverse-longdoc schema mismatch')
+        if reverse_data['summary']['total_chapters'] != 3:
+            raise AssertionError('reverse-longdoc total_chapters mismatch')
+        index_path = Path(reverse_data['outputs']['index'])
+        summary_json_path = Path(reverse_data['outputs']['summary_json'])
+        summary_md_path = Path(reverse_data['outputs']['summary_md'])
+        if not index_path.exists() or not summary_json_path.exists() or not summary_md_path.exists():
+            raise AssertionError('reverse-longdoc missing output files')
+        index_data = json.loads(index_path.read_text(encoding='utf-8'))
+        if index_data['total_chapters'] != 3 or len(index_data['chunk_files']) != 2:
+            raise AssertionError('reverse-longdoc index mismatch')
+        summary_data = json.loads(summary_json_path.read_text(encoding='utf-8'))
+        if len(summary_data['chapters']) != 3:
+            raise AssertionError('reverse-longdoc summary chapter mismatch')
+        if 'all_state_changes' not in summary_data['aggregated']:
+            raise AssertionError('reverse-longdoc aggregated summary missing state changes')
+        print('reverse-longdoc entrypoint ok')
+
         print('===== package entrypoint =====')
         dist = tmp / 'dist'
         package = run_cli('package', str(dist), 'test-build', check=False)

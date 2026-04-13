@@ -186,6 +186,31 @@
 - `human_review_needed`
 - `stale_hook_count`
 
+## 9. `inkos.longdoc-reverse.v1`
+
+来源：`scripts/reverse_long_document.py --json`
+
+核心字段：
+- `schema_version`
+- `tool`
+- `generated_at`
+- `source`
+- `workspace`
+- `summary`
+- `outputs`
+
+### `summary`
+- `total_chapters`
+- `chunk_file_count`
+- `analysis_file_count`
+
+### `outputs`
+- `index`
+- `chunks_dir`
+- `chunk_analysis_dir`
+- `summary_json`
+- `summary_md`
+
 ## 稳定性原则
 
 - 先新增字段，再考虑移除字段

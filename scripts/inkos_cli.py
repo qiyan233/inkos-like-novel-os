@@ -87,6 +87,12 @@ def main():
     p.add_argument('--chapter-file', required=True)
     p.add_argument('--json', action='store_true')
 
+    p = sub.add_parser('reverse-longdoc', help='Split and reverse-analyze a very long source document.')
+    p.add_argument('--source', required=True)
+    p.add_argument('--workspace', required=True)
+    p.add_argument('--chapters-per-file', type=int, default=10)
+    p.add_argument('--json', action='store_true')
+
     p = sub.add_parser('hook-report', help='Summarize hook lifecycle status.')
     p.add_argument('--project', required=True)
     p.add_argument('--stale-after', type=int, default=5)
@@ -188,6 +194,13 @@ def main():
         run(cmd)
     elif args.command == 'extract-state':
         cmd = py('extract_state.py', ['--project', args.project, '--chapter-file', args.chapter_file])
+        if args.json:
+            cmd.append('--json')
+        run(cmd)
+    elif args.command == 'reverse-longdoc':
+        if args.chapters_per_file <= 0:
+            raise SystemExit('--chapters-per-file must be > 0')
+        cmd = py('reverse_long_document.py', ['--source', args.source, '--workspace', args.workspace, '--chapters-per-file', str(args.chapters_per_file)])
         if args.json:
             cmd.append('--json')
         run(cmd)

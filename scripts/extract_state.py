@@ -84,21 +84,23 @@ def extract_candidates(sentences):
     }
 
 
-def build_report(project, chapter_file):
-    project = require_project_markers(project)
-    chapter_file = require_existing_file(chapter_file, 'Chapter file')
-    chapter_text = read_text(chapter_file)
+def build_report_from_text(chapter_text, chapter_file='', chapter_num=None, project=None, title_guess_value=None):
     sentences = split_sentences(chapter_text)
     candidates = extract_candidates(sentences)
-    chapter_num = parse_chapter_number(Path(chapter_file).stem) or parse_chapter_number(chapter_text) or None
+    guessed_title = title_guess_value or guess_title(chapter_text, chapter_file or 'chapter')
+    inferred_chapter = chapter_num
+    if inferred_chapter is None:
+        inferred_chapter = parse_chapter_number(Path(chapter_file).stem) if chapter_file else None
+    if inferred_chapter is None:
+        inferred_chapter = parse_chapter_number(chapter_text) or None
     return {
         'schema_version': 'inkos.extract-state.v1',
         'tool': 'extract_state',
         'generated_at': iso_now(),
-        'project': str(project),
-        'chapter': chapter_num,
-        'chapter_file': str(chapter_file),
-        'title_guess': guess_title(chapter_text, chapter_file),
+        'project': str(project) if project is not None else '',
+        'chapter': inferred_chapter,
+        'chapter_file': str(chapter_file) if chapter_file else '',
+        'title_guess': guessed_title,
         'summary': pick_summary(sentences),
         'state_changes': candidates['state_changes'],
         'hook_open': candidates['hook_open'],
@@ -108,6 +110,13 @@ def build_report(project, chapter_file):
         'emotions': candidates['emotions'],
         'write_mode': 'candidate-only',
     }
+
+
+def build_report(project, chapter_file):
+    project = require_project_markers(project)
+    chapter_file = require_existing_file(chapter_file, 'Chapter file')
+    chapter_text = read_text(chapter_file)
+    return build_report_from_text(chapter_text, chapter_file=str(chapter_file), project=project)
 
 
 def print_markdown(report):

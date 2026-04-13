@@ -116,6 +116,24 @@ python scripts/inkos_cli.py revise \
   --write-report
 ```
 
+### 长文档拆解 / Reverse long document
+
+```bash
+python scripts/inkos_cli.py reverse-longdoc \
+  --source /path/to/long-document.md \
+  --workspace /path/to/reverse-workspace \
+  --chapters-per-file 10 \
+  --json
+```
+
+这个命令适合超长文本拆解场景，会产出：
+
+- `index/chapter_list.json`
+- `chunks/*.json`
+- `reverse_analysis/chunk_analysis/*.json`
+- `reverse_analysis/summary/summary.json`
+- `reverse_analysis/summary/summary.md`
+
 ### 跑回归 / Run smoke tests
 
 ```bash
