@@ -1,6 +1,6 @@
 # {{BOOK_TITLE}}
 
-This is a long-form fiction project scaffold for an InkOS-like operating workflow.
+This is a long-form fiction project scaffold for a NovelOps Skill operating workflow.
 
 ## Operating rule
 

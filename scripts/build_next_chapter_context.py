@@ -110,7 +110,7 @@ def build_context_report(project, recent_chapters, max_chars_per_file, chapter=N
     prompt.append('- After acceptance, update chapter_summaries, current_state, pending_hooks, and relationship/emotion files.')
 
     return {
-        'schema_version': 'inkos.next-context.v1',
+        'schema_version': 'novelops.next-context.v1',
         'tool': 'build_next_chapter_context',
         'generated_at': iso_now(),
         'project': str(project),

@@ -71,7 +71,7 @@ def diff_report(project, from_ref, to_ref):
         })
 
     return {
-        'schema_version': 'inkos.state-diff.v1',
+        'schema_version': 'novelops.state-diff.v1',
         'tool': 'diff_story_state',
         'generated_at': iso_now(),
         'project': str(project),

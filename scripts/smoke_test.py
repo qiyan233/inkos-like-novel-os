@@ -9,7 +9,7 @@ from pathlib import Path
 from inkos_common import configure_stdio_utf8
 
 ROOT = Path(__file__).resolve().parent.parent
-CLI = ROOT / 'scripts' / 'inkos_cli.py'
+CLI = ROOT / 'scripts' / 'novelops_cli.py'
 PYTHON = sys.executable
 
 configure_stdio_utf8()
@@ -68,6 +68,32 @@ def main():
             if not (project / rel).exists():
                 raise AssertionError(f'missing initialized file: {rel}')
         print('cli init ok')
+
+        print('===== init non-empty directory safety regression =====')
+        custom_state = project / 'current_state.md'
+        custom_state.write_text('CUSTOM USER STATE SHOULD SURVIVE\n', encoding='utf-8')
+        blocked_init = run_cli('init', str(project), '覆盖测试', check=False)
+        if blocked_init.returncode == 0:
+            raise AssertionError('init should fail for a non-empty directory without --force')
+        blocked_message = (blocked_init.stderr + blocked_init.stdout).lower()
+        if '--force' not in blocked_message:
+            raise AssertionError('init safety error should mention --force')
+        if custom_state.read_text(encoding='utf-8') != 'CUSTOM USER STATE SHOULD SURVIVE\n':
+            raise AssertionError('init safety check allowed existing project content to change')
+
+        empty_project = tmp / 'empty-init-novel'
+        empty_project.mkdir()
+        empty_init = run_cli('init', str(empty_project), '空目录项目', check=False)
+        if empty_init.returncode != 0:
+            raise SystemExit(empty_init.stderr.strip() or empty_init.stdout.strip() or 'cli init failed for empty directory')
+        if not (empty_project / 'current_state.md').exists():
+            raise AssertionError('init should allow an existing empty directory')
+
+        force_init = run_cli('init', str(project), '强制覆盖测试', '--force', check=False)
+        if force_init.returncode != 0:
+            raise SystemExit(force_init.stderr.strip() or force_init.stdout.strip() or 'cli init --force failed')
+        assert_contains(project / 'current_state.md', '强制覆盖测试')
+        print('init non-empty directory safety ok')
 
         print('===== init title escaping regression =====')
         special_project = tmp / 'special-title-novel'
@@ -209,7 +235,7 @@ def main():
         if write_next.returncode != 0:
             raise SystemExit(write_next.stderr.strip() or write_next.stdout.strip() or 'cli write-next failed')
         write_next_data = json.loads(write_next.stdout)
-        if write_next_data['schema_version'] != 'inkos.write-next.v1':
+        if write_next_data['schema_version'] != 'novelops.write-next.v1':
             raise AssertionError('write-next schema mismatch')
         if write_next_data['chapter'] != 2:
             raise AssertionError(f'write-next chapter mismatch: {write_next_data["chapter"]}')
@@ -240,7 +266,7 @@ def main():
         if revise.returncode != 0:
             raise SystemExit(revise.stderr.strip() or revise.stdout.strip() or 'cli revise failed')
         revise_data = json.loads(revise.stdout)
-        if revise_data['schema_version'] != 'inkos.revision-cycle.v1':
+        if revise_data['schema_version'] != 'novelops.revision-cycle.v1':
             raise AssertionError('revise schema mismatch')
         if revise_data['summary']['knowledge_check_run'] is not True:
             raise AssertionError('revise should run knowledge check by default')
@@ -283,7 +309,7 @@ def main():
         if reverse.returncode != 0:
             raise SystemExit(reverse.stderr.strip() or reverse.stdout.strip() or 'cli reverse-longdoc failed')
         reverse_data = json.loads(reverse.stdout)
-        if reverse_data['schema_version'] != 'inkos.longdoc-reverse.v1':
+        if reverse_data['schema_version'] != 'novelops.longdoc-reverse.v1':
             raise AssertionError('reverse-longdoc schema mismatch')
         if reverse_data['summary']['total_chapters'] != 3:
             raise AssertionError('reverse-longdoc total_chapters mismatch')
@@ -307,8 +333,8 @@ def main():
         package = run_cli('package', str(dist), 'test-build', check=False)
         if package.returncode != 0:
             raise SystemExit(package.stderr.strip() or package.stdout.strip() or 'cli package failed')
-        expected = dist / 'inkos-like-novel-os.skill'
-        expected_versioned = dist / 'inkos-like-novel-os-vtest-build.skill'
+        expected = dist / 'novelops-skill.skill'
+        expected_versioned = dist / 'novelops-skill-vtest-build.skill'
         if not expected.exists() or not expected_versioned.exists():
             raise AssertionError('package outputs missing')
         print('package entrypoint ok')

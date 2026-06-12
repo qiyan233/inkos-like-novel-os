@@ -7,7 +7,7 @@ from pathlib import Path
 from inkos_common import configure_stdio_utf8
 
 ROOT = Path(__file__).resolve().parent.parent
-SKILL_NAME = 'inkos-like-novel-os'
+SKILL_NAME = 'novelops-skill'
 DEFAULT_OUTDIR = ROOT.parent.parent / 'dist'
 IGNORE_NAMES = {
     '.git',
@@ -43,9 +43,9 @@ def should_skip(path):
     name = path.name
     if name in IGNORE_NAMES:
         return True
-    if name.startswith('inkos-smoke-'):
+    if name.startswith('inkos-smoke-') or name.startswith('novelops-smoke-'):
         return True
-    if name.startswith('inkos-package-'):
+    if name.startswith('inkos-package-') or name.startswith('novelops-package-'):
         return True
     if path.is_dir() and name == '__pycache__':
         return True

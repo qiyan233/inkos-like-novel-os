@@ -1,8 +1,8 @@
-# inkos-like-novel-os
+# NovelOps Skill
 
-[![CI](https://img.shields.io/github/actions/workflow/status/qiyan233/inkos-like-novel-os/ci.yml?branch=main&label=CI)](https://github.com/qiyan233/inkos-like-novel-os/actions/workflows/ci.yml) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE) [![Version](https://img.shields.io/badge/version-v0.5.1-blue)](CHANGELOG.md)
+[![CI](https://img.shields.io/github/actions/workflow/status/qiyan233/novelops-skill/ci.yml?branch=main&label=CI)](https://github.com/qiyan233/novelops-skill/actions/workflows/ci.yml) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE) [![Version](https://img.shields.io/badge/version-v1.0.0-blue)](CHANGELOG.md)
 
-当前版本：**0.5.1**
+当前版本：**1.0.0**
 
 一个面向 **OpenClaw** 的长篇小说工作流 skill。  
 它的重点不是“单次写一章”，而是把长篇 / 连载 / 网文 / 同人写作跑成一个**长期可维护的流程**。
@@ -44,15 +44,16 @@
 
 ## 现在这个版本多了什么
 
-`0.5.1` 这个版本继续把它往“可运行 workflow skill”方向推进。
+`1.0.0` 这个版本把项目正式整理为 **NovelOps Skill**。
 
 这次比较关键的提升是：
 
-- 有了 `write-next`，能把“下一章怎么写”整理成结构化工作包
-- 有了 `revise`，能把修订环节串成一个入口
-- 文档和输出契约开始围绕 workflow，而不只是围绕单个脚本
+- 项目名称、skill 标识和打包名统一为 `novelops-skill`
+- 推荐 CLI 入口统一为 `python scripts/novelops_cli.py ...`
+- `init` 默认保护非空目录，避免误覆盖已有小说项目
+- JSON 输出契约切换到 `novelops.*` namespace
 
-换句话说，它从一个 skill skeleton，往“更可运行的 workflow 层”迈了一步。
+换句话说，它从 InkOS-inspired skeleton，进入更独立、可发布的 NovelOps Skill 阶段。
 
 ---
 

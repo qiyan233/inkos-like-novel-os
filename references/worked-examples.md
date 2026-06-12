@@ -1,6 +1,6 @@
-﻿# Worked Examples
+# Worked Examples
 
-> CLI-first / CLI 优先：示例里的推荐命令优先展示 `scripts/inkos_cli.py`，底层脚本调用仅作为补充。
+> CLI-first / CLI 优先：示例里的推荐命令优先展示 `scripts/novelops_cli.py`，底层脚本调用仅作为补充。
 
 这份文件不是理论说明，而是给 agent 和人类作者看的“落地示范”。
 
@@ -27,7 +27,7 @@
 ### 初始化命令
 
 ```bash
-bash scripts/init_novel_project.sh /path/to/project "玉佩疑云"
+python scripts/novelops_cli.py init /path/to/project "玉佩疑云"
 ```
 
 ### 初始化后至少先补这些文件

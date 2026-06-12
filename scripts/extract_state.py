@@ -94,7 +94,7 @@ def build_report_from_text(chapter_text, chapter_file='', chapter_num=None, proj
     if inferred_chapter is None:
         inferred_chapter = parse_chapter_number(chapter_text) or None
     return {
-        'schema_version': 'inkos.extract-state.v1',
+        'schema_version': 'novelops.extract-state.v1',
         'tool': 'extract_state',
         'generated_at': iso_now(),
         'project': str(project) if project is not None else '',

@@ -1,4 +1,4 @@
-﻿# FAQ / 常见问题
+# FAQ / 常见问题
 
 ## 这是自动写小说的黑盒吗？
 
@@ -29,14 +29,14 @@
 
 不会。
 
-`python scripts/inkos_cli.py extract-state ...` 默认只输出候选结果，方便你人工确认；真正写回 truth files 的是 `python scripts/inkos_cli.py state-update ...`（底层分别对应 `extract_state.py` 与 `update_story_state.py`）。
+`python scripts/novelops_cli.py extract-state ...` 默认只输出候选结果，方便你人工确认；真正写回 truth files 的是 `python scripts/novelops_cli.py state-update ...`（底层分别对应 `extract_state.py` 与 `update_story_state.py`）。
 
 ## 这个仓库适合拿来做什么？
 
 适合：
 
 - OpenClaw 小说 skill 原型
-- InkOS-like 长篇工作流底座
+- NovelOps Skill 长篇工作流底座
 - 连载 / 网文 / 同人 / 正典衍生项目
 - 需要多章一致性和可追踪状态的写作流程
 

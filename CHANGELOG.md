@@ -1,5 +1,21 @@
 # Changelog
 
+## v1.0.0 — 2026-06-12
+
+### Changed
+
+- 项目用户侧名称改为 **NovelOps Skill**，skill 标识与打包名改为 `novelops-skill`
+- 推荐 CLI 入口从 `scripts/inkos_cli.py` 更名为 `scripts/novelops_cli.py`，旧入口保留为兼容 wrapper
+- JSON schema namespace 从 `inkos.*` 调整为 `novelops.*`
+
+### Fixed
+
+- `init` 默认拒绝写入非空目录，避免误覆盖已有小说项目；确认覆盖时需显式使用 `--force`
+
+### Assets
+
+- `novelops-skill-v1.0.0.skill`
+
 ## v0.5.1 — 2026-04-13
 
 ### Added

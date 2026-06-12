@@ -1,6 +1,6 @@
-﻿# Revision Workflow
+# Revision Workflow
 
-> CLI-first / CLI 优先：推荐优先使用 `python scripts/inkos_cli.py ...` 组织审计、修订计划和 spot-fix 流程。
+> CLI-first / CLI 优先：推荐优先使用 `python scripts/novelops_cli.py ...` 组织审计、修订计划和 spot-fix 流程。
 
 这一层工作流解决的不是“怎么生成一章”，而是“写完之后如何稳地修”。
 

@@ -68,7 +68,7 @@ def build_suggestions(project, chapter_file, audit_report):
             'confidence': 'medium' if finding['severity'] in ('critical', 'major') else 'high',
         })
     return {
-        'schema_version': 'inkos.spot-fix-suggestions.v1',
+        'schema_version': 'novelops.spot-fix-suggestions.v1',
         'tool': 'suggest_spot_fixes',
         'generated_at': iso_now(),
         'project': report.get('project'),

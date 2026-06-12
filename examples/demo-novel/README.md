@@ -1,10 +1,10 @@
-﻿# demo-novel
+# demo-novel
 
 这是一个**最小但完整**的示例项目，用来展示这个仓库的核心闭环：
 
 `context -> draft -> audit -> extract-state -> state-update`
 
-> 推荐入口 / Recommended entrypoint：`python scripts/inkos_cli.py ...`
+> 推荐入口 / Recommended entrypoint：`python scripts/novelops_cli.py ...`
 
 故事设定是一个两章规模的古风悬疑开局：主角林烬发现徐家旧玉佩疑似被调包，但还不能直接确认幕后人。
 
@@ -27,7 +27,7 @@
 生成下一章上下文：
 
 ```bash
-python scripts/inkos_cli.py context --project examples/demo-novel
+python scripts/novelops_cli.py context --project examples/demo-novel
 ```
 
 脚本会读取如下一批 truth files：
@@ -48,7 +48,7 @@ python scripts/inkos_cli.py context --project examples/demo-novel
 对现有章节跑审计：
 
 ```bash
-python scripts/inkos_cli.py audit --project examples/demo-novel --chapter-file examples/demo-novel/chapters/ch02.md --json
+python scripts/novelops_cli.py audit --project examples/demo-novel --chapter-file examples/demo-novel/chapters/ch02.md --json
 ```
 
 这个结果不等于文学评价，而是帮助你检查：
@@ -62,7 +62,7 @@ python scripts/inkos_cli.py audit --project examples/demo-novel --chapter-file e
 从章节正文中提取候选状态更新：
 
 ```bash
-python scripts/inkos_cli.py extract-state --project examples/demo-novel --chapter-file examples/demo-novel/chapters/ch02.md --json
+python scripts/novelops_cli.py extract-state --project examples/demo-novel --chapter-file examples/demo-novel/chapters/ch02.md --json
 ```
 
 这里的输出是**候选项**，例如：
@@ -77,7 +77,7 @@ python scripts/inkos_cli.py extract-state --project examples/demo-novel --chapte
 确认候选项后，再写回 truth files：
 
 ```bash
-python scripts/inkos_cli.py state-update \
+python scripts/novelops_cli.py state-update \
   --project examples/demo-novel \
   --chapter 2 \
   --title "第二章 雨夜试探" \

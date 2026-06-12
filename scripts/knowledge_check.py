@@ -93,7 +93,7 @@ def build_report(project, chapter_file):
         counts[item['severity']] += 1
     ok = counts['critical'] == 0 and counts['major'] == 0
     return {
-        'schema_version': 'inkos.knowledge-check.v1',
+        'schema_version': 'novelops.knowledge-check.v1',
         'tool': 'knowledge_check',
         'generated_at': iso_now(),
         'project': str(project),

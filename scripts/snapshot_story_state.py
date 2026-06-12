@@ -87,7 +87,7 @@ def snapshot(project, label=None, chapter=None, notes=None):
         })
 
     manifest = {
-        'schema_version': 'inkos.state-snapshot.v1',
+        'schema_version': 'novelops.state-snapshot.v1',
         'tool': 'snapshot_story_state',
         'generated_at': iso_now(),
         'project': str(project),

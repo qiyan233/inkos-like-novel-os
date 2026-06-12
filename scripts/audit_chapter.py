@@ -73,7 +73,7 @@ def build_report(project, chapter_file):
         add(findings, 'AUD-000', 'critical', 'chapter-input', 'Chapter text is empty.', repair_targets=['Provide chapter text before auditing.'])
         counts = finding_counts(findings)
         return {
-            'schema_version': 'inkos.audit-report.v1',
+            'schema_version': 'novelops.audit-report.v1',
             'tool': 'audit_chapter',
             'generated_at': iso_now(),
             'project': str(project),
@@ -206,7 +206,7 @@ def build_report(project, chapter_file):
         overall = 'pass'
 
     return {
-        'schema_version': 'inkos.audit-report.v1',
+        'schema_version': 'novelops.audit-report.v1',
         'tool': 'audit_chapter',
         'generated_at': iso_now(),
         'project': str(project),
@@ -232,7 +232,7 @@ def build_report(project, chapter_file):
 
 
 def main():
-    parser = argparse.ArgumentParser(description='Heuristic chapter auditor for inkos-like-novel-os projects.')
+    parser = argparse.ArgumentParser(description='Heuristic chapter auditor for novelops-skill projects.')
     parser.add_argument('--project', required=True)
     parser.add_argument('--chapter-file', required=True)
     parser.add_argument('--json', action='store_true', help='Output JSON instead of Markdown.')

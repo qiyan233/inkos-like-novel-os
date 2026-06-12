@@ -85,7 +85,7 @@ def build_report(project, stale_after):
             })
     stale_hooks.sort(key=lambda x: (-x['age_chapters'], x['hook']))
     return {
-        'schema_version': 'inkos.hook-report.v1',
+        'schema_version': 'novelops.hook-report.v1',
         'tool': 'hook_report',
         'generated_at': iso_now(),
         'project': str(project),

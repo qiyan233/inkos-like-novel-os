@@ -1,12 +1,12 @@
-﻿# 快速上手 / Getting Started
+# 快速上手 / Getting Started
 
 
 
-本文给第一次接触 `inkos-like-novel-os` 的用户一个最小入口。
+本文给第一次接触 `NovelOps Skill` 的用户一个最小入口。
 
 
 
-> 推荐入口 / Recommended entrypoint：`python scripts/inkos_cli.py ...`
+> 推荐入口 / Recommended entrypoint：`python scripts/novelops_cli.py ...`
 
 
 ## 这个仓库是什么
@@ -31,9 +31,11 @@
 
 ```bash
 
-python scripts/inkos_cli.py init /path/to/project "书名"
+python scripts/novelops_cli.py init /path/to/project "书名"
 
 ```
+
+`init` 默认不会写入非空目录，避免误覆盖已有项目；确认覆盖模板文件时再加 `--force`。
 
 
 初始化后，优先补这些文件：
@@ -50,9 +52,9 @@ python scripts/inkos_cli.py init /path/to/project "书名"
 
 ```bash
 
-python scripts/inkos_cli.py context --project /path/to/project
+python scripts/novelops_cli.py context --project /path/to/project
 
-python scripts/inkos_cli.py audit --project /path/to/project --chapter-file /path/to/project/chapters/ch01.md
+python scripts/novelops_cli.py audit --project /path/to/project --chapter-file /path/to/project/chapters/ch01.md
 
 ```
 
@@ -64,7 +66,7 @@ python scripts/inkos_cli.py audit --project /path/to/project --chapter-file /pat
 
 ```bash
 
-python scripts/inkos_cli.py knowledge-check --project /path/to/project --chapter-file /path/to/project/chapters/ch01.md --json
+python scripts/novelops_cli.py knowledge-check --project /path/to/project --chapter-file /path/to/project/chapters/ch01.md --json
 
 ```
 
@@ -76,7 +78,7 @@ python scripts/inkos_cli.py knowledge-check --project /path/to/project --chapter
 
 ```bash
 
-python scripts/inkos_cli.py extract-state --project /path/to/project --chapter-file /path/to/project/chapters/ch01.md --json
+python scripts/novelops_cli.py extract-state --project /path/to/project --chapter-file /path/to/project/chapters/ch01.md --json
 
 ```
 
@@ -88,7 +90,7 @@ python scripts/inkos_cli.py extract-state --project /path/to/project --chapter-f
 
 ```bash
 
-python scripts/inkos_cli.py state-update --project /path/to/project --chapter 1 --title "第一章" --summary "..."
+python scripts/novelops_cli.py state-update --project /path/to/project --chapter 1 --title "第一章" --summary "..."
 
 ```
 
@@ -100,14 +102,17 @@ python scripts/inkos_cli.py state-update --project /path/to/project --chapter 1 
 
 ```bash
 
-python scripts/inkos_cli.py smoke-test
+python scripts/novelops_cli.py smoke-test
 
 ```
 
 
-这能帮助你确认当前环境下 CLI 与底层脚本链路是否正常。
-
-如果你要看 CLI 与底层脚本如何分工，可继续读 [`docs/cli.md`](cli.md)。
+这能帮助你确认当前环境下 CLI 与底层脚本链路是否正常。
+
+
+
+如果你要看 CLI 与底层脚本如何分工，可继续读 [`docs/cli.md`](cli.md)。
+
 
 ## 协作建议
 

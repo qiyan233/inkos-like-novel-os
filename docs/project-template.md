@@ -1,4 +1,4 @@
-﻿# 项目模板说明 / Project Template
+# 项目模板说明 / Project Template
 
 `assets/project-template/` 提供的是一个最小可用的长篇小说项目骨架，不是豪华模板，也不是固定写法。
 
@@ -7,14 +7,18 @@
 推荐先走 CLI：
 
 ```bash
-python scripts/inkos_cli.py init /path/to/project "书名"
+python scripts/novelops_cli.py init /path/to/project "书名"
 ```
+
+默认不会写入非空目录；如确认要覆盖模板文件，可加 `--force`。
 
 如需直接调用底层脚本，也可以：
 
 ```bash
 bash scripts/init_novel_project.sh /path/to/project "书名"
 ```
+
+底层脚本同样遵守非空目录保护，必要时可追加 `--force`。
 
 初始化后你会得到：
 
@@ -81,8 +85,8 @@ bash scripts/init_novel_project.sh /path/to/project "书名"
 
 每接受一章，至少做三件事：
 
-1. 用 `python scripts/inkos_cli.py extract-state ...` 先提取候选项
-2. 用 `python scripts/inkos_cli.py state-update ...` 更新 `chapter_summaries.md`、`pending_hooks.md` 等 truth files
+1. 用 `python scripts/novelops_cli.py extract-state ...` 先提取候选项
+2. 用 `python scripts/novelops_cli.py state-update ...` 更新 `chapter_summaries.md`、`pending_hooks.md` 等 truth files
 3. 检查 `current_state.md` 是否需要人工补充或整理
 
 如果这一章显著改变了关系或情绪，再补：

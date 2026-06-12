@@ -228,12 +228,12 @@ printf 'story state update ok\n'
 
 printf '\n===== write-next =====\n'
 W_JSON="$(run_python "$ROOT/scripts/build_write_next_packet.py" --project "$PROJECT" --json)"
-printf '%s' "$W_JSON" | run_python -c 'import json,sys; data=json.load(sys.stdin); assert data["schema_version"] == "inkos.write-next.v1"; assert data["chapter"] == 3; assert data["chapter_function"]["primary_goal"]; assert data["suggested_scene_beats"]; assert "只输出第 3 章正文。" in data["single_chapter_contract"]; print("write-next ok")' >/dev/null
+printf '%s' "$W_JSON" | run_python -c 'import json,sys; data=json.load(sys.stdin); assert data["schema_version"] == "novelops.write-next.v1"; assert data["chapter"] == 3; assert data["chapter_function"]["primary_goal"]; assert data["suggested_scene_beats"]; assert "只输出第 3 章正文。" in data["single_chapter_contract"]; print("write-next ok")' >/dev/null
 printf 'write-next ok\n'
 
 printf '\n===== revise =====\n'
 R_JSON="$(run_python "$ROOT/scripts/run_revision_cycle.py" --project "$PROJECT" --chapter-file "$PROJECT/chapters/ch01.md" --json)"
-printf '%s' "$R_JSON" | run_python -c 'import json,sys; data=json.load(sys.stdin); assert data["schema_version"] == "inkos.revision-cycle.v1"; assert data["summary"]["knowledge_check_run"] is True; assert "audit" in data and "revision_plan" in data and "spot_fixes" in data; print("revise ok")' >/dev/null
+printf '%s' "$R_JSON" | run_python -c 'import json,sys; data=json.load(sys.stdin); assert data["schema_version"] == "novelops.revision-cycle.v1"; assert data["summary"]["knowledge_check_run"] is True; assert "audit" in data and "revision_plan" in data and "spot_fixes" in data; print("revise ok")' >/dev/null
 printf 'revise ok\n'
 
 printf '\n===== hook_report =====\n'

@@ -103,7 +103,7 @@ def build_plan(project, chapter_file, audit_report):
     actions = build_actions(report)
     strategy = overall_strategy(report)
     return {
-        'schema_version': 'inkos.revision-plan.v1',
+        'schema_version': 'novelops.revision-plan.v1',
         'tool': 'build_revision_plan',
         'generated_at': iso_now(),
         'project': report.get('project'),

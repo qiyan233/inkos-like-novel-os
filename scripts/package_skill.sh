@@ -2,7 +2,7 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-SKILL_NAME="inkos-like-novel-os"
+SKILL_NAME="novelops-skill"
 OUTDIR="${1:-$(cd "$ROOT/../.." && pwd)/dist}"
 VERSION_SUFFIX="${2:-}"
 VERSION_FILE="$ROOT/VERSION"

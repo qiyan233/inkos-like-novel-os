@@ -59,7 +59,7 @@ def require_project_markers(project, markers=None):
     project = require_existing_dir(project, 'Project')
     markers = list(markers or DEFAULT_PROJECT_MARKERS)
     if markers and not any((project / name).exists() for name in markers):
-        raise SystemExit('Project does not look initialized: no standard InkOS files found under %s' % project)
+        raise SystemExit('Project does not look initialized: no standard NovelOps files found under %s' % project)
     return project
 
 

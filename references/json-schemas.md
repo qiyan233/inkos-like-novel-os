@@ -1,12 +1,12 @@
-﻿# JSON Schemas
+# JSON Schemas
 
 ## CLI-first note / CLI 优先说明
 
-这些 JSON 契约既可由底层脚本直接输出，也可通过 `python scripts/inkos_cli.py ... --json` 统一获取。对普通使用者，推荐优先走 CLI。
+这些 JSON 契约既可由底层脚本直接输出，也可通过 `python scripts/novelops_cli.py ... --json` 统一获取。对普通使用者，推荐优先走 CLI。
 
 这些不是 JSON Schema draft 文件，而是当前脚本输出的稳定 JSON 契约说明。
 
-## 1. `inkos.audit-report.v1`
+## 1. `novelops.audit-report.v1`
 
 来源：`scripts/audit_chapter.py --json`
 
@@ -32,7 +32,7 @@
 - `evidence[]`
 - `repair_targets[]`
 
-## 2. `inkos.next-context.v1`
+## 2. `novelops.next-context.v1`
 
 来源：`scripts/build_next_chapter_context.py --json`
 
@@ -48,7 +48,7 @@
 - `sections`
 - `context`
 
-## 3. `inkos.state-update.v1`
+## 3. `novelops.state-update.v1`
 
 来源：`scripts/update_story_state.py --json`
 
@@ -64,7 +64,7 @@
 - `updated_files[]`
 - `report_path`（仅 `--write-report` 时出现）
 
-## 4. `inkos.knowledge-check.v1`
+## 4. `novelops.knowledge-check.v1`
 
 来源：`scripts/knowledge_check.py --json`
 
@@ -90,7 +90,7 @@
 - `reason`
 - `suggested_fix`
 
-## 5. `inkos.hook-report.v1`
+## 5. `novelops.hook-report.v1`
 
 来源：`scripts/hook_report.py --json`
 
@@ -104,7 +104,7 @@
 - `hooks[]`
 - `stale_hooks[]`
 
-## 6. `inkos.extract-state.v1`
+## 6. `novelops.extract-state.v1`
 
 来源：`scripts/extract_state.py --json`
 
@@ -125,7 +125,7 @@
 - `emotions[]`
 - `write_mode`
 
-## 7. `inkos.write-next.v1`
+## 7. `novelops.write-next.v1`
 
 来源：`scripts/build_write_next_packet.py --json`
 
@@ -158,7 +158,7 @@
 - `constraints[]`
 - `state_targets[]`
 
-## 8. `inkos.revision-cycle.v1`
+## 8. `novelops.revision-cycle.v1`
 
 来源：`scripts/run_revision_cycle.py --json`
 
@@ -186,7 +186,7 @@
 - `human_review_needed`
 - `stale_hook_count`
 
-## 9. `inkos.longdoc-reverse.v1`
+## 9. `novelops.longdoc-reverse.v1`
 
 来源：`scripts/reverse_long_document.py --json`
 

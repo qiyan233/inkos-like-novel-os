@@ -1,16 +1,16 @@
-﻿# 安装与环境 / Installation
+# 安装与环境 / Installation
 
 如果你只想先跑起来，按下面做就够了。
 
-> 推荐入口 / Recommended entrypoint：`python scripts/inkos_cli.py ...`
+> 推荐入口 / Recommended entrypoint：`python scripts/novelops_cli.py ...`
 
 ## 方式一：直接使用仓库 / Use the repo directly
 
 ```bash
-git clone https://github.com/qiyan233/inkos-like-novel-os.git
-cd inkos-like-novel-os
-python scripts/inkos_cli.py --help
-python scripts/inkos_cli.py smoke-test
+git clone https://github.com/qiyan233/novelops-skill.git
+cd novelops-skill
+python scripts/novelops_cli.py --help
+python scripts/novelops_cli.py smoke-test
 ```
 
 适合你想：
@@ -43,7 +43,7 @@ bash scripts/package_skill.sh
 
 ```bash
 python -m py_compile scripts/*.py
-python scripts/inkos_cli.py smoke-test
+python scripts/novelops_cli.py smoke-test
 ```
 
 如果你更习惯直接调底层脚本，也可以继续使用：

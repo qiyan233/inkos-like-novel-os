@@ -106,7 +106,7 @@ def apply_update(project, chapter, title, summary, state_changes, hook_open, hoo
         updated_files.append(str(emotion_path))
 
     return {
-        'schema_version': 'inkos.state-update.v1',
+        'schema_version': 'novelops.state-update.v1',
         'tool': 'update_story_state',
         'generated_at': iso_now(),
         'project': str(project),

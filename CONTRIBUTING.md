@@ -1,6 +1,6 @@
-﻿# 贡献指南
+# 贡献指南
 
-感谢你关注 `inkos-like-novel-os`。
+感谢你关注 `NovelOps Skill`。
 
 这个仓库的定位是：**面向 OpenClaw 的长篇小说工作流 skill skeleton**。欢迎围绕这一定位提交改进，但请尽量保持变更聚焦，不把它扩张成完全不同的产品。
 

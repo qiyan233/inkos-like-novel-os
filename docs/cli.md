@@ -1,6 +1,8 @@
-﻿# CLI 入口 / CLI Entrypoint
+# CLI 入口 / CLI Entrypoint
 
-`python scripts/inkos_cli.py ...` 是这个仓库当前推荐的**统一主入口 / unified entrypoint**。
+`python scripts/novelops_cli.py ...` 是这个仓库当前推荐的**统一主入口 / unified entrypoint**。
+
+旧入口 `python scripts/inkos_cli.py ...` 仍作为兼容 wrapper 保留，但新文档和示例统一使用 `novelops_cli.py`。
 
 它不会改变底层脚本的职责，而是把常见工作流命令集中到一个地方，方便你在 README、docs、demo 和日常使用里走同一条路径。
 
@@ -31,19 +33,25 @@
 ### 初始化项目 / Initialize
 
 ```bash
-python scripts/inkos_cli.py init /path/to/project "书名"
+python scripts/novelops_cli.py init /path/to/project "书名"
+```
+
+安全规则：`init` 默认只允许写入不存在或空目录；如果目标目录已经非空，会拒绝执行。确认要覆盖模板文件时，显式使用：
+
+```bash
+python scripts/novelops_cli.py init /path/to/project "书名" --force
 ```
 
 ### 生成上下文 / Build context
 
 ```bash
-python scripts/inkos_cli.py context --project /path/to/project
+python scripts/novelops_cli.py context --project /path/to/project
 ```
 
 ### 生成下一章工作包 / Build write-next packet
 
 ```bash
-python scripts/inkos_cli.py write-next --project /path/to/project --json
+python scripts/novelops_cli.py write-next --project /path/to/project --json
 ```
 
 这个命令会在 `context` 的基础上补齐：
@@ -59,13 +67,13 @@ python scripts/inkos_cli.py write-next --project /path/to/project --json
 如果你想把结果落到 `reviews/` 里供后续自动化或人工 review 使用：
 
 ```bash
-python scripts/inkos_cli.py write-next --project /path/to/project --json --write-report
+python scripts/novelops_cli.py write-next --project /path/to/project --json --write-report
 ```
 
 ### 审计章节 / Audit chapter
 
 ```bash
-python scripts/inkos_cli.py audit \
+python scripts/novelops_cli.py audit \
   --project /path/to/project \
   --chapter-file /path/to/project/chapters/ch01.md
 ```
@@ -73,7 +81,7 @@ python scripts/inkos_cli.py audit \
 ### 提取候选状态 / Extract candidate state
 
 ```bash
-python scripts/inkos_cli.py extract-state \
+python scripts/novelops_cli.py extract-state \
   --project /path/to/project \
   --chapter-file /path/to/project/chapters/ch01.md \
   --json
@@ -82,7 +90,7 @@ python scripts/inkos_cli.py extract-state \
 ### 更新 truth files / Update truth files
 
 ```bash
-python scripts/inkos_cli.py state-update \
+python scripts/novelops_cli.py state-update \
   --project /path/to/project \
   --chapter 1 \
   --title "第一章" \
@@ -92,7 +100,7 @@ python scripts/inkos_cli.py state-update \
 ### 跑修订闭环 / Run revision cycle
 
 ```bash
-python scripts/inkos_cli.py revise \
+python scripts/novelops_cli.py revise \
   --project /path/to/project \
   --chapter-file /path/to/project/chapters/ch01.md \
   --json
@@ -109,7 +117,7 @@ python scripts/inkos_cli.py revise \
 如果你要把完整修订闭环结果存档到 `reviews/`：
 
 ```bash
-python scripts/inkos_cli.py revise \
+python scripts/novelops_cli.py revise \
   --project /path/to/project \
   --chapter-file /path/to/project/chapters/ch01.md \
   --json \
@@ -119,7 +127,7 @@ python scripts/inkos_cli.py revise \
 ### 长文档拆解 / Reverse long document
 
 ```bash
-python scripts/inkos_cli.py reverse-longdoc \
+python scripts/novelops_cli.py reverse-longdoc \
   --source /path/to/long-document.md \
   --workspace /path/to/reverse-workspace \
   --chapters-per-file 10 \
@@ -137,7 +145,7 @@ python scripts/inkos_cli.py reverse-longdoc \
 ### 跑回归 / Run smoke tests
 
 ```bash
-python scripts/inkos_cli.py smoke-test
+python scripts/novelops_cli.py smoke-test
 ```
 
 ## 补充说明 / Notes

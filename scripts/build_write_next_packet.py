@@ -174,7 +174,7 @@ def build_packet(project, chapter=None, recent_chapters=3, max_chars_per_file=18
     planned_payoff = hook_items[0]['hook'] if hook_items else primary_goal
 
     return {
-        'schema_version': 'inkos.write-next.v1',
+        'schema_version': 'novelops.write-next.v1',
         'tool': 'build_write_next_packet',
         'generated_at': iso_now(),
         'project': str(project),

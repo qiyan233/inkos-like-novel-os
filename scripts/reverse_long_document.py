@@ -95,7 +95,7 @@ def build_index(source_path, chapters, chapters_per_file):
                 'file': file_name,
             })
     return {
-        'schema_version': 'inkos.longdoc-index.v1',
+        'schema_version': 'novelops.longdoc-index.v1',
         'generated_at': iso_now(),
         'source': str(source_path),
         'total_chapters': total,
@@ -107,7 +107,7 @@ def build_index(source_path, chapters, chapters_per_file):
 
 def build_chunk_payload(source_path, chapters):
     return {
-        'schema_version': 'inkos.longdoc-chunk.v1',
+        'schema_version': 'novelops.longdoc-chunk.v1',
         'generated_at': iso_now(),
         'source': str(source_path),
         'start_chapter': chapters[0]['chapter_num'],
@@ -150,7 +150,7 @@ def analyze_chapter(item, source_file):
 
 def build_chunk_analysis(source_file, chunk_payload):
     return {
-        'schema_version': 'inkos.longdoc-chunk-analysis.v1',
+        'schema_version': 'novelops.longdoc-chunk-analysis.v1',
         'generated_at': iso_now(),
         'source_file': source_file,
         'chapters': [
@@ -192,7 +192,7 @@ def build_summary(source_path, analyses):
             all_emotions.extend(chapter['emotions'])
 
     return {
-        'schema_version': 'inkos.longdoc-summary.v1',
+        'schema_version': 'novelops.longdoc-summary.v1',
         'generated_at': iso_now(),
         'source': str(source_path),
         'total_chapters': len(chapters),
@@ -295,7 +295,7 @@ def run_pipeline(source, workspace, chapters_per_file):
     summary_md_path.write_text(summary_markdown(summary_payload), encoding='utf-8')
 
     return {
-        'schema_version': 'inkos.longdoc-reverse.v1',
+        'schema_version': 'novelops.longdoc-reverse.v1',
         'tool': 'reverse_long_document',
         'generated_at': iso_now(),
         'source': str(source_path),

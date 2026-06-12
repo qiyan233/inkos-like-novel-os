@@ -1,11 +1,11 @@
-﻿---
-name: inkos-like-novel-os
-description: Novel-production operating system for long-form fiction, web novels, serials, fanfiction, and side stories. Use when designing or running a structured writing pipeline with persistent world state, chapter summaries, hooks, character matrices, continuity audits, rewrite/revise loops, style guides, or per-book rules. Best for requests like building an InkOS-like skill, creating a long-novel workflow, keeping multi-chapter story consistency, generating/auditing/revising chapters, or maintaining story files across many chapters.
+---
+name: novelops-skill
+description: Novel-production operating system skill for long-form fiction, web novels, serials, fanfiction, and side stories. Use when designing or running a structured writing pipeline with persistent world state, chapter summaries, hooks, character matrices, continuity audits, rewrite/revise loops, style guides, or per-book rules. Best for requests like building an InkOS-inspired novel workflow skill, creating a long-novel workflow, keeping multi-chapter story consistency, generating/auditing/revising chapters, or maintaining story files across many chapters.
 ---
 
-# inkos-like-novel-os
+# NovelOps Skill
 
-Version: 0.5.1
+Version: 1.0.0
 
 Build and run long-form fiction as a stateful pipeline, not a one-shot prompt.
 
@@ -56,7 +56,7 @@ Expected files:
 默认优先使用统一入口：
 
 ```bash
-python scripts/inkos_cli.py <command> ...
+python scripts/novelops_cli.py <command> ...
 ```
 
 这样更适合日常使用、文档引用和后续自动化；底层脚本仍可直接调用，但建议视为 advanced / lower-level usage。
@@ -68,8 +68,10 @@ python scripts/inkos_cli.py <command> ...
 推荐：
 
 ```bash
-python scripts/inkos_cli.py init /path/to/project "Book Title"
+python scripts/novelops_cli.py init /path/to/project "Book Title"
 ```
+
+默认不会初始化到非空目录，避免覆盖已有小说项目；如果你确认要覆盖模板文件，可显式追加 `--force`。
 
 Lower-level usage / 底层脚本方式：
 
@@ -78,14 +80,14 @@ bash scripts/init_novel_project.sh /path/to/project "Book Title"
 ```
 
 This copies the template and creates the standard directory layout.
-For cross-platform usage, prefer `python scripts/inkos_cli.py init ...`.
+For cross-platform usage, prefer `python scripts/novelops_cli.py init ...`.
 
 #### 2) Build next-chapter context / 构建下一章上下文
 
 推荐：
 
 ```bash
-python scripts/inkos_cli.py context \
+python scripts/novelops_cli.py context \
   --project /path/to/project \
   --recent-chapters 3 \
   --json
@@ -105,7 +107,7 @@ python scripts/build_next_chapter_context.py \
 推荐：
 
 ```bash
-python scripts/inkos_cli.py write-next \
+python scripts/novelops_cli.py write-next \
   --project /path/to/project \
   --json
 ```
@@ -190,7 +192,7 @@ When the chapter depends on mystery, hidden truths, or strict POV, run:
 推荐：
 
 ```bash
-python scripts/inkos_cli.py knowledge-check \
+python scripts/novelops_cli.py knowledge-check \
   --project /path/to/project \
   --chapter-file /path/to/project/chapters/ch12.md \
   --json
@@ -230,7 +232,7 @@ Minimum audit set:
 Recommended command:
 
 ```bash
-python scripts/inkos_cli.py audit \
+python scripts/novelops_cli.py audit \
   --project /path/to/project \
   --chapter-file /path/to/project/chapters/ch12.md \
   --json
@@ -273,7 +275,7 @@ After a chapter is accepted, first extract candidate updates:
 推荐：
 
 ```bash
-python scripts/inkos_cli.py extract-state \
+python scripts/novelops_cli.py extract-state \
   --project /path/to/project \
   --chapter-file /path/to/project/chapters/ch12.md \
   --json
@@ -301,7 +303,7 @@ Then feed approved items into:
 推荐：
 
 ```bash
-python scripts/inkos_cli.py state-update \
+python scripts/novelops_cli.py state-update \
   --project /path/to/project \
   --chapter 12 \
   --title "The Price of Silence" \
@@ -335,7 +337,7 @@ When many hooks are active, run:
 推荐：
 
 ```bash
-python scripts/inkos_cli.py hook-report \
+python scripts/novelops_cli.py hook-report \
   --project /path/to/project \
   --stale-after 5 \
   --json
@@ -433,25 +435,25 @@ Good pattern:
 
 ## Bundled tools / 内置工具入口
 
-推荐优先记住这一个入口：`scripts/inkos_cli.py`。
+推荐优先记住这一个入口：`scripts/novelops_cli.py`。
 
 Common commands:
 
-- `python scripts/inkos_cli.py init ...` — scaffold a new novel project
-- `python scripts/inkos_cli.py context ...` — assemble next-chapter context
-- `python scripts/inkos_cli.py write-next ...` — build a structured write-next packet
-- `python scripts/inkos_cli.py audit ...` — run a chapter audit
-- `python scripts/inkos_cli.py knowledge-check ...` — detect knowledge-boundary / POV leaks
-- `python scripts/inkos_cli.py extract-state ...` — extract candidate state updates
-- `python scripts/inkos_cli.py hook-report ...` — summarize hook lifecycle state
-- `python scripts/inkos_cli.py state-update ...` — append structured story-state deltas and sync the latest accepted update into `current_state.md`
-- `python scripts/inkos_cli.py revision-plan ...` — build revision plan from chapter or audit
-- `python scripts/inkos_cli.py spot-fixes ...` — suggest low-risk local fixes
-- `python scripts/inkos_cli.py revise ...` — run the revision workflow as one cycle
-- `python scripts/inkos_cli.py snapshot ...` — create a state snapshot
-- `python scripts/inkos_cli.py diff ...` — diff snapshots or current state
-- `python scripts/inkos_cli.py smoke-test` — run smoke tests
-- `python scripts/inkos_cli.py package` — create a clean `.skill` package
+- `python scripts/novelops_cli.py init ...` — scaffold a new novel project
+- `python scripts/novelops_cli.py context ...` — assemble next-chapter context
+- `python scripts/novelops_cli.py write-next ...` — build a structured write-next packet
+- `python scripts/novelops_cli.py audit ...` — run a chapter audit
+- `python scripts/novelops_cli.py knowledge-check ...` — detect knowledge-boundary / POV leaks
+- `python scripts/novelops_cli.py extract-state ...` — extract candidate state updates
+- `python scripts/novelops_cli.py hook-report ...` — summarize hook lifecycle state
+- `python scripts/novelops_cli.py state-update ...` — append structured story-state deltas and sync the latest accepted update into `current_state.md`
+- `python scripts/novelops_cli.py revision-plan ...` — build revision plan from chapter or audit
+- `python scripts/novelops_cli.py spot-fixes ...` — suggest low-risk local fixes
+- `python scripts/novelops_cli.py revise ...` — run the revision workflow as one cycle
+- `python scripts/novelops_cli.py snapshot ...` — create a state snapshot
+- `python scripts/novelops_cli.py diff ...` — diff snapshots or current state
+- `python scripts/novelops_cli.py smoke-test` — run smoke tests
+- `python scripts/novelops_cli.py package` — create a clean `.skill` package
 
 Advanced / lower-level usage:
 

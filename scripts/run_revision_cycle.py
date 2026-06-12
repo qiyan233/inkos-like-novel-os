@@ -40,7 +40,7 @@ def build_cycle(project, chapter_file, run_knowledge_check=True):
     blocking_items += audit_report['summary']['counts']['critical'] + audit_report['summary']['counts']['major']
 
     return {
-        'schema_version': 'inkos.revision-cycle.v1',
+        'schema_version': 'novelops.revision-cycle.v1',
         'tool': 'run_revision_cycle',
         'generated_at': iso_now(),
         'project': str(project),
