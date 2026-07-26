@@ -7,7 +7,7 @@ import subprocess
 import sys
 from pathlib import Path
 
-from novelops_common import configure_stdio_utf8
+from novelops_common import configure_stdio_utf8, parse_chinese_numeral
 
 ROOT = Path(__file__).resolve().parent.parent
 CLI = ROOT / 'scripts' / 'novelops_cli.py'
@@ -353,6 +353,43 @@ def main():
         if 'all_state_changes' not in summary_data['aggregated']:
             raise AssertionError('reverse-longdoc aggregated summary missing state changes')
         print('reverse-longdoc entrypoint ok')
+
+        print('===== chinese chapter numbering regression =====')
+        expected_numerals = {'一': 1, '十二': 12, '一百零三': 103, '两百': 200, '三千': 3000}
+        for numeral, expected in expected_numerals.items():
+            actual = parse_chinese_numeral(numeral)
+            if actual != expected:
+                raise AssertionError('parse_chinese_numeral(%r) = %r, expected %r' % (numeral, actual, expected))
+        cn_source = tmp / 'cn-longdoc.md'
+        cn_workspace = tmp / 'cn-reverse-project'
+        cn_source.write_text(
+            """第三章 回廊夜话
+他在回廊里等到了徐安，两人围绕玉佩的来历彼此试探。
+
+第十二章 账册缺页
+他发现账册缺了关键一页，怀疑有人提前处理过记录。
+
+第一百零三章 尘埃落定
+真正的经手人终于浮出水面，旧案得以了结。
+""",
+            encoding='utf-8',
+        )
+        cn_reverse = run_cli(
+            'reverse-longdoc',
+            '--source',
+            str(cn_source),
+            '--workspace',
+            str(cn_workspace),
+            '--json',
+            check=False,
+        )
+        if cn_reverse.returncode != 0:
+            raise SystemExit(cn_reverse.stderr.strip() or cn_reverse.stdout.strip() or 'cn reverse-longdoc failed')
+        cn_index = json.loads(Path(json.loads(cn_reverse.stdout)['outputs']['index']).read_text(encoding='utf-8'))
+        cn_numbers = [row['chapter_num'] for row in cn_index['chapters']]
+        if cn_numbers != [3, 12, 103]:
+            raise AssertionError('chinese numeral chapter numbers mismatch: %r (expected [3, 12, 103])' % cn_numbers)
+        print('chinese chapter numbering ok')
 
         print('===== package entrypoint =====')
         dist = tmp / 'dist'

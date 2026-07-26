@@ -166,6 +166,34 @@ def extract_markdown_section(text, heading_title):
     return (text or '')[start:end].strip()
 
 
+CN_NUM_DIGITS = {'零': 0, '一': 1, '二': 2, '两': 2, '三': 3, '四': 4,
+                 '五': 5, '六': 6, '七': 7, '八': 8, '九': 9}
+CN_NUM_UNITS = {'十': 10, '百': 100, '千': 1000}
+
+
+def parse_chinese_numeral(text):
+    """把中文数字（一/十二/一百零三/两百/三千二百一十五，支持到千位）解析为 int；无法解析返回 None。"""
+    text = (text or '').strip()
+    if not text:
+        return None
+    if text.isdigit():
+        return int(text)
+    total = 0
+    num = 0
+    seen = False
+    for ch in text:
+        if ch in CN_NUM_DIGITS:
+            num = CN_NUM_DIGITS[ch]
+            seen = True
+        elif ch in CN_NUM_UNITS:
+            total += (num or 1) * CN_NUM_UNITS[ch]
+            num = 0
+            seen = True
+        else:
+            return None
+    return total + num if seen else None
+
+
 def parse_chapter_number(label):
     text = normalize_space(label)
     match = re.search(r'Chapter\s+(\d+)', text, flags=re.I)

@@ -5,7 +5,7 @@ import re
 from pathlib import Path
 
 from extract_state import build_report_from_text
-from novelops_common import iso_now, read_text, require_existing_file, write_json
+from novelops_common import iso_now, parse_chinese_numeral, read_text, require_existing_file, write_json
 
 HEADING_PATTERNS = [
     re.compile(r'^\s*#{1,6}\s*(Chapter\s+\d+.*)$', re.I),
@@ -58,9 +58,11 @@ def chapter_number_from_heading(heading, fallback):
     match = re.search(r'Chapter\s+(\d+)', heading, flags=re.I)
     if match:
         return int(match.group(1))
-    match = re.search(r'第\s*([0-9]+)\s*[章节回卷集部篇节]', heading)
+    match = re.search(r'第\s*([0-9一二三四五六七八九十百千零两]+)\s*[章节回卷集部篇节]', heading)
     if match:
-        return int(match.group(1))
+        value = parse_chinese_numeral(match.group(1))
+        if value is not None:
+            return value
     return fallback
 
 
