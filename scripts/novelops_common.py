@@ -15,6 +15,21 @@ DEFAULT_PROJECT_MARKERS = [
     'outline.md',
     'current_state.md',
 ]
+STATE_DIR_NAME = '.novelops-state'
+LEGACY_STATE_DIR_NAME = '.inkos-state'
+
+
+def state_root(project):
+    """写入用：始终返回 <project>/.novelops-state（不创建目录）。"""
+    return Path(project) / STATE_DIR_NAME
+
+
+def snapshot_roots(project):
+    """读取用：按优先级返回存在的快照根目录列表（新目录在前，旧目录兜底）。"""
+    project = Path(project)
+    return [project / name / 'snapshots'
+            for name in (STATE_DIR_NAME, LEGACY_STATE_DIR_NAME)
+            if (project / name / 'snapshots').exists()]
 
 
 def configure_stdio_utf8():

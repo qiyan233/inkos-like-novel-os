@@ -7,7 +7,7 @@ import shutil
 from datetime import datetime, timezone
 from pathlib import Path
 
-from novelops_common import iso_now, require_project_markers, write_json
+from novelops_common import iso_now, require_project_markers, state_root, write_json
 
 TRACKED_FILES = [
     'story_bible.md',
@@ -58,7 +58,7 @@ def unique_snapshot_dir(root, snapshot_id):
 
 def snapshot(project, label=None, chapter=None, notes=None):
     project = require_project_markers(project)
-    root = project / '.inkos-state' / 'snapshots'
+    root = state_root(project) / 'snapshots'
     root.mkdir(parents=True, exist_ok=True)
     stamp = datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%SZ')
     parts = [stamp]
@@ -101,7 +101,7 @@ def snapshot(project, label=None, chapter=None, notes=None):
     }
     write_json(dest / 'manifest.json', manifest)
 
-    index = project / '.inkos-state' / 'index.jsonl'
+    index = state_root(project) / 'index.jsonl'
     index.parent.mkdir(parents=True, exist_ok=True)
     with index.open('a', encoding='utf-8') as f:
         f.write(json.dumps({

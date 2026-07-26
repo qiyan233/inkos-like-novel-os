@@ -4,29 +4,31 @@ import difflib
 import json
 from pathlib import Path
 
-from novelops_common import iso_now, read_text, require_project_markers
+from novelops_common import iso_now, read_text, require_project_markers, snapshot_roots, state_root
 from snapshot_story_state import TRACKED_FILES
 
 
 def resolve_snapshot(project, ref):
     project = Path(project)
-    root = project / '.inkos-state' / 'snapshots'
+    roots = snapshot_roots(project)
     if ref == 'current':
         return {'kind': 'current', 'id': 'current', 'path': project, 'path_str': str(project)}
     if ref == 'latest':
-        if not root.exists():
-            raise SystemExit('No snapshots found under %s' % root)
-        choices = sorted([p for p in root.iterdir() if p.is_dir()])
+        choices = sorted(
+            [p for root in roots for p in root.iterdir() if p.is_dir()],
+            key=lambda p: p.name,
+        )
         if not choices:
-            raise SystemExit('No snapshots found under %s' % root)
+            raise SystemExit('No snapshots found under %s' % (state_root(project) / 'snapshots'))
         target = choices[-1]
         return {'kind': 'snapshot', 'id': target.name, 'path': target, 'path_str': str(target)}
     path = Path(ref)
     if path.exists():
         return {'kind': 'snapshot', 'id': path.name, 'path': path, 'path_str': str(path)}
-    target = root / ref
-    if target.exists():
-        return {'kind': 'snapshot', 'id': target.name, 'path': target, 'path_str': str(target)}
+    for root in roots:
+        target = root / ref
+        if target.exists():
+            return {'kind': 'snapshot', 'id': target.name, 'path': target, 'path_str': str(target)}
     raise SystemExit('Snapshot ref not found: %s' % ref)
 
 

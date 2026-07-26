@@ -30,6 +30,8 @@
 ### 状态快照器
 负责在章节接受或重大调整前后留下 truth files 的可回溯版本。
 
+快照存放在 `<project>/.novelops-state/snapshots/` 下；旧项目遗留在 `.inkos-state/` 中的历史快照仍可被 `diff_story_state.py` 读取（`latest` 与快照 ID 解析都会自动回退到旧目录）。
+
 ## 核心原则
 
 - 先定修订策略，再动正文

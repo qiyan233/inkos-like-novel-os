@@ -348,6 +348,36 @@ def main():
         json.loads(bare_fixes.stdout)
         print('write-report guard ok')
 
+        print('===== snapshot dir & legacy fallback regression =====')
+        snap_manifest = json.loads(run_cli('snapshot', '--project', str(project), '--json').stdout)
+        if '.novelops-state' not in snap_manifest['snapshot_dir']:
+            raise AssertionError('snapshot should be written under .novelops-state, got: %s' % snap_manifest['snapshot_dir'])
+        if not (project / '.novelops-state' / 'snapshots').exists():
+            raise AssertionError('snapshot did not create .novelops-state/snapshots')
+        if not (project / '.novelops-state' / 'index.jsonl').exists():
+            raise AssertionError('snapshot did not append .novelops-state/index.jsonl')
+        if (project / '.inkos-state').exists():
+            raise AssertionError('snapshot should not create the legacy .inkos-state directory')
+        legacy_project = tmp / 'legacy-snap-novel'
+        legacy_init = run_cli('init', str(legacy_project), '旧快照项目', check=False)
+        if legacy_init.returncode != 0:
+            raise SystemExit(legacy_init.stderr.strip() or legacy_init.stdout.strip() or 'legacy project init failed')
+        legacy_snapshot_dir = legacy_project / '.inkos-state' / 'snapshots' / '20200101T000000Z-ch001-legacy'
+        legacy_snapshot_dir.mkdir(parents=True)
+        shutil.copy2(str(legacy_project / 'current_state.md'), str(legacy_snapshot_dir / 'current_state.md'))
+        with (legacy_project / 'current_state.md').open('a', encoding='utf-8') as f:
+            f.write('\n- 旧快照回退测试：当前状态已推进。\n')
+        legacy_diff = run_cli('diff', '--project', str(legacy_project), '--from', 'latest', '--to', 'current', '--json', check=False)
+        if legacy_diff.returncode != 0:
+            raise AssertionError('diff should read snapshots from the legacy .inkos-state directory: %s'
+                                 % (legacy_diff.stderr or legacy_diff.stdout or '').strip())
+        legacy_diff_data = json.loads(legacy_diff.stdout)
+        if legacy_diff_data['from']['id'] != '20200101T000000Z-ch001-legacy':
+            raise AssertionError('diff latest should resolve to the legacy snapshot, got: %s' % legacy_diff_data['from']['id'])
+        if legacy_diff_data['summary']['changed_files'] < 1:
+            raise AssertionError('legacy fallback diff should report changes')
+        print('snapshot dir & legacy fallback ok')
+
         print('===== reverse-longdoc entrypoint =====')
         longdoc_source = tmp / 'longdoc-source.md'
         longdoc_workspace = tmp / 'reverse-project'
