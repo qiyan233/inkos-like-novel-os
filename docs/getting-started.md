@@ -56,7 +56,7 @@ python scripts/novelops_cli.py context --project /path/to/project
 
 ```
 
-`context` 之后，先由你（或 agent）依据上下文起草一章正文（draft），保存为 `/path/to/project/chapters/ch01.md`，然后再对它跑审计：
+`context` 之后，先由你（或 agent）依据上下文起草一章正文（draft），保存为 `/path/to/project/chapters/ch01.md`——也可以用 `python scripts/novelops_cli.py draft ...` 交给本地 Hermes 模型自动起草（见 [llm-drafting.md](llm-drafting.md)），然后再对它跑审计：
 
 ```bash
 

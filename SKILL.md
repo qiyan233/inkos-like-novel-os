@@ -17,10 +17,10 @@ Use this loop:
 
 1. **Load truth files**
 2. **Plan the next chapter**
-3. **Draft with constraints**
+3. **Draft with constraints** — 可由人或 agent 执笔；也可用 `draft` 命令交给 Hermes 等 OpenAI 兼容模型自动起草（见下文 Bundled tools）
 4. **Run knowledge-boundary checks when the chapter depends on hidden truths or limited POV**
 5. **Audit for continuity / style / pacing / leaks**
-6. **Revise with spot fixes first**
+6. **Revise with spot fixes first** — 局部性问题可用 `auto-revise` 命令做 LLM 段落级最小化重写（默认只出 diff，`--apply` 才写回）
 7. **Extract candidate state updates from the accepted draft**
 8. **Update story state**
 9. **Queue unresolved issues for human review**
@@ -46,6 +46,7 @@ Expected files:
 - `continuity_issues.md` — known inconsistencies or manual review backlog
 - `style_guide.md` — qualitative style guide
 - `style_profile.json` — optional quantitative style stats
+- `novelops.config.json` — optional project config: LLM endpoint/model, audit rule overrides, knowledge-check overrides
 - `chapters/` — chapter markdown files
 - `reviews/` — audit and revision reports
 
@@ -442,6 +443,8 @@ Common commands:
 - `python scripts/novelops_cli.py init ...` — scaffold a new novel project
 - `python scripts/novelops_cli.py context ...` — assemble next-chapter context
 - `python scripts/novelops_cli.py write-next ...` — build a structured write-next packet
+- `python scripts/novelops_cli.py draft ...` — draft the next chapter with an OpenAI-compatible LLM (Hermes-first; supports `--dry-run` / `--mock-response`)
+- `python scripts/novelops_cli.py auto-revise ...` — LLM paragraph-level minimal revision (diff by default, `--apply` writes back after snapshot + backup)
 - `python scripts/novelops_cli.py audit ...` — run a chapter audit
 - `python scripts/novelops_cli.py knowledge-check ...` — detect knowledge-boundary / POV leaks
 - `python scripts/novelops_cli.py extract-state ...` — extract candidate state updates
@@ -460,6 +463,10 @@ Advanced / lower-level usage:
 - `scripts/init_novel_project.sh`
 - `scripts/build_next_chapter_context.py`
 - `scripts/build_write_next_packet.py`
+- `scripts/draft_chapter.py`
+- `scripts/auto_revise.py`
+- `scripts/llm_client.py`（LLM 传输层）
+- `scripts/novelops_config.py`（项目配置加载）
 - `scripts/audit_chapter.py`
 - `scripts/knowledge_check.py`
 - `scripts/extract_state.py`

@@ -126,6 +126,57 @@ python scripts/novelops_cli.py revise \
   --write-report
 ```
 
+### LLM 起草章节 / Draft with an LLM
+
+```bash
+python scripts/novelops_cli.py draft \
+  --project /path/to/project \
+  --chapter 3 \
+  --json
+```
+
+把 write-next 工作包交给 OpenAI 兼容模型（默认本地 Ollama 上的 Hermes）生成单章草稿并写入 `chapters/ch03.md`。已存在的章节需要 `--force` 才会覆盖。
+
+离线调试：
+
+```bash
+# 只输出请求 payload，不联网
+python scripts/novelops_cli.py draft --project /path/to/project --chapter 3 --dry-run --json
+
+# 用文件内容充当模型响应，走完整校验与落盘链路
+python scripts/novelops_cli.py draft --project /path/to/project --chapter 3 --mock-response mock.txt --json
+```
+
+接入方式与排错见 [llm-drafting.md](llm-drafting.md)。
+
+### LLM 自动修订 / Auto revise with an LLM
+
+```bash
+# 缺省：只输出整章 diff，不写盘
+python scripts/novelops_cli.py auto-revise \
+  --project /path/to/project \
+  --chapter-file /path/to/project/chapters/ch03.md \
+  --json
+
+# 确认 diff 后写回（先自动 snapshot + 章节备份）
+python scripts/novelops_cli.py auto-revise \
+  --project /path/to/project \
+  --chapter-file /path/to/project/chapters/ch03.md \
+  --apply --json
+```
+
+跑完修订闭环后，把可局部修补（local-dimension）的问题段落交 LLM 做最小化重写；同样支持 `--dry-run` 与 `--mock-response`。
+
+### 项目级配置 / Project config
+
+`init` 会在项目根生成 `novelops.config.json`，三个节都可省略：
+
+- `llm`：模型接入（默认本地 Ollama `http://localhost:11434/v1`；接 Nous Portal 云端改 `base_url` 为 `https://inference-api.nousresearch.com/v1` 并设环境变量 `NOVELOPS_LLM_API_KEY`）
+- `audit`：审计规则定制——关键词表 extend/replace/disable、逐规则阈值覆盖、`rules_disabled` 禁用规则
+- `knowledge`：知识边界检查定制——token 表、自定义泄漏正则、`kinds_disabled`
+
+字段清单见 [references/json-schemas.md](../references/json-schemas.md) 第 14 节；无配置时所有行为与 1.0.0 一致。
+
 ### 长文档拆解 / Reverse long document
 
 ```bash

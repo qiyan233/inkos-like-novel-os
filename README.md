@@ -21,7 +21,8 @@
 
 - 用 truth files 维护世界观和当前状态
 - 用 `write-next` 准备下一章
-- 用 `revise` 做修订闭环
+- 用 `draft` 把工作包交给 Hermes 等 LLM 直接起草（默认本地 Ollama）
+- 用 `revise` 做修订闭环，用 `auto-revise` 做 LLM 段落级自动修订
 - 用 `extract-state` / `state-update` 维护长期状态
 
 也就是说，它不是只负责“写”，而是负责把**多章写作**这件事组织起来。
@@ -126,17 +127,19 @@ README 负责介绍项目，`SKILL.md` 才更接近“这个 skill 真正怎么�
 它已经能覆盖的事情：
 
 - 下一章准备
+- LLM 写作执行器（`draft`，Hermes 优先，默认本地 Ollama，云端 Nous Portal 可切换）
 - 修订闭环
+- LLM 段落级自动修订（`auto-revise`，默认出 diff，`--apply` 前自动快照）
+- 可配置规则引擎（`novelops.config.json` 定制审计词表/阈值/禁用规则）
 - 状态提取
 - truth files 更新
 - 基础回归和打包
 
 还没做到的事情也很明确：
 
-- 真正的 LLM 写作执行器
-- 更强的规则引擎
-- 更深入的自动修订
 - 更多完整示例项目
+- 多模型对比与自动重试策略
+- 更细粒度的风格学习自动化
 
 ---
 
