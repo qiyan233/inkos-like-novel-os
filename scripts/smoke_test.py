@@ -579,6 +579,66 @@ def main():
             raise AssertionError('NOVELOPS_LLM_MOCK env channel should behave like --mock-response')
         print('draft dry-run & mock ok')
 
+        print('===== auto-revise offline paths =====')
+        ar_ch03 = draft_project / 'chapters' / 'ch03.md'
+        ar_paragraph = '他突然停下，又突然抬头，突然转身，随后突然开口，语气突然放缓。'
+        ar_ch03.write_text(
+            '# 第三章\n\n%s\n\n灯芯安静地燃着，屋里只剩雨声。\n' % ar_paragraph,
+            encoding='utf-8',
+        )
+        ar_before = ar_ch03.read_text(encoding='utf-8')
+
+        ar_dry = json.loads(
+            run_cli('auto-revise', '--project', str(draft_project), '--chapter-file', str(ar_ch03),
+                    '--dry-run', '--json').stdout
+        )
+        if ar_dry['schema_version'] != 'novelops.auto-revise.v1' or ar_dry['mode'] != 'dry-run':
+            raise AssertionError('auto-revise dry-run schema/mode mismatch')
+        if not ar_dry['targets']:
+            raise AssertionError('auto-revise dry-run should find at least one target paragraph')
+        ar_dry_payload = ar_dry['targets'][0].get('payload')
+        if not ar_dry_payload or not ar_dry_payload.get('messages'):
+            raise AssertionError('auto-revise dry-run target should carry a chat payload')
+        if ar_paragraph not in ar_dry_payload['messages'][1]['content']:
+            raise AssertionError('auto-revise prompt should contain the target paragraph text')
+        if ar_ch03.read_text(encoding='utf-8') != ar_before:
+            raise AssertionError('auto-revise dry-run must not modify the chapter file')
+
+        ar_mock_file = tmp / 'auto-revise-mock.json'
+        ar_mock_file.write_text('他停下脚步，抬头看了一眼，转身之后才缓缓开口，语气比先前放得更轻。', encoding='utf-8')
+        ar_diff = json.loads(
+            run_cli('auto-revise', '--project', str(draft_project), '--chapter-file', str(ar_ch03),
+                    '--mock-response', str(ar_mock_file), '--json').stdout
+        )
+        if ar_diff['mode'] != 'diff' or ar_diff['summary']['paragraphs_rewritten'] < 1:
+            raise AssertionError('auto-revise diff mode should rewrite at least one paragraph')
+        if not any(line.startswith('-') for line in ar_diff['diff']) or not any(line.startswith('+') for line in ar_diff['diff']):
+            raise AssertionError('auto-revise diff should contain both removed and added lines')
+        if ar_ch03.read_text(encoding='utf-8') != ar_before:
+            raise AssertionError('auto-revise diff mode must not modify the chapter file')
+        if ar_diff['snapshot'] is not None:
+            raise AssertionError('auto-revise diff mode should not snapshot')
+
+        ar_apply = json.loads(
+            run_cli('auto-revise', '--project', str(draft_project), '--chapter-file', str(ar_ch03),
+                    '--mock-response', str(ar_mock_file), '--apply', '--json').stdout
+        )
+        if ar_apply['mode'] != 'apply' or ar_apply['summary']['applied'] is not True:
+            raise AssertionError('auto-revise --apply should mark applied')
+        ar_after = ar_ch03.read_text(encoding='utf-8')
+        if ar_after == ar_before or ar_after.count('突然') >= ar_before.count('突然'):
+            raise AssertionError('auto-revise --apply should reduce the repeated transition word')
+        ar_snapshot = ar_apply['snapshot']
+        if not ar_snapshot or not ar_snapshot.get('snapshot_id'):
+            raise AssertionError('auto-revise --apply should create a snapshot first')
+        snapshot_manifest = draft_project / '.novelops-state' / 'snapshots' / ar_snapshot['snapshot_id'] / 'manifest.json'
+        if not snapshot_manifest.exists():
+            raise AssertionError('auto-revise --apply snapshot manifest missing')
+        ar_backup = Path(ar_snapshot['chapter_backup'])
+        if not ar_backup.exists() or ar_backup.read_text(encoding='utf-8') != ar_before:
+            raise AssertionError('auto-revise --apply should back up the original chapter text')
+        print('auto-revise offline paths ok')
+
         print('===== update_story_state =====')
         state_update = run_script(
             'update_story_state.py',
