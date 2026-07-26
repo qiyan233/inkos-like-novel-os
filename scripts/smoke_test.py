@@ -374,6 +374,76 @@ def main():
         cfg_config_path.write_text(json.dumps({'audit': {}, 'knowledge': {}}, ensure_ascii=False), encoding='utf-8')
         print('audit config engine ok')
 
+        print('===== knowledge config engine =====')
+        kn_ch = cfg_project / 'chapters' / 'kn01.md'
+        kn_ch.write_text('# 章节\n\n林烬早就知道真相。\n\n没人知道的是，账册已被换过。\n', encoding='utf-8')
+
+        def cfg_knowledge():
+            return json.loads(
+                run_cli('knowledge-check', '--project', str(cfg_project), '--chapter-file', str(kn_ch), '--json').stdout
+            )
+
+        kn_with_cfg = cfg_knowledge()
+        cfg_config_path.unlink()
+        kn_no_cfg = cfg_knowledge()
+        if kn_with_cfg['violations'] != kn_no_cfg['violations'] or kn_with_cfg['ok'] != kn_no_cfg['ok']:
+            raise AssertionError('empty knowledge config must not change violations')
+        if 'config' not in kn_no_cfg['summary'] or kn_no_cfg['summary']['config']['config_file'] is not None:
+            raise AssertionError('knowledge summary should carry a config block with config_file None when unconfigured')
+        if not any(v['type'] == 'knowledge-leak' for v in kn_no_cfg['violations']):
+            raise AssertionError('default knowledge-leak pattern behavior changed')
+        if not any(v['type'] == 'omniscient-leak' and v['severity'] == 'major' for v in kn_no_cfg['violations']):
+            raise AssertionError('default omniscient-leak behavior changed')
+        if kn_no_cfg['ok'] is not False:
+            raise AssertionError('major omniscient-leak should make ok False')
+
+        cfg_config_path.write_text(json.dumps({
+            'knowledge': {'kinds_disabled': ['omniscient-leak']}
+        }, ensure_ascii=False), encoding='utf-8')
+        kn_disabled = cfg_knowledge()
+        if any(v['type'] == 'omniscient-leak' for v in kn_disabled['violations']):
+            raise AssertionError('disabled omniscient-leak should not produce violations')
+        if kn_disabled['ok'] is not True:
+            raise AssertionError('with omniscient-leak disabled the remaining minor leak should leave ok True')
+        if kn_disabled['summary']['config']['kinds_disabled'] != ['omniscient-leak']:
+            raise AssertionError('knowledge summary.config should record kinds_disabled')
+
+        cfg_config_path.write_text(json.dumps({
+            'knowledge': {'leak_patterns': {'mode': 'extend', 'items': [{'kind': 'knowledge-leak', 'pattern': '早已看穿'}]}}
+        }, ensure_ascii=False), encoding='utf-8')
+        kn_ch.write_text('# 章节\n\n他早已看穿一切。\n', encoding='utf-8')
+        kn_extended = cfg_knowledge()
+        if not any(v['type'] == 'knowledge-leak' and '早已看穿' in v['evidence'] for v in kn_extended['violations']):
+            raise AssertionError('extended leak pattern should trigger a violation')
+
+        (cfg_project / 'current_state.md').write_text(
+            '# Current State\n\n## Character beliefs\n- 林烬：并不清楚玉佩的真相\n', encoding='utf-8')
+        kn_ch.write_text('# 章节\n\n林烬看出了真相的全部内情。\n', encoding='utf-8')
+        cfg_config_path.unlink()
+        kn_belief = cfg_knowledge()
+        if not any(v.get('character') == '林烬' for v in kn_belief['violations']):
+            raise AssertionError('belief-based knowledge leak should trigger by default')
+        cfg_config_path.write_text(json.dumps({
+            'knowledge': {'keywords': {'BELIEF_SUSPICION_TOKENS': {'mode': 'extend', 'items': ['看出']}}}
+        }, ensure_ascii=False), encoding='utf-8')
+        kn_exempted = cfg_knowledge()
+        if any(v.get('character') == '林烬' for v in kn_exempted['violations']):
+            raise AssertionError('extended suspicion token should exempt the belief-based violation')
+
+        for bad_kn_cfg in (
+            {'knowledge': {'kinds_disabled': ['not-a-kind']}},
+            {'knowledge': {'leak_patterns': {'mode': 'extend', 'items': [{'kind': 'knowledge-leak', 'pattern': '('}]}}},
+            {'knowledge': {'keywords': {'NOT_A_TABLE': {'mode': 'extend', 'items': ['x']}}}},
+        ):
+            cfg_config_path.write_text(json.dumps(bad_kn_cfg, ensure_ascii=False), encoding='utf-8')
+            bad_kn_run = run_cli('knowledge-check', '--project', str(cfg_project), '--chapter-file', str(kn_ch), '--json', check=False)
+            if bad_kn_run.returncode == 0:
+                raise AssertionError('invalid knowledge config should fail: %r' % bad_kn_cfg)
+            if 'Traceback' in (bad_kn_run.stderr or ''):
+                raise AssertionError('invalid knowledge config should not raise a traceback: %s' % bad_kn_run.stderr.strip())
+        cfg_config_path.write_text(json.dumps({'audit': {}, 'knowledge': {}}, ensure_ascii=False), encoding='utf-8')
+        print('knowledge config engine ok')
+
         print('===== update_story_state =====')
         state_update = run_script(
             'update_story_state.py',
