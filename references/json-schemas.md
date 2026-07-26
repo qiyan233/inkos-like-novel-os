@@ -15,13 +15,15 @@
 - `tool`
 - `generated_at`
 - `project`
-- `chapter`
+- `chapter`（因历史原因为章节文件路径字符串，语义保持不变）
+- `chapter_file`（与 `chapter` 同值的章节文件路径，用于与 knowledge-check 的字段约定对齐）
 - `overall`
 - `summary`
 - `source_files`
 - `chapter_metrics`
 - `findings[]`
 - `minimal_fix_plan[]`
+- `report_path`（仅 `--write-report` 时出现）
 
 ### `findings[]`
 每条 finding 包含：
@@ -167,7 +169,8 @@
 - `tool`
 - `generated_at`
 - `project`
-- `chapter`
+- `chapter`（章节文件路径字符串）
+- `chapter_file`（与 `chapter` 同值）
 - `status`
 - `summary`
 - `recommended_sequence[]`
@@ -210,6 +213,141 @@
 - `chunk_analysis_dir`
 - `summary_json`
 - `summary_md`
+
+## 10. `novelops.revision-plan.v1`
+
+来源：`scripts/build_revision_plan.py --json`
+
+核心字段：
+- `schema_version`
+- `tool`
+- `generated_at`
+- `project`
+- `chapter`（沿用 audit 报告中的章节文件路径）
+- `chapter_file`（优先取 audit 报告的 `chapter_file`，缺失时回退 `chapter`）
+- `based_on`
+- `overall_strategy`
+- `summary`
+- `source_files[]`
+- `minimal_fix_plan[]`
+- `actions[]`
+- `report_path`（仅 `--write-report` 时出现）
+
+### `based_on`
+- `schema_version`
+- `overall`
+
+### `overall_strategy`
+- `mode`（`block-and-patch` / `targeted-scene-rewrite` / `targeted-rewrite` / `spot-fix-pass` / `light-pass-or-accept`）
+- `reason`
+
+### `summary`
+- `action_count`
+- `human_review_needed`
+- `counts`
+
+### `actions[]`
+每条 action 包含：
+- `action_id`（`REV-001` 起）
+- `priority`
+- `rule_id`
+- `dimension`
+- `target_scope`
+- `needs_human_review`
+- `goal`
+- `recommended_strategy`
+- `repair_targets[]`
+- `evidence[]`
+
+## 11. `novelops.spot-fix-suggestions.v1`
+
+来源：`scripts/suggest_spot_fixes.py --json`
+
+核心字段：
+- `schema_version`
+- `tool`
+- `generated_at`
+- `project`
+- `chapter`（沿用 audit 报告中的章节文件路径）
+- `chapter_file`（优先取 audit 报告的 `chapter_file`，缺失时回退 `chapter`）
+- `based_on`
+- `summary`
+- `suggestions[]`
+- `report_path`（仅 `--write-report` 时出现）
+
+### `summary`
+- `suggestion_count`
+- `local_dimensions[]`
+
+### `suggestions[]`
+每条 suggestion 包含：
+- `suggestion_id`（`FIX-001` 起）
+- `rule_id`
+- `severity`
+- `dimension`
+- `snippet`
+- `suggested_action`
+- `repair_targets[]`
+- `confidence`
+
+## 12. `novelops.state-snapshot.v1`
+
+来源：`scripts/snapshot_story_state.py --json`
+
+快照写入 `<project>/.novelops-state/snapshots/<snapshot_id>/`，并在 `<project>/.novelops-state/index.jsonl` 追加一行索引。
+
+核心字段：
+- `schema_version`
+- `tool`
+- `generated_at`
+- `project`
+- `snapshot_id`
+- `snapshot_dir`
+- `label`
+- `chapter`
+- `notes`
+- `files_copied[]`
+- `files_missing[]`
+
+### `files_copied[]`
+每条包含：
+- `path`
+- `bytes`
+- `sha1`
+
+## 13. `novelops.state-diff.v1`
+
+来源：`scripts/diff_story_state.py --json`
+
+`latest` 与裸快照 ID 的解析会优先查 `.novelops-state/snapshots/`，查不到时回退兼容旧的 `.inkos-state/snapshots/`。
+
+核心字段：
+- `schema_version`
+- `tool`
+- `generated_at`
+- `project`
+- `from`
+- `to`
+- `summary`
+- `file_diffs[]`
+
+### `from` / `to`
+- `kind`（`current` / `snapshot`）
+- `id`
+- `path`
+
+### `summary`
+- `changed_files`
+- `added_lines`
+- `removed_lines`
+
+### `file_diffs[]`
+每条包含：
+- `path`
+- `status`（`added` / `removed` / `changed`）
+- `added_lines`
+- `removed_lines`
+- `diff_excerpt[]`（unified diff 片段，最多 80 行）
 
 ## 稳定性原则
 
