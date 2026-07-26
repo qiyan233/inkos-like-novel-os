@@ -1,6 +1,6 @@
 # Chapter Summaries
 
-## Chapter 1 - 第一章 库房旧玉
+## Chapter 1 - 第一章 库房异响
 - POV: 林烬
 - Summary: 林烬在徐家旧库房清点旧物时，察觉家传玉佩的手感与磨痕不对，第一次生出“有人提前动过它”的怀疑。
 - Key events:

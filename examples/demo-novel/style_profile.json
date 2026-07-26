@@ -1,7 +1,8 @@
 {
-  "notes": [
-    "short to medium paragraphs",
-    "detail-first suspense",
-    "limited POV"
-  ]
+  "avgSentenceLength": 21.4,
+  "paragraphLengthRange": [4, 86],
+  "dialogueRatio": 0.27,
+  "lexicalDiversity": 0.26,
+  "favoriteTransitions": ["只是", "却", "可", "才"],
+  "notes": "统计自 ch01-ch02 正文：短中段落为主，细节先行的悬疑推进，严格限制视角（limited POV）。"
 }
