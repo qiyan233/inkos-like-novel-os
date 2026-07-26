@@ -46,7 +46,8 @@ def snippet_around(text, token, radius=70):
 
 def build_suggestions(project, chapter_file, audit_report):
     report = load_audit(project, chapter_file, audit_report)
-    chapter_text = read_text(report['chapter'])
+    chapter_ref = report.get('chapter_file') or report.get('chapter')
+    chapter_text = read_text(chapter_ref) if chapter_ref else ''
     suggestions = []
     for idx, finding in enumerate(report['findings'], 1):
         if finding['dimension'] not in LOCAL_DIMENSIONS:
@@ -116,8 +117,15 @@ def main():
     data = build_suggestions(args.project, args.chapter_file, args.audit_report)
 
     if args.write_report:
-        chapter_stem = Path(data['chapter']).stem
-        out = Path(data['project']) / 'reviews' / ('%s.spot-fixes.json' % chapter_stem)
+        project_dir = data.get('project')
+        chapter_ref = data.get('chapter_file') or data.get('chapter')
+        if not project_dir or not chapter_ref:
+            raise SystemExit(
+                '--write-report requires "project" and "chapter"/"chapter_file" in the audit report; '
+                'the provided --audit-report JSON is missing them. '
+                'Pass --project/--chapter-file instead, or omit --write-report.')
+        chapter_stem = Path(chapter_ref).stem
+        out = Path(project_dir) / 'reviews' / ('%s.spot-fixes.json' % chapter_stem)
         data['report_path'] = str(out)
         write_json(out, data)
 

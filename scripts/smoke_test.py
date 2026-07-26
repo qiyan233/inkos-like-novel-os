@@ -304,6 +304,34 @@ def main():
             raise AssertionError('revise missing stale hook count')
         print('revise entrypoint ok')
 
+        print('===== write-report guard regression =====')
+        audit_json = json.loads(
+            run_cli('audit', '--project', str(project), '--chapter-file', str(project / 'chapters' / 'ch01.md'), '--json').stdout
+        )
+        partial_audit = dict(audit_json)
+        partial_audit.pop('project', None)
+        partial_audit_path = tmp / 'partial-audit.json'
+        partial_audit_path.write_text(json.dumps(partial_audit, ensure_ascii=False, indent=2), encoding='utf-8')
+        for subcommand in ('revision-plan', 'spot-fixes'):
+            guarded = run_cli(subcommand, '--audit-report', str(partial_audit_path), '--write-report', check=False)
+            if guarded.returncode == 0:
+                raise AssertionError('%s --write-report should fail when the audit report lacks "project"' % subcommand)
+            guarded_stderr = guarded.stderr or ''
+            if '--write-report requires' not in guarded_stderr:
+                raise AssertionError('%s guard error should mention --write-report requires, got: %s' % (subcommand, guarded_stderr.strip()))
+            if 'Traceback' in guarded_stderr:
+                raise AssertionError('%s guard should not raise a traceback:\n%s' % (subcommand, guarded_stderr.strip()))
+        bare_audit = dict(partial_audit)
+        bare_audit.pop('chapter', None)
+        bare_audit.pop('chapter_file', None)
+        bare_audit_path = tmp / 'bare-audit.json'
+        bare_audit_path.write_text(json.dumps(bare_audit, ensure_ascii=False, indent=2), encoding='utf-8')
+        bare_fixes = run_cli('spot-fixes', '--audit-report', str(bare_audit_path), '--json', check=False)
+        if bare_fixes.returncode != 0:
+            raise AssertionError('spot-fixes without --write-report should tolerate a report missing "chapter": %s' % (bare_fixes.stderr or '').strip())
+        json.loads(bare_fixes.stdout)
+        print('write-report guard ok')
+
         print('===== reverse-longdoc entrypoint =====')
         longdoc_source = tmp / 'longdoc-source.md'
         longdoc_workspace = tmp / 'reverse-project'

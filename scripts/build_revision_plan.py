@@ -160,8 +160,15 @@ def main():
     plan = build_plan(args.project, args.chapter_file, args.audit_report)
 
     if args.write_report:
-        chapter_stem = Path(plan['chapter']).stem
-        out = Path(plan['project']) / 'reviews' / ('%s.revision-plan.json' % chapter_stem)
+        project_dir = plan.get('project')
+        chapter_ref = plan.get('chapter_file') or plan.get('chapter')
+        if not project_dir or not chapter_ref:
+            raise SystemExit(
+                '--write-report requires "project" and "chapter"/"chapter_file" in the audit report; '
+                'the provided --audit-report JSON is missing them. '
+                'Pass --project/--chapter-file instead, or omit --write-report.')
+        chapter_stem = Path(chapter_ref).stem
+        out = Path(project_dir) / 'reviews' / ('%s.revision-plan.json' % chapter_stem)
         plan['report_path'] = str(out)
         write_json(out, plan)
 
