@@ -138,6 +138,24 @@ def main():
     p.add_argument('--json', action='store_true')
     p.add_argument('--write-report', action='store_true')
 
+    p = sub.add_parser('draft', help='Draft the next chapter with an OpenAI-compatible LLM (Hermes-first).')
+    p.add_argument('--project', required=True)
+    p.add_argument('--chapter', type=int)
+    p.add_argument('--out')
+    p.add_argument('--force', action='store_true')
+    p.add_argument('--dry-run', action='store_true')
+    p.add_argument('--mock-response')
+    p.add_argument('--json', action='store_true')
+    p.add_argument('--write-report', action='store_true')
+    p.add_argument('--model')
+    p.add_argument('--base-url')
+    p.add_argument('--temperature', type=float)
+    p.add_argument('--top-p', dest='top_p', type=float)
+    p.add_argument('--max-tokens', dest='max_tokens', type=int)
+    p.add_argument('--timeout', dest='timeout_seconds', type=int)
+    p.add_argument('--recent-chapters', type=int, default=3)
+    p.add_argument('--max-chars-per-file', type=int, default=1800)
+
     p = sub.add_parser('snapshot', help='Create a versioned story-state snapshot.')
     p.add_argument('--project', required=True)
     p.add_argument('--label')
@@ -265,6 +283,37 @@ def main():
         cmd = py('run_revision_cycle.py', ['--project', args.project, '--chapter-file', args.chapter_file])
         if args.skip_knowledge_check:
             cmd.append('--skip-knowledge-check')
+        if args.json:
+            cmd.append('--json')
+        if args.write_report:
+            cmd.append('--write-report')
+        run(cmd)
+    elif args.command == 'draft':
+        cmd = py('draft_chapter.py', ['--project', args.project])
+        if args.chapter is not None:
+            cmd.extend(['--chapter', str(args.chapter)])
+        if args.out:
+            cmd.extend(['--out', args.out])
+        if args.force:
+            cmd.append('--force')
+        if args.dry_run:
+            cmd.append('--dry-run')
+        if args.mock_response:
+            cmd.extend(['--mock-response', args.mock_response])
+        if args.model:
+            cmd.extend(['--model', args.model])
+        if args.base_url:
+            cmd.extend(['--base-url', args.base_url])
+        if args.temperature is not None:
+            cmd.extend(['--temperature', str(args.temperature)])
+        if args.top_p is not None:
+            cmd.extend(['--top-p', str(args.top_p)])
+        if args.max_tokens is not None:
+            cmd.extend(['--max-tokens', str(args.max_tokens)])
+        if args.timeout_seconds is not None:
+            cmd.extend(['--timeout', str(args.timeout_seconds)])
+        cmd.extend(['--recent-chapters', str(args.recent_chapters)])
+        cmd.extend(['--max-chars-per-file', str(args.max_chars_per_file)])
         if args.json:
             cmd.append('--json')
         if args.write_report:

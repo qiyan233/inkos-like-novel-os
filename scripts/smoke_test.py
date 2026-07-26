@@ -16,9 +16,11 @@ PYTHON = sys.executable
 configure_stdio_utf8()
 
 
-def run_cli(*args, check=True, capture_output=True, text=True, cwd=None):
+def run_cli(*args, check=True, capture_output=True, text=True, cwd=None, extra_env=None):
     env = dict(os.environ)
     env['PYTHONUTF8'] = '1'
+    if extra_env:
+        env.update(extra_env)
     return subprocess.run(
         [PYTHON, str(CLI), *args],
         check=check,
@@ -491,6 +493,91 @@ def main():
         if mock_chat['content'] != 'mock 正文' or mock_chat['transport'] != 'mock':
             raise AssertionError('mock chat should strip think and mark transport=mock')
         print('llm client offline paths ok')
+
+        print('===== draft dry-run & mock =====')
+        draft_project = tmp / 'draft-novel'
+        draft_init = run_cli('init', str(draft_project), '起草测试', check=False)
+        if draft_init.returncode != 0:
+            raise SystemExit(draft_init.stderr.strip() or draft_init.stdout.strip() or 'draft project init failed')
+        draft_ch02 = draft_project / 'chapters' / 'ch02.md'
+
+        dry_draft = json.loads(
+            run_cli('draft', '--project', str(draft_project), '--chapter', '2', '--dry-run', '--json').stdout
+        )
+        if dry_draft['schema_version'] != 'novelops.draft.v1' or dry_draft['mode'] != 'dry-run':
+            raise AssertionError('draft dry-run schema/mode mismatch')
+        dry_payload = dry_draft['request']['payload']
+        if dry_payload['stream'] is not False or dry_payload['temperature'] != 0.6 or dry_payload['top_p'] != 0.95:
+            raise AssertionError('draft dry-run payload should carry Hermes sampling defaults')
+        if dry_payload['messages'][0]['role'] != 'system':
+            raise AssertionError('draft payload should start with a system message')
+        combined_prompt = '\n'.join(m['content'] for m in dry_payload['messages'])
+        if '只输出第 2 章正文。' not in combined_prompt:
+            raise AssertionError('draft prompt should carry the single-chapter contract')
+        if dry_draft['write']['written'] is not False or draft_ch02.exists():
+            raise AssertionError('draft dry-run must not write the chapter file')
+        if dry_draft['llm'].get('api_key') is not None:
+            raise AssertionError('draft output must never carry a plaintext api key')
+
+        draft_mock_file = tmp / 'draft-mock.json'
+        draft_mock_file.write_text(json.dumps({
+            'choices': [{'message': {'content': '<think>先想清楚场景。</think>\n## 第 2 章 雨夜再探\n\n林烬把记录册压在灯下。\n\n他没有急着开口。'}}]
+        }, ensure_ascii=False), encoding='utf-8')
+        mock_draft = json.loads(
+            run_cli('draft', '--project', str(draft_project), '--chapter', '2',
+                    '--mock-response', str(draft_mock_file), '--json').stdout
+        )
+        if mock_draft['mode'] != 'mock' or mock_draft['write']['written'] is not True:
+            raise AssertionError('mock draft should write the chapter file')
+        draft_text = draft_ch02.read_text(encoding='utf-8')
+        if not draft_text.startswith('## 第 2 章'):
+            raise AssertionError('mock draft output should start with the chapter heading')
+        if '<think>' in draft_text or '<think>' in json.dumps(mock_draft, ensure_ascii=False):
+            raise AssertionError('think blocks must not survive into the chapter file or report')
+        if mock_draft['response']['think_stripped'] is not True:
+            raise AssertionError('draft report should record think stripping')
+
+        rerun_draft = run_cli('draft', '--project', str(draft_project), '--chapter', '2',
+                              '--mock-response', str(draft_mock_file), '--json', check=False)
+        if rerun_draft.returncode == 0 or '--force' not in (rerun_draft.stderr or ''):
+            raise AssertionError('draft should refuse to overwrite an existing chapter without --force')
+        forced_draft = run_cli('draft', '--project', str(draft_project), '--chapter', '2',
+                               '--mock-response', str(draft_mock_file), '--force', '--json', check=False)
+        if forced_draft.returncode != 0:
+            raise AssertionError('draft --force should overwrite: %s' % (forced_draft.stderr or '').strip())
+
+        multi_mock_file = tmp / 'draft-mock-multi.json'
+        multi_mock_file.write_text(json.dumps({
+            'choices': [{'message': {'content': '## 第 2 章 甲\n\n正文。\n\n## 第 3 章 乙\n\n更多正文。'}}]
+        }, ensure_ascii=False), encoding='utf-8')
+        before_multi = draft_ch02.read_text(encoding='utf-8')
+        multi_draft = run_cli('draft', '--project', str(draft_project), '--chapter', '2',
+                              '--mock-response', str(multi_mock_file), '--force', '--json', check=False)
+        if multi_draft.returncode == 0:
+            raise AssertionError('draft should reject a multi-chapter response')
+        if 'Traceback' in (multi_draft.stderr or ''):
+            raise AssertionError('multi-chapter rejection should not raise a traceback: %s' % multi_draft.stderr.strip())
+        if draft_ch02.read_text(encoding='utf-8') != before_multi:
+            raise AssertionError('rejected multi-chapter draft must not modify the existing chapter file')
+
+        headless_mock_file = tmp / 'draft-mock-headless.json'
+        headless_mock_file.write_text('灯下的正文段落，没有任何标题。', encoding='utf-8')
+        headless_draft = json.loads(
+            run_cli('draft', '--project', str(draft_project), '--chapter', '2',
+                    '--mock-response', str(headless_mock_file), '--force', '--json').stdout
+        )
+        if headless_draft['validation']['heading_added'] is not True:
+            raise AssertionError('draft should auto-add a heading when the response has none')
+        if not draft_ch02.read_text(encoding='utf-8').startswith('## 第 2 章'):
+            raise AssertionError('auto-added heading missing from the chapter file')
+
+        env_draft = json.loads(
+            run_cli('draft', '--project', str(draft_project), '--chapter', '2', '--force', '--json',
+                    extra_env={'NOVELOPS_LLM_MOCK': str(draft_mock_file)}).stdout
+        )
+        if env_draft['mode'] != 'mock' or env_draft['write']['written'] is not True:
+            raise AssertionError('NOVELOPS_LLM_MOCK env channel should behave like --mock-response')
+        print('draft dry-run & mock ok')
 
         print('===== update_story_state =====')
         state_update = run_script(
