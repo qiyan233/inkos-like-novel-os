@@ -444,6 +444,54 @@ def main():
         cfg_config_path.write_text(json.dumps({'audit': {}, 'knowledge': {}}, ensure_ascii=False), encoding='utf-8')
         print('knowledge config engine ok')
 
+        print('===== llm client offline paths =====')
+        import llm_client
+        if llm_client.strip_think_blocks('<think>推理过程</think>\n正文段落。') != '正文段落。':
+            raise AssertionError('strip_think_blocks should remove closed think blocks')
+        if llm_client.strip_think_blocks('残留推理</think>\n正文段落。') != '正文段落。':
+            raise AssertionError('strip_think_blocks should recover from a dangling closing tag')
+        try:
+            llm_client.strip_think_blocks('<think>未闭合的推理与正文混在一起')
+        except SystemExit as exc:
+            if 'max_tokens' not in str(exc):
+                raise AssertionError('unclosed think block error should mention max_tokens: %s' % exc)
+        else:
+            raise AssertionError('unclosed think block should raise SystemExit')
+        default_llm_cfg = llm_client.resolve_llm_config({})
+        if default_llm_cfg['base_url'] != 'http://localhost:11434/v1' or default_llm_cfg['temperature'] != 0.6:
+            raise AssertionError('default llm config should target local Ollama with Hermes sampling defaults')
+        overridden_llm_cfg = llm_client.resolve_llm_config({}, {'model': 'custom-model'})
+        if overridden_llm_cfg['model'] != 'custom-model' or overridden_llm_cfg['top_p'] != 0.95:
+            raise AssertionError('llm config overrides should only touch given keys')
+        try:
+            llm_client.resolve_llm_config({'llm': {'no_such_key': 1}})
+        except SystemExit:
+            pass
+        else:
+            raise AssertionError('unknown llm config key should raise SystemExit')
+        payload = llm_client.build_chat_payload(
+            [{'role': 'system', 'content': 's'}, {'role': 'user', 'content': 'u'}], default_llm_cfg)
+        if payload['stream'] is not False or payload['temperature'] != 0.6 or payload['top_p'] != 0.95:
+            raise AssertionError('chat payload should carry Hermes sampling defaults and stream=False')
+        if payload['model'] != default_llm_cfg['model'] or len(payload['messages']) != 2:
+            raise AssertionError('chat payload should carry model and messages')
+        mock_file = tmp / 'mock-response.json'
+        mock_file.write_text(json.dumps(
+            {'choices': [{'message': {'content': '来自 OpenAI 格式的正文'}}]}, ensure_ascii=False), encoding='utf-8')
+        if llm_client.load_mock_responses(mock_file) != ['来自 OpenAI 格式的正文']:
+            raise AssertionError('load_mock_responses should unwrap an OpenAI response object')
+        mock_file.write_text(json.dumps(['第一段', '第二段'], ensure_ascii=False), encoding='utf-8')
+        if llm_client.load_mock_responses(mock_file) != ['第一段', '第二段']:
+            raise AssertionError('load_mock_responses should accept a JSON array')
+        mock_file.write_text('纯文本 mock 正文', encoding='utf-8')
+        if llm_client.load_mock_responses(mock_file) != ['纯文本 mock 正文']:
+            raise AssertionError('load_mock_responses should fall back to raw text')
+        mock_chat = llm_client.chat(
+            [{'role': 'user', 'content': 'u'}], default_llm_cfg, mock_content='<think>t</think>\nmock 正文')
+        if mock_chat['content'] != 'mock 正文' or mock_chat['transport'] != 'mock':
+            raise AssertionError('mock chat should strip think and mark transport=mock')
+        print('llm client offline paths ok')
+
         print('===== update_story_state =====')
         state_update = run_script(
             'update_story_state.py',
