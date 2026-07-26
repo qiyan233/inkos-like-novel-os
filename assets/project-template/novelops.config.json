@@ -1,0 +1,17 @@
+{
+  "schema_version": "novelops.config.v1",
+  "llm": {
+    "provider": "ollama",
+    "base_url": "http://localhost:11434/v1",
+    "model": "hermes4",
+    "api_key": null,
+    "api_key_env": "NOVELOPS_LLM_API_KEY",
+    "temperature": 0.6,
+    "top_p": 0.95,
+    "max_tokens": 4096,
+    "timeout_seconds": 300,
+    "strip_think": true
+  },
+  "audit": {},
+  "knowledge": {}
+}

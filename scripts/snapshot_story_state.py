@@ -22,6 +22,7 @@ TRACKED_FILES = [
     'continuity_issues.md',
     'style_guide.md',
     'style_profile.json',
+    'novelops.config.json',
     'README-project.md',
 ]
 

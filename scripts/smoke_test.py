@@ -236,6 +236,44 @@ def main():
                 raise AssertionError('%s output missing chapter_file' % report_key)
         print('chapter_file contract ok')
 
+        print('===== project config engine =====')
+        import novelops_config
+        if novelops_config.load_project_config(tmp) != {}:
+            raise AssertionError('load_project_config should return {} when no config file exists')
+        merged, source = novelops_config.resolve_keyword_table(
+            'T', ['a', 'b'], {'mode': 'extend', 'items': ['c', 'a']})
+        if merged != ['a', 'b', 'c'] or source != 'extend':
+            raise AssertionError('extend merge mismatch: %r / %r' % (merged, source))
+        merged, source = novelops_config.resolve_keyword_table(
+            'T', ['a', 'b'], {'mode': 'replace', 'items': ['x']})
+        if merged != ['x'] or source != 'replace':
+            raise AssertionError('replace merge mismatch: %r / %r' % (merged, source))
+        merged, source = novelops_config.resolve_keyword_table('T', ['a'], {'mode': 'disable'})
+        if merged != [] or source != 'disable':
+            raise AssertionError('disable merge mismatch: %r / %r' % (merged, source))
+        merged, source = novelops_config.resolve_keyword_table('T', ['a'], None)
+        if merged != ['a'] or source != 'default':
+            raise AssertionError('default merge mismatch: %r / %r' % (merged, source))
+        bad_config_dir = tmp / 'bad-config-project'
+        bad_config_dir.mkdir(exist_ok=True)
+        (bad_config_dir / 'novelops.config.json').write_text('{broken', encoding='utf-8')
+        try:
+            novelops_config.load_project_config(bad_config_dir)
+        except SystemExit as exc:
+            if 'novelops.config.json' not in str(exc):
+                raise AssertionError('bad config error should mention the file: %s' % exc)
+        else:
+            raise AssertionError('broken config JSON should raise SystemExit')
+        template_config_path = project / 'novelops.config.json'
+        if not template_config_path.exists():
+            raise AssertionError('init should copy novelops.config.json from the template')
+        template_config = json.loads(template_config_path.read_text(encoding='utf-8'))
+        if template_config.get('audit') != {} or template_config.get('knowledge') != {}:
+            raise AssertionError('template config should ship empty audit/knowledge sections')
+        if template_config.get('llm', {}).get('base_url') != 'http://localhost:11434/v1':
+            raise AssertionError('template config should default llm.base_url to local Ollama')
+        print('project config engine ok')
+
         print('===== update_story_state =====')
         state_update = run_script(
             'update_story_state.py',
