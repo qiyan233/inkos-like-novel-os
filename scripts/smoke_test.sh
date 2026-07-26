@@ -259,6 +259,14 @@ if [ "$SNAP1" = "$SNAP2" ]; then
 fi
 echo "补一条临时状态" >> "$PROJECT/current_state.md"
 run_python "$ROOT/scripts/diff_story_state.py" --project "$PROJECT" --from "$SNAP1" --to current --json >/dev/null
+if [ ! -d "$PROJECT/.novelops-state/snapshots" ]; then
+  echo 'snapshot should be stored under .novelops-state/snapshots' >&2
+  exit 1
+fi
+if [ -d "$PROJECT/.inkos-state" ]; then
+  echo 'snapshot should not create the legacy .inkos-state directory' >&2
+  exit 1
+fi
 printf 'state snapshot diff ok\n'
 
 printf '\n===== write-report regression =====\n'
@@ -295,6 +303,19 @@ if [ "$CODE" -eq 0 ]; then
 fi
 grep -q 'No snapshots found under' "$TMPDIR/latest.err"
 printf 'latest-without-snapshot regression ok\n'
+
+printf '\n===== legacy snapshot fallback regression =====\n'
+LEGACY="$TMPDIR/legacy-project"
+mkdir -p "$LEGACY"
+cp "$PROJECT/README-project.md" "$LEGACY/README-project.md"
+cp "$PROJECT/current_state.md" "$LEGACY/current_state.md"
+LEGACY_SNAP_ID="20200101T000000Z-ch001-legacy"
+mkdir -p "$LEGACY/.inkos-state/snapshots/$LEGACY_SNAP_ID"
+cp "$LEGACY/current_state.md" "$LEGACY/.inkos-state/snapshots/$LEGACY_SNAP_ID/current_state.md"
+echo "旧快照回退测试：当前状态已推进" >> "$LEGACY/current_state.md"
+LEGACY_DIFF="$(run_python "$ROOT/scripts/diff_story_state.py" --project "$LEGACY" --from latest --to current --json)"
+printf '%s' "$LEGACY_DIFF" | run_python -c 'import json,sys; data=json.load(sys.stdin); assert data["from"]["id"] == "20200101T000000Z-ch001-legacy", data["from"]; assert data["summary"]["changed_files"] >= 1; print("legacy fallback ok")' >/dev/null
+printf 'legacy snapshot fallback regression ok\n'
 
 printf '\n===== missing-project validation regression =====\n'
 MISSING="$TMPDIR/does-not-exist"
