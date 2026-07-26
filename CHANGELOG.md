@@ -1,5 +1,7 @@
 # Changelog
 
+这个文件记录 GitHub 上已发布版本的主要变化。
+
 ## v1.0.0 — 2026-06-12
 
 ### Changed
@@ -145,8 +147,6 @@
 ### Assets
 
 - `inkos-like-novel-os-v0.4.1.skill`
-
-这个文件记录 GitHub 上已发布版本的主要变化。
 
 ## v0.4.0 — 2026-03-18
 

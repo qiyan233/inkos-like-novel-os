@@ -20,6 +20,8 @@
 - 你希望 README / docs / demo 用一致命令
 - 你想把 `init -> context -> audit -> extract-state -> state-update -> smoke-test` 作为主线
 
+> 说明：上面是按底层命令展开的教学主线。日常推荐主线是 `init -> write-next -> draft -> revise -> extract-state -> state-update`（见 SKILL.md / README）；其中 `context` 是 `write-next` 的组成部分，`audit` 是 `revise` 的组成环节，`draft` 由人或 agent 完成。
+
 ## 什么时候直接调底层脚本 / When to call scripts directly
 
 直接调底层脚本更合适：

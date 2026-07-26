@@ -21,7 +21,7 @@
 1. 看 [安装与环境](installation.md)
 2. 用 `python scripts/novelops_cli.py init /path/to/project "书名"` 初始化
 3. 参考 [project-template.md](project-template.md) 补 truth files
-4. 用 `context -> draft -> audit -> extract-state -> state-update` 跑第一章
+4. 用 `context -> draft -> audit -> extract-state -> state-update` 跑第一章（对应主线 `write-next -> draft -> revise -> ...` 的底层展开，`draft` 由人或 agent 完成）
 5. 需要逐脚本调试时，再回到底层脚本路径
 
 这条路径适合已经理解 InkOS / OpenClaw 工作流思路，只是想快速落地的人。

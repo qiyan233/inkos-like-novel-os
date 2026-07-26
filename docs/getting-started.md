@@ -54,6 +54,12 @@ python scripts/novelops_cli.py init /path/to/project "书名"
 
 python scripts/novelops_cli.py context --project /path/to/project
 
+```
+
+`context` 之后，先由你（或 agent）依据上下文起草一章正文（draft），保存为 `/path/to/project/chapters/ch01.md`，然后再对它跑审计：
+
+```bash
+
 python scripts/novelops_cli.py audit --project /path/to/project --chapter-file /path/to/project/chapters/ch01.md
 
 ```
@@ -93,6 +99,8 @@ python scripts/novelops_cli.py extract-state --project /path/to/project --chapte
 python scripts/novelops_cli.py state-update --project /path/to/project --chapter 1 --title "第一章" --summary "..."
 
 ```
+
+完整推荐主线见 SKILL.md：`init -> write-next -> draft -> revise -> extract-state -> state-update`；本节的 `context` / `audit` 是其中 `write-next` / `revise` 的底层组成命令。
 
 
 

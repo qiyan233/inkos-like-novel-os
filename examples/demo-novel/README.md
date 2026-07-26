@@ -4,6 +4,8 @@
 
 `context -> draft -> audit -> extract-state -> state-update`
 
+这是教学用的最小演示链路。对应 SKILL.md / README 的推荐主线 `init -> write-next -> draft -> revise -> extract-state -> state-update`：`context` 是 `write-next` 工作包的底层组成部分，`audit` 是 `revise` 修订闭环中的一个环节，而 `draft`（写正文）由你或 agent 完成，不是脚本命令。
+
 > 推荐入口 / Recommended entrypoint：`python scripts/novelops_cli.py ...`
 
 故事设定是一个两章规模的古风悬疑开局：主角林烬发现徐家旧玉佩疑似被调包，但还不能直接确认幕后人。
