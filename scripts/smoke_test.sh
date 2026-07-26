@@ -181,6 +181,10 @@ fi
 grep -q -- '--recent-chapters must be >= 0' "$TMPDIR/recent.err"
 printf 'chapter heading compatibility ok\n'
 
+# 上面的兼容性用例向 chapter_summaries.md 写入了“第3章”标题，
+# 若不清理会污染后续 write-next 的下一章推断（max(3)+1=4 而非预期 3）。
+: > "$PROJECT/chapter_summaries.md"
+
 printf '\n===== audit_chapter =====\n'
 run_python "$ROOT/scripts/audit_chapter.py" --project "$PROJECT" --chapter-file "$PROJECT/chapters/ch01.md" --json >/dev/null
 printf 'chapter audit ok\n'
