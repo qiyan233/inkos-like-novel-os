@@ -274,6 +274,106 @@ def main():
             raise AssertionError('template config should default llm.base_url to local Ollama')
         print('project config engine ok')
 
+        print('===== audit config engine =====')
+        cfg_project = tmp / 'config-novel'
+        cfg_init = run_cli('init', str(cfg_project), '配置测试', check=False)
+        if cfg_init.returncode != 0:
+            raise SystemExit(cfg_init.stderr.strip() or cfg_init.stdout.strip() or 'config project init failed')
+        cfg_config_path = cfg_project / 'novelops.config.json'
+        cfg_ch01 = cfg_project / 'chapters' / 'ch01.md'
+        cfg_ch01.write_text(
+            '# 第一章\n\n'
+            '突然一声。突然又一声。突然第三声。突然第四声。突然第五声。\n\n'
+            '这件事的核心在于本质上的动机差异。\n\n'
+            '他感到不安。她感到紧张。他意识到自己已经疲惫。\n',
+            encoding='utf-8',
+        )
+
+        def cfg_audit():
+            return json.loads(
+                run_cli('audit', '--project', str(cfg_project), '--chapter-file', str(cfg_ch01), '--json').stdout
+            )
+
+        with_template_cfg = cfg_audit()
+        cfg_config_path.unlink()
+        without_cfg = cfg_audit()
+        if with_template_cfg['findings'] != without_cfg['findings']:
+            raise AssertionError('empty audit config must not change findings')
+        if with_template_cfg['summary']['rules_evaluated'] != without_cfg['summary']['rules_evaluated']:
+            raise AssertionError('empty audit config must not change rules_evaluated')
+        if with_template_cfg['summary']['counts'] != without_cfg['summary']['counts']:
+            raise AssertionError('empty audit config must not change counts')
+        if 'config' not in without_cfg['summary'] or without_cfg['summary']['config']['config_file'] is not None:
+            raise AssertionError('audit summary should carry a config block with config_file None when unconfigured')
+        aud101 = [f for f in without_cfg['findings'] if f['rule_id'] == 'AUD-101']
+        if not aud101 or aud101[0]['severity'] != 'major' or aud101[0]['evidence'] != ['突然']:
+            raise AssertionError('default AUD-101 behavior changed: %r' % aud101)
+        if not any(f['rule_id'] == 'AUD-102' for f in without_cfg['findings']):
+            raise AssertionError('default AUD-102 behavior changed')
+        if not any(f['rule_id'] == 'AUD-113' for f in without_cfg['findings']):
+            raise AssertionError('default AUD-113 behavior changed')
+
+        cfg_config_path.write_text(json.dumps({
+            'audit': {'keywords': {'TRANSITIONS': {'mode': 'extend', 'items': ['蓦然回身']}}}
+        }, ensure_ascii=False), encoding='utf-8')
+        cfg_ch01.write_text(
+            '# 第一章\n\n蓦然回身一次。蓦然回身两次。蓦然回身三次。\n',
+            encoding='utf-8',
+        )
+        extended = cfg_audit()
+        if not any(f['rule_id'] == 'AUD-101' and f['evidence'] == ['蓦然回身'] for f in extended['findings']):
+            raise AssertionError('extended TRANSITIONS keyword should trigger AUD-101')
+        if extended['summary']['config']['keyword_tables_overridden'].get('TRANSITIONS') != 'extend':
+            raise AssertionError('summary.config should record the extended table')
+
+        cfg_config_path.write_text(json.dumps({
+            'audit': {'keywords': {'TRANSITIONS': {'mode': 'replace', 'items': ['蓦然回身']}}}
+        }, ensure_ascii=False), encoding='utf-8')
+        cfg_ch01.write_text(
+            '# 第一章\n\n突然一声。突然又一声。突然第三声。突然第四声。突然第五声。\n',
+            encoding='utf-8',
+        )
+        replaced = cfg_audit()
+        if any(f['rule_id'] == 'AUD-101' for f in replaced['findings']):
+            raise AssertionError('replaced TRANSITIONS table should stop default word from triggering AUD-101')
+
+        cfg_config_path.write_text(json.dumps({
+            'audit': {'thresholds': {'AUD-113': {'min_hits': 1}}}
+        }, ensure_ascii=False), encoding='utf-8')
+        cfg_ch01.write_text('# 第一章\n\n他感到不安，但没有说出口。\n', encoding='utf-8')
+        threshold_hit = cfg_audit()
+        if not any(f['rule_id'] == 'AUD-113' for f in threshold_hit['findings']):
+            raise AssertionError('lowered AUD-113 threshold should trigger on a single hit')
+        if 'AUD-113' not in threshold_hit['summary']['config']['thresholds_overridden']:
+            raise AssertionError('summary.config should record threshold override')
+
+        cfg_config_path.write_text(json.dumps({
+            'audit': {'rules_disabled': ['AUD-113']}
+        }, ensure_ascii=False), encoding='utf-8')
+        cfg_ch01.write_text(
+            '# 第一章\n\n他感到不安。她感到紧张。他意识到自己已经疲惫。\n', encoding='utf-8')
+        disabled_report = cfg_audit()
+        if any(f['rule_id'] == 'AUD-113' for f in disabled_report['findings']):
+            raise AssertionError('disabled AUD-113 should not produce findings')
+        if 'AUD-113' in disabled_report['summary']['rules_evaluated']:
+            raise AssertionError('disabled AUD-113 should not be in rules_evaluated')
+        if disabled_report['summary']['config']['rules_disabled'] != ['AUD-113']:
+            raise AssertionError('summary.config should record disabled rules')
+
+        for bad_audit_cfg in (
+            {'audit': {'keywords': {'NOT_A_TABLE': {'mode': 'extend', 'items': ['x']}}}},
+            {'audit': {'thresholds': {'AUD-999': {'min_hits': 1}}}},
+            {'audit': {'rules_disabled': ['AUD-999']}},
+        ):
+            cfg_config_path.write_text(json.dumps(bad_audit_cfg, ensure_ascii=False), encoding='utf-8')
+            bad_run = run_cli('audit', '--project', str(cfg_project), '--chapter-file', str(cfg_ch01), '--json', check=False)
+            if bad_run.returncode == 0:
+                raise AssertionError('invalid audit config should fail: %r' % bad_audit_cfg)
+            if 'Traceback' in (bad_run.stderr or ''):
+                raise AssertionError('invalid audit config should not raise a traceback: %s' % bad_run.stderr.strip())
+        cfg_config_path.write_text(json.dumps({'audit': {}, 'knowledge': {}}, ensure_ascii=False), encoding='utf-8')
+        print('audit config engine ok')
+
         print('===== update_story_state =====')
         state_update = run_script(
             'update_story_state.py',
