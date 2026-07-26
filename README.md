@@ -1,8 +1,8 @@
 # NovelOps Skill
 
-[![CI](https://img.shields.io/github/actions/workflow/status/qiyan233/novelops-skill/ci.yml?branch=main&label=CI)](https://github.com/qiyan233/novelops-skill/actions/workflows/ci.yml) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE) [![Version](https://img.shields.io/badge/version-v1.0.0-blue)](CHANGELOG.md)
+[![CI](https://img.shields.io/github/actions/workflow/status/qiyan233/novelops-skill/ci.yml?branch=main&label=CI)](https://github.com/qiyan233/novelops-skill/actions/workflows/ci.yml) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE) [![Version](https://img.shields.io/badge/version-v1.1.0-blue)](CHANGELOG.md)
 
-当前版本：**1.0.0**
+当前版本：**1.1.0**
 
 一个面向 **OpenClaw** 的长篇小说工作流 skill。  
 它的重点不是“单次写一章”，而是把长篇 / 连载 / 网文 / 同人写作跑成一个**长期可维护的流程**。

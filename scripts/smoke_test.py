@@ -86,6 +86,23 @@ def main():
         check_iso_now_format()
         print('iso_now format ok')
 
+        print('===== release version markers =====')
+        expected_version = (ROOT / 'VERSION').read_text(encoding='utf-8').strip()
+        readme_text = (ROOT / 'README.md').read_text(encoding='utf-8')
+        skill_text = (ROOT / 'SKILL.md').read_text(encoding='utf-8')
+        changelog_text = (ROOT / 'CHANGELOG.md').read_text(encoding='utf-8')
+        if expected_version != '1.1.0':
+            raise AssertionError('VERSION should be 1.1.0, got %r' % expected_version)
+        if ('version-v%s-blue' % expected_version) not in readme_text:
+            raise AssertionError('README badge does not match VERSION %s' % expected_version)
+        if ('当前版本：**%s**' % expected_version) not in readme_text:
+            raise AssertionError('README version line does not match VERSION %s' % expected_version)
+        if ('Version: %s' % expected_version) not in skill_text:
+            raise AssertionError('SKILL.md version line does not match VERSION %s' % expected_version)
+        if ('## v%s' % expected_version) not in changelog_text:
+            raise AssertionError('CHANGELOG is missing the v%s entry' % expected_version)
+        print('release version markers ok')
+
         project = tmp / 'demo-novel'
 
         print('===== cli init regression =====')

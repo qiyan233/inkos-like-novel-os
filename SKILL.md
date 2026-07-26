@@ -5,7 +5,7 @@ description: Novel-production operating system skill for long-form fiction, web 
 
 # NovelOps Skill
 
-Version: 1.0.0
+Version: 1.1.0
 
 Build and run long-form fiction as a stateful pipeline, not a one-shot prompt.
 

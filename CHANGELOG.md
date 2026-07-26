@@ -2,6 +2,37 @@
 
 这个文件记录 GitHub 上已发布版本的主要变化。
 
+## v1.1.0 — 2026-07-26
+
+### Added
+
+- 新增 `draft` 命令：LLM 章节写作执行器（`scripts/draft_chapter.py`），把 write-next 工作包交给 Hermes 等 OpenAI 兼容模型生成单章草稿；默认接本地 Ollama，Nous Portal 云端改配置即可；支持 `--dry-run` 与 `--mock-response`/`NOVELOPS_LLM_MOCK` 离线通道；空响应/多章输出会被拒绝，缺标题自动补齐
+- 新增 `auto-revise` 命令：LLM 段落级最小化自动修订（`scripts/auto_revise.py`）；默认只输出整章 diff，`--apply` 写回前自动 snapshot 并把章节原文备份到 `.novelops-state/backups/<id>/`
+- 新增项目级配置 `novelops.config.json`（`scripts/novelops_config.py`，随 `init` 复制、随 snapshot 追踪）：`llm` 节（端点/模型/采样/超时）、`audit` 节（关键词表 extend/replace/disable、逐规则阈值、禁用规则）、`knowledge` 节（token 表、自定义泄漏正则、禁用类型）
+- 新增 `scripts/llm_client.py`：纯标准库 OpenAI 兼容 chat completions 传输层，含 Hermes 混合推理 `<think>` 块剥离与清晰的连接/超时/鉴权报错文案
+- 新增 JSON 契约：`novelops.config.v1`（输入契约）、`novelops.draft.v1`、`novelops.auto-revise.v1`；新增 `docs/llm-drafting.md`
+- `reverse_long_document.py` 支持中文数字章节标题编号（第三章 → 3、第一百零三章 → 103），不再回退顺序编号
+- audit / revision-plan / spot-fixes / revise 输出新增 `chapter_file` 字段（与 knowledge-check 字段约定对齐）；`references/json-schemas.md` 补齐 revision-plan / spot-fix-suggestions / state-snapshot / state-diff 四个契约
+
+### Changed
+
+- 共享模块 `scripts/inkos_common.py` 更名为 `scripts/novelops_common.py`（旧名保留为兼容 wrapper）
+- 快照目录从 `.inkos-state` 更名为 `.novelops-state`；`diff` 的 `latest` 与快照 ID 解析自动回退兼容旧目录
+- audit / knowledge-check 的关键词表与阈值可通过配置覆盖，输出新增 `summary.config`；无配置时行为与 1.0.0 完全一致
+- 各文档管线叫法统一：教学简化线（`context -> draft -> audit -> ...`）与主线（`init -> write-next -> draft -> revise -> extract-state -> state-update`）的映射在 demo README / cli.md / getting-started.md / user-paths.md 中显式说明
+
+### Fixed
+
+- `iso_now()` 弃用 `datetime.utcnow()`，改为 timezone-aware 写法（输出格式不变）
+- `revision-plan` / `spot-fixes` 对缺 `project`/`chapter` 键的手工 audit JSON 增加 `--write-report` 防护与读取兜底，不再抛 `Path(None)` TypeError
+- demo 示例修正：第一章标题与正文统一为「库房异响」；`style_profile.json` 按模板 schema 重写；`style_guide.md` 按模板五节重组
+- `smoke_test.sh` 章节标题兼容性用例残留的「第3章」摘要污染 write-next 下一章推断的问题（该失败因 CI 只执行 Python 版 smoke test 而长期未暴露）
+- CHANGELOG 的文件用途说明句从文件中部移回顶部
+
+### Assets
+
+- `novelops-skill-v1.1.0.skill`
+
 ## v1.0.0 — 2026-06-12
 
 ### Changed
