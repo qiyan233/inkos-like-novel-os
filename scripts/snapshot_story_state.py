@@ -4,7 +4,7 @@ import hashlib
 import json
 import re
 import shutil
-from datetime import datetime, UTC
+from datetime import datetime, timezone
 from pathlib import Path
 
 from novelops_common import iso_now, require_project_markers, write_json
@@ -60,7 +60,7 @@ def snapshot(project, label=None, chapter=None, notes=None):
     project = require_project_markers(project)
     root = project / '.inkos-state' / 'snapshots'
     root.mkdir(parents=True, exist_ok=True)
-    stamp = datetime.now(UTC).strftime('%Y%m%dT%H%M%SZ')
+    stamp = datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%SZ')
     parts = [stamp]
     if chapter is not None:
         parts.append('ch%03d' % chapter)

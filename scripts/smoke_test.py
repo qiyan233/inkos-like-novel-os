@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import json
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -52,12 +53,37 @@ def assert_contains(path, needle):
     if '{{BOOK_TITLE}}' in text:
         raise AssertionError(f'placeholder not replaced in {path}')
 
+
+def check_iso_now_format():
+    env = dict(os.environ)
+    env['PYTHONUTF8'] = '1'
+    result = subprocess.run(
+        [PYTHON, '-W', 'error::DeprecationWarning', '-c',
+         'import sys; sys.path.insert(0, r"%s"); from novelops_common import iso_now; print(iso_now())'
+         % str(ROOT / 'scripts')],
+        capture_output=True,
+        text=True,
+        encoding='utf-8',
+        errors='replace',
+        env=env,
+    )
+    if result.returncode != 0:
+        raise AssertionError('iso_now raised a warning/error: %s' % result.stderr.strip())
+    stamp = result.stdout.strip()
+    if not re.fullmatch(r'\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z', stamp):
+        raise AssertionError('iso_now format changed: %r' % stamp)
+
+
 def main():
     invoked_by_cli = '--invoked-by-cli' in sys.argv[1:]
     tmp = ROOT / '.smoke-work'
     shutil.rmtree(tmp, ignore_errors=True)
     tmp.mkdir(parents=True, exist_ok=True)
     try:
+        print('===== iso_now format regression =====')
+        check_iso_now_format()
+        print('iso_now format ok')
+
         project = tmp / 'demo-novel'
 
         print('===== cli init regression =====')
