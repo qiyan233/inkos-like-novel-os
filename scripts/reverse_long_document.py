@@ -5,7 +5,7 @@ import re
 from pathlib import Path
 
 from extract_state import build_report_from_text
-from inkos_common import iso_now, read_text, require_existing_file, write_json
+from novelops_common import iso_now, read_text, require_existing_file, write_json
 
 HEADING_PATTERNS = [
     re.compile(r'^\s*#{1,6}\s*(Chapter\s+\d+.*)$', re.I),

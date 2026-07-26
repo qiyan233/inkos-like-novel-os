@@ -6,7 +6,7 @@ from pathlib import Path
 from audit_chapter import build_report as build_audit_report
 from build_revision_plan import build_plan
 from hook_report import build_report as build_hook_report
-from inkos_common import iso_now, write_json
+from novelops_common import iso_now, write_json
 from knowledge_check import build_report as build_knowledge_report
 from suggest_spot_fixes import build_suggestions
 

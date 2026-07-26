@@ -6,7 +6,7 @@ import subprocess
 import sys
 from pathlib import Path
 
-from inkos_common import configure_stdio_utf8
+from novelops_common import configure_stdio_utf8
 
 ROOT = Path(__file__).resolve().parent.parent
 CLI = ROOT / 'scripts' / 'novelops_cli.py'

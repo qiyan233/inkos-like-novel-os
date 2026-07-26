@@ -4,7 +4,7 @@ import difflib
 import json
 from pathlib import Path
 
-from inkos_common import iso_now, read_text, require_project_markers
+from novelops_common import iso_now, read_text, require_project_markers
 from snapshot_story_state import TRACKED_FILES
 
 

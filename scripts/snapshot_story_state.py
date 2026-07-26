@@ -7,7 +7,7 @@ import shutil
 from datetime import datetime, UTC
 from pathlib import Path
 
-from inkos_common import iso_now, require_project_markers, write_json
+from novelops_common import iso_now, require_project_markers, write_json
 
 TRACKED_FILES = [
     'story_bible.md',

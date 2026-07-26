@@ -5,7 +5,7 @@ import re
 from pathlib import Path
 
 from build_next_chapter_context import build_context_report
-from inkos_common import (
+from novelops_common import (
     CHAPTER_HEADING_RE,
     chapter_sections,
     extract_bullets,

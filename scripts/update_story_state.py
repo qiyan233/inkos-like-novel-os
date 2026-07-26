@@ -4,7 +4,7 @@ import json
 import re
 from pathlib import Path
 
-from inkos_common import iso_now, require_project_markers, write_json
+from novelops_common import iso_now, require_project_markers, write_json
 
 
 def append_block(path, text):

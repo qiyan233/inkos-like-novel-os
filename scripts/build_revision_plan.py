@@ -4,7 +4,7 @@ import json
 from pathlib import Path
 
 from audit_chapter import build_report
-from inkos_common import iso_now, write_json
+from novelops_common import iso_now, write_json
 
 SCOPE_BY_DIMENSION = {
     'information-boundary': 'scene',

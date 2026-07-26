@@ -4,7 +4,7 @@ import json
 import re
 from pathlib import Path
 
-from inkos_common import (
+from novelops_common import (
     extract_markdown_section,
     iso_now,
     parse_chapter_number,

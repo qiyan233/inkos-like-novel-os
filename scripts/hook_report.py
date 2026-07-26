@@ -4,7 +4,7 @@ import json
 import re
 from collections import Counter
 
-from inkos_common import iso_now, read_text, require_project_markers
+from novelops_common import iso_now, read_text, require_project_markers
 
 STATUS_ALIASES = {
     'OPEN': 'OPEN',

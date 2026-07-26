@@ -4,7 +4,7 @@ import json
 import re
 from pathlib import Path
 
-from inkos_common import (
+from novelops_common import (
     CHAPTER_HEADING_RE,
     infer_next_chapter_from_project,
     iso_now,

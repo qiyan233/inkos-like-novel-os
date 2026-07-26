@@ -4,7 +4,7 @@ import json
 import re
 from pathlib import Path
 
-from inkos_common import CHAPTER_HEADING_RE, extract_bullets, extract_keywords, iso_now, latest_sections, read_text, require_existing_file, require_project_markers, write_json
+from novelops_common import CHAPTER_HEADING_RE, extract_bullets, extract_keywords, iso_now, latest_sections, read_text, require_existing_file, require_project_markers, write_json
 
 SEVERITY_ORDER = {'critical': 0, 'major': 1, 'minor': 2, 'note': 3}
 TRANSITIONS = ['突然', '忽然', '仿佛', '竟然', '不禁', '猛地', '一时间', 'at that moment', 'suddenly', 'instantly', 'as if', 'unexpectedly']

@@ -4,7 +4,7 @@ import json
 from pathlib import Path
 
 from audit_chapter import build_report
-from inkos_common import iso_now, read_text, write_json
+from novelops_common import iso_now, read_text, write_json
 
 LOCAL_DIMENSIONS = set([
     'repetition-fatigue',

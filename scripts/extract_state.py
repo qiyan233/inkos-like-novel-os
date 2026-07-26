@@ -4,7 +4,7 @@ import json
 import re
 from pathlib import Path
 
-from inkos_common import iso_now, parse_chapter_number, read_text, require_existing_file, require_project_markers, split_sentences
+from novelops_common import iso_now, parse_chapter_number, read_text, require_existing_file, require_project_markers, split_sentences
 
 SUMMARY_HINTS = ['怀疑', '确认', '发现', '决定', '暴露', '受伤', '失去', '拿到']
 RELATION_HINTS = ['信任', '怀疑', '敌意', '合作', '试探', '关系']
