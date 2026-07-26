@@ -222,6 +222,20 @@ def main():
         run_script('audit_chapter.py', '--project', str(project), '--chapter-file', str(project / 'chapters' / 'ch01.md'), '--json')
         print('chapter audit ok')
 
+        print('===== chapter_file contract regression =====')
+        audit_contract = json.loads(
+            run_cli('audit', '--project', str(project), '--chapter-file', str(project / 'chapters' / 'ch01.md'), '--json').stdout
+        )
+        if not audit_contract.get('chapter_file') or audit_contract['chapter_file'] != audit_contract['chapter']:
+            raise AssertionError('audit report should carry chapter_file equal to chapter')
+        for subcommand, report_key in (('revision-plan', 'revision plan'), ('spot-fixes', 'spot-fix suggestions')):
+            contract_data = json.loads(
+                run_cli(subcommand, '--project', str(project), '--chapter-file', str(project / 'chapters' / 'ch01.md'), '--json').stdout
+            )
+            if not contract_data.get('chapter_file'):
+                raise AssertionError('%s output missing chapter_file' % report_key)
+        print('chapter_file contract ok')
+
         print('===== update_story_state =====')
         state_update = run_script(
             'update_story_state.py',
@@ -302,6 +316,8 @@ def main():
             raise AssertionError('revise missing hook pressure')
         if 'stale_hook_count' not in revise_data['summary']:
             raise AssertionError('revise missing stale hook count')
+        if not revise_data.get('chapter_file') or not revise_data['audit'].get('chapter_file'):
+            raise AssertionError('revise output missing chapter_file fields')
         print('revise entrypoint ok')
 
         print('===== write-report guard regression =====')

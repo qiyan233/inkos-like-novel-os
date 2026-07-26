@@ -45,6 +45,7 @@ def build_cycle(project, chapter_file, run_knowledge_check=True):
         'generated_at': iso_now(),
         'project': str(project),
         'chapter': str(chapter_file),
+        'chapter_file': str(chapter_file),
         'status': status,
         'summary': {
             'knowledge_check_run': run_knowledge_check,

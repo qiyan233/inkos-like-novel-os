@@ -78,6 +78,7 @@ def build_report(project, chapter_file):
             'generated_at': iso_now(),
             'project': str(project),
             'chapter': str(chapter_file),
+            'chapter_file': str(chapter_file),
             'overall': 'block',
             'summary': {'counts': counts, 'finding_count': 1, 'rules_evaluated': []},
             'source_files': [str(chapter_file)],
@@ -211,6 +212,7 @@ def build_report(project, chapter_file):
         'generated_at': iso_now(),
         'project': str(project),
         'chapter': str(chapter_file),
+        'chapter_file': str(chapter_file),
         'overall': overall,
         'summary': {
             'counts': counts,

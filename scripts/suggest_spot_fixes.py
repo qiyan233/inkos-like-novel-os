@@ -74,6 +74,7 @@ def build_suggestions(project, chapter_file, audit_report):
         'generated_at': iso_now(),
         'project': report.get('project'),
         'chapter': report.get('chapter'),
+        'chapter_file': report.get('chapter_file') or report.get('chapter'),
         'based_on': {
             'schema_version': report.get('schema_version'),
             'overall': report.get('overall'),
